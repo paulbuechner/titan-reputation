@@ -1,0 +1,7 @@
+.vscode\
+scripts\
+.publishignore
+TitanReputation.lua
+README.md
+CHANGELOG.md
+.png

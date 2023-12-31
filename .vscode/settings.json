@@ -1,0 +1,33 @@
+{
+  "Lua.diagnostics.globals": [
+    "StaticPopupDialogs",
+    "StaticPopup_Show",
+    "ToggleCharacter",
+    "HIGHLIGHT_FONT_COLOR",
+    "UIErrorsFrame",
+    "DropDownList1",
+    "DEFAULT_CHAT_FRAME",
+    "UIDropDownMenu_AddButton",
+    "UIDROPDOWNMENU_MENU_LEVEL",
+    "UIDropDownMenu_AddSeparator",
+    "UIDropDownMenu_AddSpace",
+    "TOOLTIP_DEFAULT_COLOR",
+    "TOOLTIP_DEFAULT_BACKGROUND_COLOR",
+    "ToggleDropDownMenu",
+    "UIDropDownMenu_Initialize",
+    "UKNOWNBEING",
+    "message",
+    "GREEN_FONT_COLOR_CODE",
+    "FONT_COLOR_CODE_CLOSE",
+    "MouseIsOver",
+    "SHORT",
+    "SlashCmdList",
+    "Settings",
+    "ACCEPT",
+    "CANCEL",
+    "HIDE",
+    "ReloadUI",
+    "OrderHallCommandBar",
+    "NAME"
+  ]
+}

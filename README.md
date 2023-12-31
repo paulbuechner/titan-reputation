@@ -10,7 +10,9 @@ Titan Reputation is a reputation plugin for Titan Panel. It allows you to more e
 standings with any faction you may be farming reputation with. 
 
 ![TitanReputation_Screenshot_01](assets/TitanReputation_Screenshot_01.png)
-![TitanReputation_Screenshot_02](assets/TitanReputation_Screenshot_02.png)
+
+<div align="center"><img src="assets/TitanReputation_Screenshot_02.png" width="70%;"/></div>
+
 
 
 ## Features
@@ -31,11 +33,11 @@ standings with any faction you may be farming reputation with.
 
 ### Button Customization Options:
  
-![TitanReputation_Screenshot_03](assets/TitanReputation_Screenshot_03.png)
+<div align="center"><img src="assets/TitanReputation_Screenshot_03.png" width="70%;"/></div>
 
 ### Tooltip Customization Options:
 
-![TitanReputation_Screenshot_04](assets/TitanReputation_Screenshot_04.png)
+<div align="center"><img src="assets/TitanReputation_Screenshot_04.png" width="70%;"/></div>
 
 ### Additional Feature
 

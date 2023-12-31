@@ -8,30 +8,6 @@ TITAMREP_InitTime = 0
 TITANREP_RTS = {}
 gFactionID = 1168
 
---check Glamour version
---
-
-if (C_AddOns.IsAddOnLoaded("Glamour")) then
-    local min_version = 1.2
-    local major, minor, _ = strsplit(".", Glamour_VERSION)
-    local glam_ver = tonumber(major .. "." .. minor)
-
-    if (glam_ver < min_version) then
-        StaticPopupDialogs["! ! ! Glamour Outdated ! ! !"] = {
-            text =
-                "An outdated version of Glamour has been detected. Running an older version of Glamour can have undesired effects on Glamour enabled addons.\n\n" ..
-                "Reporting Addon:\n" .. TITANREP_TITLE .. " v" .. TITANREP_VERSION .. "\n\n" ..
-                "Glamour Version Detected: " ..
-                Glamour_VERSION .. "\nGlamour Version Required: " .. min_version .. "\n\n",
-            button1 = "Ok",
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-        }
-        StaticPopup_Show("! ! ! Glamour Outdated ! ! !")
-    end
-end
-
 --new color coding
 local TITANREP_COLORS_DEFAULT = {
     [1] = { r = 0.8, g = 0, b = 0 },            -- #33ffff
@@ -93,7 +69,8 @@ local TITANREP_NO_COLORS = "Basic Colors"
 local TITANREP_SHOW_STATS = "Show Exalted Total"
 local TITANREP_SHOW_SUMMARY = "Show Session Summary"
 local TITANREP_SHOW_ANNOUNCE = "Announce Standing Changes"
-local TITANREP_SHOW_ANNOUNCE_FRAME = "Glamourize Standing Changes"
+-- TODO: Implement achivement style announcements based on official WoW API
+-- local TITANREP_SHOW_ANNOUNCE_FRAME = "Glamourize Standing Changes"
 local TITANREP_SHOW_ANNOUNCE_MIK = " - Use MikSBT for Announcement"
 local TITANREP_SHOW_MINIMAL = "Use Minimal Tooltip Display"
 local TITANREP_SCALE_INCREASE = "+ Increase Tooltip Scale"
@@ -193,7 +170,7 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         end
 
         TITANREP_InitTime = GetTime();
-        print("TITANREP_InitTime Set:", TITANREP_InitTime);
+        TitanDebug("<TITANREP> InitTime Set: " .. TITANREP_InitTime);
     end
 
 
@@ -212,7 +189,7 @@ function TitanPanelReputationButton_OnEvent(event, ...)
     TitanPanelReputation_GatherFactions(TitanPanelReputation_GatherValues)
     if not TITANREP_TABLE_INIT then
         TITANREP_TABLE_INIT = true
-        print("INIT SET")
+        TitanDebug("<TITANREP> INIT SET")
     end
     TitanPanelReputation_Refresh()
     TitanPanelButton_UpdateTooltip()
@@ -740,12 +717,16 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     TitanPanelRightClickMenu_AddTitle2(TitanPlugins[TITANREP_ID].menuText .. " v" .. TITANREP_VERSION)
     TitanPanelRightClickMenu_AddToggleVar(TITANREP_AUTO_CHANGE, TITANREP_ID, "AutoChange")
     TitanPanelRightClickMenu_AddToggleVar(TITANREP_SHOW_ANNOUNCE, TITANREP_ID, "ShowAnnounce")
+
     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText")) then
         TitanPanelRightClickMenu_AddToggleVar(TITANREP_SHOW_ANNOUNCE_MIK, TITANREP_ID, "ShowAnnounceMik")
     end
-    if (C_AddOns.IsAddOnLoaded("Glamour")) then
-        TitanPanelRightClickMenu_AddToggleVar(TITANREP_SHOW_ANNOUNCE_FRAME, TITANREP_ID, "ShowAnnounceFrame")
-    end
+
+    -- TODO: Implement achivement style announcements based on official WoW API
+    -- if (C_AddOns.IsAddOnLoaded("Glamour")) then
+    --     TitanPanelRightClickMenu_AddToggleVar(TITANREP_SHOW_ANNOUNCE_FRAME, TITANREP_ID, "ShowAnnounceFrame")
+    -- end
+
     TitanPanelRightClickMenu_AddSpacer2()
     TitanPanelReputation_GatherFactions(TitanPanelReputation_BuildRightClickMenu)
     TitanPanelRightClickMenu_AddSpacer2()
@@ -1129,8 +1110,10 @@ function TitanPanelReputation_GatherValues(name, parentName, standingID, topValu
                     msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
                     dsc = dsc .. TitanUtils_GetGoldText(LABEL)
                 end
+
                 dsc = dsc .. " standing with " .. name .. "."
                 msg = tag .. msg .. tag
+
                 if (TitanGetVar(TITANREP_ID, "ShowAnnounce")) then
                     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TITANREP_ID, "ShowAnnounceMik")) then
                         MikSBT.DisplayMessage(
@@ -1141,25 +1124,28 @@ function TitanPanelReputation_GatherValues(name, parentName, standingID, topValu
                             "|T" .. TITANREP_BUTTON_ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
                     end
                 end
-                if (TitanGetVar(TITANREP_ID, "ShowAnnounceFrame")) then
-                    if (C_AddOns.IsAddOnLoaded("Glamour")) then
-                        local MyData = {}
-                        MyData.Text = name .. " - " .. LABEL
-                        MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TITANREP_ICONS[(adjustedId)]
-                        local color = {}
-                        color.r = TITANREP_COLORS_ARMORY[(adjustedId)].r
-                        color.g = TITANREP_COLORS_ARMORY[(adjustedId)].g
-                        color.b = TITANREP_COLORS_ARMORY[(adjustedId)].b
-                        MyData.bTitle = "New " .. factionType .. " Discovered"
-                        MyData.Title = "You have discovered"
-                        MyData.FrameStyle = "GuildAchievement"
-                        MyData.BannerColor = color
-                        local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-                    end
-                end
+
+                -- TODO: Implement achivement style announcements based on official WoW API
+                -- if (TitanGetVar(TITANREP_ID, "ShowAnnounceFrame")) then
+                --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
+                --         local MyData = {}
+                --         MyData.Text = name .. " - " .. LABEL
+                --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TITANREP_ICONS[(adjustedId)]
+                --         local color = {}
+                --         color.r = TITANREP_COLORS_ARMORY[(adjustedId)].r
+                --         color.g = TITANREP_COLORS_ARMORY[(adjustedId)].g
+                --         color.b = TITANREP_COLORS_ARMORY[(adjustedId)].b
+                --         MyData.bTitle = "New " .. factionType .. " Discovered"
+                --         MyData.Title = "You have discovered"
+                --         MyData.FrameStyle = "GuildAchievement"
+                --         MyData.BannerColor = color
+                --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
+                --     end
+                -- end
             end
         end
     end
+
     if ((not isHeader and name) or (isHeader and hasRep)) then
         TITANREP_TABLE[factionID] = {}
         TITANREP_TABLE[factionID].standingID = standingID
@@ -1229,8 +1215,10 @@ function TitanPanelReputation_GetChangedName(name, parentName, standingID, topVa
                     msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
                     dsc = dsc .. TitanUtils_GetGoldText(LABEL)
                 end
+
                 dsc = dsc .. " standing with " .. name .. "."
                 msg = tag .. msg .. tag
+
                 if (TitanGetVar(TITANREP_ID, "ShowAnnounce")) then
                     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TITANREP_ID, "ShowAnnounceMik")) then
                         MikSBT.DisplayMessage(
@@ -1241,22 +1229,25 @@ function TitanPanelReputation_GetChangedName(name, parentName, standingID, topVa
                             "|T" .. TITANREP_BUTTON_ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
                     end
                 end
-                if (TitanGetVar(TITANREP_ID, "ShowAnnounceFrame")) then
-                    if (C_AddOns.IsAddOnLoaded("Glamour")) then
-                        local MyData = {}
-                        MyData.Text = name .. " - " .. LABEL
-                        MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TITANREP_ICONS[(adjustedId)]
-                        local color = {}
-                        color.r = TITANREP_COLORS_ARMORY[(adjustedId)].r
-                        color.g = TITANREP_COLORS_ARMORY[(adjustedId)].g
-                        color.b = TITANREP_COLORS_ARMORY[(adjustedId)].b
-                        MyData.bTitle = factionType .. " Upgrade"
-                        MyData.Title = ""
-                        MyData.FrameStyle = "GuildAchievement"
-                        MyData.BannerColor = color
-                        local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-                    end
-                end
+
+                -- TODO: Implement achivement style announcements based on official WoW API
+                -- if (TitanGetVar(TITANREP_ID, "ShowAnnounceFrame")) then
+                --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
+                --         local MyData = {}
+                --         MyData.Text = name .. " - " .. LABEL
+                --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TITANREP_ICONS[(adjustedId)]
+                --         local color = {}
+                --         color.r = TITANREP_COLORS_ARMORY[(adjustedId)].r
+                --         color.g = TITANREP_COLORS_ARMORY[(adjustedId)].g
+                --         color.b = TITANREP_COLORS_ARMORY[(adjustedId)].b
+                --         MyData.bTitle = factionType .. " Upgrade"
+                --         MyData.Title = ""
+                --         MyData.FrameStyle = "GuildAchievement"
+                --         MyData.BannerColor = color
+                --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
+                --     end
+                -- end
+
                 earnedAmount = TITANREP_TABLE[factionID].topValue - TITANREP_TABLE[factionID].earnedValue
                 earnedAmount = earnedValue + earnedAmount
             elseif (TITANREP_TABLE[factionID].standingID > standingID) then
@@ -1267,8 +1258,10 @@ function TitanPanelReputation_GetChangedName(name, parentName, standingID, topVa
                     msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
                     dsc = dsc .. TitanUtils_GetGoldText(LABEL)
                 end
+
                 dsc = dsc .. " standing with " .. name .. "."
                 msg = tag .. msg .. tag
+
                 if (TitanGetVar(TITANREP_ID, "ShowAnnounce")) then
                     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TITANREP_ID, "ShowAnnounceMik")) then
                         MikSBT.DisplayMessage(
@@ -1279,22 +1272,25 @@ function TitanPanelReputation_GetChangedName(name, parentName, standingID, topVa
                             "|T" .. TITANREP_BUTTON_ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
                     end
                 end
-                if (TitanGetVar(TITANREP_ID, "ShowAnnounceFrame")) then
-                    if (C_AddOns.IsAddOnLoaded("Glamour")) then
-                        local MyData = {}
-                        MyData.Text = name .. " - " .. LABEL
-                        MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TITANREP_ICONS[(adjustedId)]
-                        local color = {}
-                        color.r = TITANREP_COLORS_ARMORY[(adjustedId)].r
-                        color.g = TITANREP_COLORS_ARMORY[(adjustedId)].g
-                        color.b = TITANREP_COLORS_ARMORY[(adjustedId)].b
-                        MyData.bTitle = factionType .. " Downgrade"
-                        MyData.Title = ""
-                        MyData.FrameStyle = "GuildAchievement"
-                        MyData.BannerColor = color
-                        local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-                    end
-                end
+
+                -- TODO: Implement achivement style announcements based on official WoW API
+                -- if (TitanGetVar(TITANREP_ID, "ShowAnnounceFrame")) then
+                --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
+                --         local MyData = {}
+                --         MyData.Text = name .. " - " .. LABEL
+                --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TITANREP_ICONS[(adjustedId)]
+                --         local color = {}
+                --         color.r = TITANREP_COLORS_ARMORY[(adjustedId)].r
+                --         color.g = TITANREP_COLORS_ARMORY[(adjustedId)].g
+                --         color.b = TITANREP_COLORS_ARMORY[(adjustedId)].b
+                --         MyData.bTitle = factionType .. " Downgrade"
+                --         MyData.Title = ""
+                --         MyData.FrameStyle = "GuildAchievement"
+                --         MyData.BannerColor = color
+                --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
+                --     end
+                -- end
+
                 earnedAmount = earnedValue - topValue
                 earnedAmount = earnedAmount - TITANREP_TABLE[factionID].earnedValue
             elseif (TITANREP_TABLE[factionID].standingID == standingID) then

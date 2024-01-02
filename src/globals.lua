@@ -9,10 +9,10 @@
 -- determine the data-type of the variable
 
 
--- TitanReputation.lua --------------------------------------------------------------------------------
+-- main.lua --------------------------------------------------------------------------------
 
---[[ TitanReputation
-NAME: TitanPanelBarButton_OnEnter
+--[[ TitanPanelReputation
+NAME: TitanPanelReputationButton
 DESC: No code - this is a place holder for the XML template.
 VAR: self - expected to be a Titan bar
 OUT: None

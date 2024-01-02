@@ -4,11 +4,11 @@ TITANREP_VERSION = TitanUtils_GetAddOnMetadata("TitanReputation", "Version") or 
 TITANREP_TITLE = TitanUtils_GetAddOnMetadata("TitanReputation", "Title") or "UnKnown Title"
 TITANREP_BUTTON_ICON = "Interface\\AddOns\\TitanReputation\\assets\\TitanReputation"
 TITANREP_EventTime = GetTime()
-TITAMREP_InitTime = 0
+TITANREP_InitTime = 0
 TITANREP_RTS = {}
 gFactionID = 1168
 
---new color coding
+-- Color coding
 local TITANREP_COLORS_DEFAULT = {
     [1] = { r = 0.8, g = 0, b = 0 },            -- #33ffff
     [2] = { r = 0.8, g = 0.3, b = 0.22 },       -- #33b3c7
@@ -67,12 +67,21 @@ local TITANREP_ARMORY_COLORS = "Armory Colors"
 local TITANREP_DEFAULT_COLORS = "Default Colors"
 local TITANREP_NO_COLORS = "Basic Colors"
 local TITANREP_SHOW_STATS = "Show Exalted Total"
-local TITANREP_SHOW_SUMMARY = "Show Session Summary"
+
+-- Session Summary
+local TITANREP_SESSION_SUMMARY_SETTINGS = "Session Summary Settings"
+local TITANREP_SHOW_SUMMARY_DURATION = "Show Duration"
+local TITANREP_SHOW_SUMMARY_TTL = "Show Time to Level"
+
+local TITANREP_TIP_SESSION_SUMMARY_SETTINGS = "Tooltip Session Summary Settings"
+local TITANREP_TIP_SHOW_SUMMARY_DURATION = "Show Duration"
+local TITANREP_TIP_SHOW_SUMMARY_TTL = "Show Time to Level"
+
 local TITANREP_SHOW_ANNOUNCE = "Announce Standing Changes"
 -- TODO: Implement achivement style announcements based on official WoW API
 -- local TITANREP_SHOW_ANNOUNCE_FRAME = "Glamourize Standing Changes"
 local TITANREP_SHOW_ANNOUNCE_MIK = " - Use MikSBT for Announcement"
-local TITANREP_SHOW_MINIMAL = "Use Minimal Tooltip Display"
+local TITANREP_SHOW_MINIMAL = "Use MinimalTip Tooltip Display"
 local TITANREP_SCALE_INCREASE = "+ Increase Tooltip Scale"
 local TITANREP_SCALE_DECREASE = "- Decrease Tooltip Scale"
 local TITANREP_DisplayOnRightSide = "Align Plugin to Right-Side"
@@ -101,50 +110,86 @@ function TitanPanelReputationButton_OnLoad(self)
         menuText = TITANREP_ID,
         version = TITANREP_VERSION,
         buttonTextFunction = "TitanPanelReputation_GetButtonText",
-        tooltipCustomFunction = TitanPanelReputation_localGetToolTipText,
+        tooltipCustomFunction = function(self)
+            if not TitanGetVar(TITANREP_ID, "MinimalTip") then
+                local tleft = "|T" .. TITANREP_BUTTON_ICON .. ":20|t " .. TITANREP_TITLE
+                -- local tright = "v" .. TITANREP_VERSION .. "|T" .. TITANREP_BUTTON_ICON .. ":20|t"
+                local tright = ""
+                GameTooltip:AddDoubleLine(tleft, tright, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g,
+                    HIGHLIGHT_FONT_COLOR.b,
+                    HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+            end
+
+            TitanPanelReputationUtils_AddTooltipText(TitanPanelReputation_GetToolTipText())
+
+            GameTooltip:Show()
+        end,
         category = "Information",
         icon = TITANREP_BUTTON_ICON,
         iconWidth = 16,
         savedVariables = {
-            ShowIcon = 1,
-            ShowFriendships = 1,
-            ShowFactionName = 1,
-            ShowStanding = 1,
-            ShortStanding = false,
-            ShowValue = 1,
-            ShowPercent = 1,
-            AutoChange = 1,
-            TITANREP_WATCHED_FACTION = "none",
-            ShowExalted = 1,
-            ShowRevered = 1,
-            ShowHonored = 1,
-            ShowFriendly = 1,
-            ShowNeutral = 1,
-            ShowUnfriendly = 1,
-            ShowHostile = 1,
-            ShowHated = 1,
-            ShowBESTFRIEND = 1,
-            ShowGOODFRIEND = 1,
-            ShowFRIEND = 1,
-            ShowBUDDY = 1,
-            ShowACQUAINTANCE = 1,
-            ShowSTRANGER = 1,
-            MyColor = 1,
-            ShowSummary = 1,
-            ShowStats = 1,
+            -- General Options -------------------------------------------
+            AutoChange = true, -- Auto Show Changed
+
+            -- Announcement Settings
+            ShowAnnounce = true, -- Announce Standing Changes
+            ShowAnnounceFrame = true,
+            ShowAnnounceMik = true,
+
             FactionHeaders = { "" },
-            ShowTipValue = 1,
-            ShowTipPercent = 1,
-            ShowTipStanding = 1,
-            ShowTipSummary = 1,
-            ShowAnnounce = 1,
-            ShowAnnounceFrame = 1,
-            ShowAnnounceMik = 1,
-            ShortTipStanding = false,
-            ToolTipScale = .8,
-            Minimal = false,
-            ShowFriendsOnBar = 1,
-            DisplayOnRightSide = false
+
+            -- Button Options --------------------------------------------
+            DisplayOnRightSide = false, -- Align Plugin to Right-Side
+            ShowIcon = true,            -- Show Icon
+            ShowFriendsOnBar = true,    -- Show Friendships
+            ShowFactionName = true,     -- Show Faction Name
+            ShowStanding = true,        -- Show Standing
+            ShortStanding = false,      -- Abbreviate Standing
+            ShowValue = true,           -- Show Reputation Value
+            ShowPercent = true,         -- Show Percent
+
+            -- Session Summary Settings
+            ShowSessionSummaryDuration = true, -- Show Duration
+            ShowSessionSummaryTTL = true,      -- Show Time to Level
+
+            -- Tooltip Options -------------------------------------------
+            ToolTipScale = 1.0,
+            MinimalTip = false,
+
+            -- Friendship Rank Settings
+            ShowFriendships = true,
+            ShowBESTFRIEND = true,
+            ShowGOODFRIEND = true,
+            ShowFRIEND = true,
+            ShowBUDDY = true,
+            ShowACQUAINTANCE = true,
+            ShowSTRANGER = true,
+
+            -- Reputation Standing Settings
+            ShowExalted = true,
+            ShowRevered = true,
+            ShowHonored = true,
+            ShowFriendly = true,
+            ShowNeutral = true,
+            ShowUnfriendly = true,
+            ShowHostile = true,
+            ShowHated = true,
+
+            ShowTipReputationValue = true, -- Show Reputation Value
+            ShowTipPercent = true,         -- Show Percent
+            ShowTipStanding = true,        -- Show Standing
+            ShortTipStanding = false,      -- Abbreviate Standing
+            ShowTipExaltedTotal = true,    -- Show Exalted Total
+
+            -- Session Summary Settings
+            ShowTipSessionSummaryDuration = true, -- Show Duration
+            ShowTipSessionSummaryTTL = true,      -- Show Time to Level
+
+            -- Color Options --------------------------------------------
+            ColorValue = true,
+
+            -- Other ----------------------------------------------------
+            TITANREP_WATCHED_FACTION = "none",
         }
     }
     self:RegisterEvent("UPDATE_FACTION")
@@ -164,7 +209,7 @@ function TitanPanelReputationButton_OnClick(self, button)
 end
 
 function TitanPanelReputationButton_OnEvent(event, ...)
-    if event == "ADDON_LOADED" and ... == "TitanReputation" then
+    if event == "ADDON_LOADED" and ... == "TitanPanelReputation" then
         if not TitanRep_Data then
             TitanRep_Data = {}
         end
@@ -202,35 +247,10 @@ function TitanPanelReputation_GetButtonText(id)
     return TITANREP_BUTTON_TEXT
 end
 
-function TitanReputation_AddTooltipText(text)
-    if (text) then
-        -- Append a "\n" to the end
-        if (string.sub(text, -1, -1) ~= "\n") then
-            --		text = text.."\n"
-        end
-
-        -- See if the string is intended for a double column
-        for text1, text2 in string.gmatch(text, "([^\t\n]*)\t?([^\t\n]*)\n") do
-            if (text2 ~= "") then
-                -- Add as double wide
-                GameTooltip:AddDoubleLine(text1, text2)
-            elseif (text1 ~= "") then
-                -- Add single column line
-                GameTooltip:AddLine(text1)
-            else
-                if not TitanGetVar(TITANREP_ID, "Minimal") then
-                    -- Assume a blank line
-                    GameTooltip:AddLine("\n")
-                end
-            end
-        end
-    end
-end
-
 -- Tooltip scaling hooked ownership check (Thanks to Pankkirosvo, this was educational.)
 local TITANREP_OldScale
 local TITANREP_isTooltipShowing = false
-function TITANREP_TooltipHook()
+function TitanPanelReputation_TooltipHook()
     if GameTooltip:GetOwner() == TitanPanelReputationButton then
         if not TITANREP_isTooltipShowing then
             TITANREP_isTooltipShowing = true
@@ -249,21 +269,207 @@ function TITANREP_TooltipHook()
     end
 end
 
-hooksecurefunc(GameTooltip, "Show", TITANREP_TooltipHook)
+hooksecurefunc(GameTooltip, "Show", TitanPanelReputation_TooltipHook)
 
+function TitanPanelReputationSetColor()
+    if (TitanGetVar(TITANREP_ID, "ColorValue") == 1) then
+        MYBARCOLORS = TITANREP_COLORS_DEFAULT
+    end
+    if (TitanGetVar(TITANREP_ID, "ColorValue") == 2) then
+        MYBARCOLORS = TITANREP_COLORS_ARMORY
+    end
+    if (TitanGetVar(TITANREP_ID, "ColorValue") == 3) then
+        MYBARCOLORS = nil
+    end
+end
 
--- for titan tool tip text building
-function TitanPanelReputation_localGetToolTipText(self)
-    if not TitanGetVar(TITANREP_ID, "Minimal") then
-        local tleft = "|T" .. TITANREP_BUTTON_ICON .. ":20|t " .. TITANREP_TITLE
-        -- local tright = "v" .. TITANREP_VERSION .. "|T" .. TITANREP_BUTTON_ICON .. ":20|t"
-        local tright = ""
-        GameTooltip:AddDoubleLine(tleft, tright, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b,
-            HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+-- This method sets the text of the button according to selected faction's data
+function TitanPanelReputation_BuildButtonText(name, parentName, standingID, topValue, earnedValue, percent, isHeader,
+                                              isCollapsed, isInactive, hasRep, isChild, isFriendship, factionID,
+                                              hasBonusRepGain)
+    local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold
+    local adjustedId = standingID
+
+    if isFriendship then
+        if not TitanGetVar(TITANREP_ID, "ShowFriendsOnBar") then
+            return
+        end
+
+        local reputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
+
+        friendID = reputationInfo["friendshipFactionID"]
+        friendRep = reputationInfo["standing"]
+        friendMaxRep = reputationInfo["maxRep"]
+        friendName = reputationInfo["name"]
+        friendText = reputationInfo["text"]
+        friendTexture = reputationInfo["texture"]
+        friendTextLevel = reputationInfo["reaction"]
+        friendThreshold = reputationInfo["reactionThreshold"]
+        nextFriendThreshold = reputationInfo["nextThreshold"]
     end
 
-    TitanReputation_AddTooltipText(TitanPanelReputation_GetToolTipText())
-    GameTooltip:Show()
+    if hasBonusRepGain then
+        adjustedId = 9
+    end
+
+    if topValue == 0 then adjustedId = 8 end
+
+    local preface = ""
+
+    local LABEL = getglobal("FACTION_STANDING_LABEL" .. standingID)
+    if isFriendship then LABEL = friendTextLevel end
+
+    if hasBonusRepGain and not (isFriendship and not nextFriendThreshold) and not (adjustedId >= 8 and topValue == 0) then
+        LABEL = TITANREP_PARAGON
+    end
+
+    if factionID and C_Reputation.IsMajorFaction(factionID) then
+        local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
+
+        if majorFactionData ~= nil then
+            LABEL = tostring(majorFactionData.renownLevel)
+        end
+        adjustedId = 10
+    end
+
+    if (TitanGetVar(TITANREP_ID, "ShortStanding")) then LABEL = strsub(LABEL, 1, adjustedId == 10 and 2 or 1) end
+
+    TitanPanelReputationSetColor()
+
+    if ((not isHeader or (isHeader and hasRep)) and (TitanGetVar(TITANREP_ID, "TITANREP_WATCHED_FACTION") == name)) then
+        TITANREP_BUTTON_TEXT = ""
+        local COLOR = nil
+        if (MYBARCOLORS) then
+            COLOR = MYBARCOLORS[(adjustedId)]
+        end
+
+        if (TitanGetVar(TITANREP_ID, "ShowFactionName")) then
+            if (COLOR) then
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TitanUtils_GetColoredText(name, COLOR)
+            else
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. name
+            end
+            if (TitanGetVar(TITANREP_ID, "ShowStanding") or
+                    TitanGetVar(TITANREP_ID, "ShowStanding") or
+                    TitanGetVar(TITANREP_ID, "ShowValue") or
+                    TitanGetVar(TITANREP_ID, "ShowPercent")) then
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " - "
+            end
+        end
+
+        if (TitanGetVar(TITANREP_ID, "ShowStanding")) then
+            if (COLOR) then
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TitanUtils_GetColoredText(LABEL, COLOR) .. " "
+            else
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. LABEL .. " "
+            end
+        end
+        if (TitanGetVar(TITANREP_ID, "ShowValue") and not (isFriendship and not nextFriendThreshold) and not (adjustedId >= 8 and topValue == 0)) then
+            if (COLOR) then
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT ..
+                    "[" .. TitanUtils_GetColoredText(earnedValue .. "/" .. topValue, COLOR) .. "] "
+            else
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. "[" .. earnedValue .. "/" .. topValue .. "] "
+            end
+        end
+
+        if (TitanGetVar(TITANREP_ID, "ShowPercent") and not (isFriendship and not nextFriendThreshold) and not (adjustedId >= 8 and topValue == 0)) then
+            if (COLOR) then
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TitanUtils_GetColoredText(percent .. "%", COLOR)
+            else
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. percent .. "%"
+            end
+        end
+
+        if (TitanGetVar(TITANREP_ID, "ShowSessionSummaryDuration") or TitanGetVar(TITANREP_ID, "ShowSessionSummaryTTL")) then
+            local timeonline = GetTime() - TITANREP_TIME
+
+            RTS_HAS_ENTRIES = (next(TITANREP_RTS) ~= nil)
+
+            if RTS_HAS_ENTRIES then
+                if (TitanGetVar(TITANREP_ID, "ShowSessionSummaryDuration")) then
+                    local humantime = TitanPanelReputationUtils_GetHumanReadableTime(timeonline)
+
+                    if (COLOR) then
+                        TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " - " ..
+                            TitanUtils_GetColoredText(TITANREP_SESSION_SUMMARY_DURATION .. ": ", COLOR) ..
+                            TitanUtils_GetNormalText(humantime)
+                    else
+                        TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " - " ..
+                            TitanUtils_GetNormalText(TITANREP_SESSION_SUMMARY_DURATION .. ": " .. humantime)
+                    end
+                end
+
+                for f, v in pairs(TITANREP_RTS) do
+                    local RPH_STRING = ""
+                    local RPH = floor(v / (timeonline / 60 / 60))
+                    local RPM = floor(v / (timeonline / 60))
+
+                    if (TitanGetVar(TITANREP_ID, "ShowSessionSummaryDuration")) then
+                        if (RPH > 0) then
+                            if (COLOR) then
+                                RPH_STRING = TitanUtils_GetGreenText(RPH) .. TitanUtils_GetColoredText("/h ", COLOR) ..
+                                    TitanUtils_GetGreenText(RPM) .. TitanUtils_GetColoredText("/min", COLOR)
+                            else
+                                RPH_STRING = TitanUtils_GetGreenText(RPH) ..
+                                    "/h " .. TitanUtils_GetGreenText(RPM) .. "/min"
+                            end
+                        else
+                            if (COLOR) then
+                                RPH_STRING = TitanUtils_GetRedText(RPH) .. TitanUtils_GetColoredText("/h ", COLOR) ..
+                                    TitanUtils_GetRedText(RPM) .. TitanUtils_GetColoredText("/min ", COLOR)
+                            else
+                                RPH_STRING = TitanUtils_GetRedText(RPH) .. "/h " .. TitanUtils_GetRedText(RPM) .. "/min"
+                            end
+                        end
+
+                        if (COLOR) then
+                            TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT ..
+                                TitanUtils_GetColoredText(" @ ", COLOR) .. RPH_STRING
+                        else
+                            TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " @ " .. RPH_STRING
+                        end
+                    end
+
+                    -- Calculate time to next level
+                    if (TitanGetVar(TITANREP_ID, "ShowSessionSummaryTTL")) then
+                        local TTL_STRING = ""
+                        local timeToNextLevel = TitanPanelReputationUtils_CalculateTimeToNextLevel(earnedValue, topValue,
+                            RPH)
+                        local hours = floor(timeToNextLevel)
+                        local minutes = floor((timeToNextLevel * 60) % 60)
+
+                        if (hours > 0) then
+                            if (COLOR) then
+                                TTL_STRING = TitanUtils_GetColoredText("TTL: ", COLOR) ..
+                                    hours .. "hrs " .. minutes .. "mins"
+                            else
+                                TTL_STRING = "TTL: " .. hours .. "hrs " .. minutes .. "mins"
+                            end
+                        else
+                            if (COLOR) then
+                                TTL_STRING = TitanUtils_GetColoredText("TTL: ", COLOR) .. minutes .. "mins"
+                            else
+                                TTL_STRING = "TTL: " .. minutes .. " mins"
+                            end
+                        end
+
+                        TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " - " .. TTL_STRING
+                    end
+                end
+
+                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT
+            end
+        end
+
+        if (not (TitanGetVar(TITANREP_ID, "ShowFactionName") or
+                TitanGetVar(TITANREP_ID, "ShowStanding") or
+                TitanGetVar(TITANREP_ID, "ShowValue") or
+                TitanGetVar(TITANREP_ID, "ShowPercent") or
+                TitanGetVar(TITANREP_ID, "ShowSummary"))) then
+            TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TITANREP_ALL_HIDDEN_LABEL
+        end
+    end
 end
 
 function TitanPanelReputation_GetToolTipText()
@@ -272,39 +478,29 @@ function TitanPanelReputation_GetToolTipText()
     TOTAL_EXALTED = 0
     TOTAL_BESTFRIENDS = 0
     LAST_HEADER = { "HEADER", 1 }
+
     TitanPanelReputation_GatherFactions(TitanPanelReputation_BuildToolTipText)
-    if (TitanGetVar(TITANREP_ID, "ShowTipSummary") == 1) then
+
+    if (TitanGetVar(TITANREP_ID, "ShowTipSessionSummaryDuration") or TitanGetVar(TITANREP_ID, "ShowTipSessionSummaryTTL")) then
         local timeonline = GetTime() - TITANREP_TIME
-        local humantime
 
-        if (timeonline < 60) then
-            humantime = "< 1min"
-        else
-            humantime = floor(timeonline / 60)
-            if (humantime < 60) then
-                humantime = humantime .. "min"
-            else
-                local hours = floor(humantime / 60)
-                local mins = floor((timeonline - (hours * 60 * 60)) / 60)
-                humantime = hours .. "hr " .. mins .. "min"
-            end
-        end
-
-        for f, v in pairs(TITANREP_RTS) do
-            RTS_HAS_ENTRIES = true
-        end
+        RTS_HAS_ENTRIES = (next(TITANREP_RTS) ~= nil)
 
         if RTS_HAS_ENTRIES then
+            local humantime = TitanPanelReputationUtils_GetHumanReadableTime(timeonline)
+
             TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT ..
                 "\n" ..
                 TitanUtils_GetHighlightText(TITANREP_SESSION_SUMMARY .. ":") ..
                 "\t" .. TitanUtils_GetNormalText(TITANREP_SESSION_SUMMARY_DURATION .. ": " .. humantime)
+
             for f, v in pairs(TITANREP_RTS) do
                 local RPH_STRING = ""
                 local RPH = floor(v / (timeonline / 60 / 60))
                 local RPM = floor(v / (timeonline / 60))
+
                 if (RPH > 0) then
-                    RPH_STRING = TitanUtils_GetGoldText(f) .. " : " .. TitanUtils_GetGreenText(RPH) .. "/h " ..
+                    RPH_STRING = TitanUtils_GetGoldText(f) .. ": " .. TitanUtils_GetGreenText(RPH) .. "/h " ..
                         TitanUtils_GetGreenText(RPM) .. "/min " ..
                         "\t Total: " .. TitanUtils_GetGreenText(v)
                 else
@@ -312,13 +508,36 @@ function TitanPanelReputation_GetToolTipText()
                         TitanUtils_GetRedText(RPM) .. "/min " ..
                         "\t Total: " .. TitanUtils_GetGreenText(v)
                 end
+
+                -- Calculate time to next level
+                if (TitanGetVar(TITANREP_ID, "ShowTipSessionSummaryTTL")) then
+                    -- Retrieve the earnedValue and topValue for the faction
+                    local _, _, _, _, topValue, earnedValue, _, _, _, _, _, _, _, _, _, _ =
+                        TitanPanelReputationUtils_GetFactionInfoByName(f)
+
+                    local TTL_STRING = ""
+                    local timeToNextLevel = TitanPanelReputationUtils_CalculateTimeToNextLevel(earnedValue, topValue,
+                        RPH)
+                    local hours = floor(timeToNextLevel)
+                    local minutes = floor((timeToNextLevel * 60) % 60)
+
+                    if (hours > 0) then
+                        TTL_STRING = "TTL: " .. hours .. "hrs " .. minutes .. "mins"
+                    else
+                        TTL_STRING = "TTL: " .. minutes .. " mins"
+                    end
+
+                    RPH_STRING = RPH_STRING .. " - " .. TTL_STRING
+                end
+
                 TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT .. "\n  " .. RPH_STRING
             end
+
             TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT .. "\n"
         end
     end
 
-    if (TitanGetVar(TITANREP_ID, "ShowStats") == 1) then
+    if (TitanGetVar(TITANREP_ID, "ShowTipExaltedTotal") == 1) then
         TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT ..
             "\n" .. TitanUtils_GetHighlightText(TITANREP_SESSION_SUMMARY_TOTAL_EXALTED_FACTIONS .. ":")
         TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT .. "\t" ..
@@ -329,22 +548,10 @@ function TitanPanelReputation_GetToolTipText()
             TitanUtils_GetGoldText(" " .. TITANREP_SESSION_SUMMARY_TOTAL .. ": ") ..
             TitanUtils_GetGreenText((TOTAL_EXALTED + TOTAL_BESTFRIENDS)) .. "\n"
     end
+
     return TITANREP_TOOLTIP_TEXT
 end
 
-function TitanReputationSetColor()
-    if (TitanGetVar(TITANREP_ID, "MyColor") == 1) then
-        MYBARCOLORS = TITANREP_COLORS_DEFAULT
-    end
-    if (TitanGetVar(TITANREP_ID, "MyColor") == 2) then
-        MYBARCOLORS = TITANREP_COLORS_ARMORY
-    end
-    if (TitanGetVar(TITANREP_ID, "MyColor") == 3) then
-        MYBARCOLORS = nil
-    end
-end
-
--- this method adds a line to the tooltip text
 function TitanPanelReputation_BuildToolTipText(name, parentName, standingID, topValue, earnedValue, percent, isHeader,
                                                isCollapsed, isInactive, hasRep, isChild, isFriendship, factionID,
                                                hasBonusRepGain)
@@ -382,7 +589,7 @@ function TitanPanelReputation_BuildToolTipText(name, parentName, standingID, top
         return
     end
 
-    TitanReputationSetColor()
+    TitanPanelReputationSetColor()
 
     local preface = TitanUtils_GetHighlightText(" - ")
     local postface = ""
@@ -465,7 +672,7 @@ function TitanPanelReputation_BuildToolTipText(name, parentName, standingID, top
                 else
                     TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT ..
                         TitanUtils_GetColoredText(name, MYBARCOLORS[(adjustedId)]) .. postface .. "\t"
-                    if (TitanGetVar(TITANREP_ID, "ShowTipValue")) then
+                    if (TitanGetVar(TITANREP_ID, "ShowTipReputationValue")) then
                         TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT ..
                             TitanUtils_GetColoredText("[" .. earnedValue .. "/" .. topValue .. "]",
                                 MYBARCOLORS[(adjustedId)]) .. " "
@@ -486,7 +693,7 @@ function TitanPanelReputation_BuildToolTipText(name, parentName, standingID, top
                     TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT .. LABEL
                 else
                     TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT .. name .. postface .. "\t"
-                    if (TitanGetVar(TITANREP_ID, "ShowTipValue")) then
+                    if (TitanGetVar(TITANREP_ID, "ShowTipReputationValue")) then
                         TITANREP_TOOLTIP_TEXT = TITANREP_TOOLTIP_TEXT .. "[" .. earnedValue .. "/" .. topValue .. "] "
                     end
                     if (TitanGetVar(TITANREP_ID, "ShowTipPercent")) then
@@ -575,6 +782,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
                 true)
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_STRANGER, TITANREP_ID, "ShowSTRANGER", "", 3, true)
         end
+
         if TitanPanelRightClickMenu_GetDropdMenuValue() == "Reputation Standing Settings" then
             TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(),
                 TitanPanelRightClickMenu_GetDropdownLevel())
@@ -587,6 +795,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_HOSTILE, TITANREP_ID, "ShowHostile", "", 3, true)
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_HATED, TITANREP_ID, "ShowHated", "", 3, true)
         end
+
         if TitanPanelRightClickMenu_GetDropdMenuValue() == "Tooltip Scale" then
             TitanPanelRightClickMenu_AddTitle2("CAUTION: This effects ALL tooltips",
                 TitanPanelRightClickMenu_GetDropdownLevel())
@@ -618,12 +827,35 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             end
             TitanPanelRightClickMenu_AddButton(info, 3)
         end
+
+        -- Button Options
+        if TitanPanelRightClickMenu_GetDropdMenuValue() == TITANREP_SESSION_SUMMARY_SETTINGS then
+            TitanPanelRightClickMenu_AddTitle2(TITANREP_SESSION_SUMMARY_SETTINGS,
+                TitanPanelRightClickMenu_GetDropdownLevel())
+            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_SUMMARY_DURATION,
+                TITANREP_ID, "ShowSessionSummaryDuration", "", 3, true)
+            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_SUMMARY_TTL,
+                TITANREP_ID, "ShowSessionSummaryTTL", "", 3, true)
+        end
+
+        -- Tooltip Options
+        if TitanPanelRightClickMenu_GetDropdMenuValue() == TITANREP_TIP_SESSION_SUMMARY_SETTINGS then
+            TitanPanelRightClickMenu_AddTitle2(TITANREP_SESSION_SUMMARY_SETTINGS,
+                TitanPanelRightClickMenu_GetDropdownLevel())
+            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_TIP_SHOW_SUMMARY_DURATION,
+                TITANREP_ID, "ShowTipSessionSummaryDuration", "", 3, true)
+            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_TIP_SHOW_SUMMARY_TTL,
+                TITANREP_ID, "ShowTipSessionSummaryTTL", "", 3, true)
+        end
+
         return
     end
+
     if (TitanPanelRightClickMenu_GetDropdownLevel() == 2) then
         TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(),
             TitanPanelRightClickMenu_GetDropdownLevel())
         TitanPanelReputation_GatherFactions(TitanPanelReputation_BuildFactionSubMenu)
+
         if TitanPanelRightClickMenu_GetDropdMenuValue() == "Button Options" then
             info.text = TITANREP_DisplayOnRightSide
             if TitanGetVar(TITANREP_ID, "DisplayOnRightSide") then
@@ -641,6 +873,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
                 TitanPanel_InitPanelButtons()
             end
             TitanPanelRightClickMenu_AddButton(info, 2)
+
             TitanPanelRightClickMenu_AddToggleIcon2(TITANREP_ID, TitanPanelRightClickMenu_GetDropdownLevel())
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_ShowFriendsOnBar, TITANREP_ID, "ShowFriendsOnBar", "", 2,
                 true)
@@ -651,8 +884,16 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHORT_STANDING, TITANREP_ID, "ShortStanding", "", 2, true)
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_VALUE, TITANREP_ID, "ShowValue", "", 2, true)
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_PERCENT, TITANREP_ID, "ShowPercent", "", 2, true)
-            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_SUMMARY, TITANREP_ID, "ShowSummary", "", 2, true)
+
+            info.disabled = nil
+            info.func = nil
+            info.hasArrow = true
+            info.notCheckable = true
+            info.text = TITANREP_SESSION_SUMMARY_SETTINGS
+            info.value = TITANREP_SESSION_SUMMARY_SETTINGS
+            TitanPanelRightClickMenu_AddButton(info, 2)
         end
+
         if TitanPanelRightClickMenu_GetDropdMenuValue() == "Tooltip Options" then
             info.disabled = nil
             info.func = nil
@@ -661,23 +902,35 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             info.text = "Tooltip Scale (" .. (TitanGetVar(TITANREP_ID, "ToolTipScale") * 100) .. "%)"
             info.value = "Tooltip Scale"
             TitanPanelRightClickMenu_AddButton(info, 2)
-            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_MINIMAL, TITANREP_ID, "Minimal")
+
+            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_MINIMAL, TITANREP_ID, "MinimalTip")
+
             TitanPanelRightClickMenu_AddSpacer2(2)
+
             info.text = "Friendship Rank Settings"
             info.value = "Friendship Rank Settings"
             TitanPanelRightClickMenu_AddButton(info, 2)
+
             info.text = "Reputation Standing Settings"
             info.value = "Reputation Standing Settings"
             TitanPanelRightClickMenu_AddButton(info, 2)
+
             TitanPanelRightClickMenu_AddSpacer2(2)
-            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_VALUE, TITANREP_ID, "ShowTipValue")
+
+            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_VALUE, TITANREP_ID, "ShowTipReputationValue")
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_PERCENT, TITANREP_ID, "ShowTipPercent")
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_STANDING, TITANREP_ID, "ShowTipStanding")
             TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHORT_STANDING, TITANREP_ID, "ShortTipStanding")
+
             TitanPanelRightClickMenu_AddSpacer2(2)
-            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_STATS, TITANREP_ID, "ShowStats")
-            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_SUMMARY, TITANREP_ID, "ShowTipSummary")
+
+            TitanPanelRightClickMenu_AddToggleVar2(TITANREP_SHOW_STATS, TITANREP_ID, "ShowTipExaltedTotal")
+
+            info.text = TITANREP_SESSION_SUMMARY_SETTINGS
+            info.value = TITANREP_TIP_SESSION_SUMMARY_SETTINGS
+            TitanPanelRightClickMenu_AddButton(info, 2)
         end
+
         if TitanPanelRightClickMenu_GetDropdMenuValue() == "Color Options" then
             info.disabled = nil
             info.hasArrow = nil
@@ -685,27 +938,27 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             info.value = nil
 
             info.text = TITANREP_DEFAULT_COLORS
-            info.checked = function() if TitanGetVar(TITANREP_ID, "MyColor") == 1 then return true else return nil end end
+            info.checked = function() if TitanGetVar(TITANREP_ID, "ColorValue") == 1 then return true else return nil end end
             info.func = function()
-                TitanSetVar(TITANREP_ID, "MyColor", 1)
+                TitanSetVar(TITANREP_ID, "ColorValue", 1)
                 TitanPanelButton_UpdateButton(TITANREP_ID)
                 TitanPanelRightClickMenu_Close()
             end
             TitanPanelRightClickMenu_AddButton(info, 2)
 
             info.text = TITANREP_ARMORY_COLORS
-            info.checked = function() if TitanGetVar(TITANREP_ID, "MyColor") == 2 then return true else return nil end end
+            info.checked = function() if TitanGetVar(TITANREP_ID, "ColorValue") == 2 then return true else return nil end end
             info.func = function()
-                TitanSetVar(TITANREP_ID, "MyColor", 2)
+                TitanSetVar(TITANREP_ID, "ColorValue", 2)
                 TitanPanelButton_UpdateButton(TITANREP_ID)
                 TitanPanelRightClickMenu_Close()
             end
             TitanPanelRightClickMenu_AddButton(info, 2)
 
             info.text = TITANREP_NO_COLORS
-            info.checked = function() if TitanGetVar(TITANREP_ID, "MyColor") == 3 then return true else return nil end end
+            info.checked = function() if TitanGetVar(TITANREP_ID, "ColorValue") == 3 then return true else return nil end end
             info.func = function()
-                TitanSetVar(TITANREP_ID, "MyColor", 3)
+                TitanSetVar(TITANREP_ID, "ColorValue", 3)
                 TitanPanelButton_UpdateButton(TITANREP_ID)
                 TitanPanelRightClickMenu_Close()
             end
@@ -713,6 +966,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         end
         return
     end
+
     -- level 1 menu
     TitanPanelRightClickMenu_AddTitle2(TitanPlugins[TITANREP_ID].menuText .. " v" .. TITANREP_VERSION)
     TitanPanelRightClickMenu_AddToggleVar(TITANREP_AUTO_CHANGE, TITANREP_ID, "AutoChange")
@@ -754,7 +1008,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     info.func = function()
         wipe(TITANREP_RTS)
         TITANREP_TIME = GetTime()
-        print("TitanReputation Session Data Reset!")
+        print("TitanPanelReputation Session Data Reset!")
         TitanPanelRightClickMenu_Close()
     end
     TitanPanelRightClickMenu_AddButton(info, 1)
@@ -764,7 +1018,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     TitanPanelRightClickMenu_AddButton(info, 1)
 end
 
-function TitanReputationHeaderFactionToggle(name)
+function TitanPanelReputationHeaderFactionToggle(name)
     local value = ""
     local found = false
     local array = TitanGetVar(TITANREP_ID, "FactionHeaders")
@@ -793,9 +1047,15 @@ function TitanPanelReputation_BuildRightClickMenu(name, parentName, standingID, 
             command.value = name
             command.hasArrow = 1
             command.keepShownOnClick = 1
-            command.checked = function() if (tContains(TitanGetVar(TITANREP_ID, "FactionHeaders"), name)) then return nil else return true end end
+            command.checked = function()
+                if (tContains(TitanGetVar(TITANREP_ID, "FactionHeaders"), name)) then
+                    return nil
+                else
+                    return true
+                end
+            end
             command.func = function()
-                TitanReputationHeaderFactionToggle(name)
+                TitanPanelReputationHeaderFactionToggle(name)
                 TitanPanelButton_UpdateButton(TITANREP_ID)
             end
             TitanPanelRightClickMenu_AddButton(command)
@@ -874,177 +1134,6 @@ function TitanPanelReputation_Refresh()
         TitanPanelReputation_GatherFactions(TitanPanelReputation_BuildButtonText)
     else
         TITANREP_BUTTON_TEXT = TITANREP_NO_FACTION_LABEL
-    end
-end
-
--- This method sets the text of the button according to selected faction's data
-function TitanPanelReputation_BuildButtonText(name, parentName, standingID, topValue, earnedValue, percent, isHeader,
-                                              isCollapsed, isInactive, hasRep, isChild, isFriendship, factionID,
-                                              hasBonusRepGain)
-    local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold
-    local adjustedId = standingID
-
-    if isFriendship then
-        if not TitanGetVar(TITANREP_ID, "ShowFriendsOnBar") then
-            return
-        end
-
-        local reputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
-
-        friendID = reputationInfo["friendshipFactionID"]
-        friendRep = reputationInfo["standing"]
-        friendMaxRep = reputationInfo["maxRep"]
-        friendName = reputationInfo["name"]
-        friendText = reputationInfo["text"]
-        friendTexture = reputationInfo["texture"]
-        friendTextLevel = reputationInfo["reaction"]
-        friendThreshold = reputationInfo["reactionThreshold"]
-        nextFriendThreshold = reputationInfo["nextThreshold"]
-    end
-
-    if hasBonusRepGain then
-        adjustedId = 9
-    end
-
-    if topValue == 0 then adjustedId = 8 end
-
-    local preface = ""
-
-    local LABEL = getglobal("FACTION_STANDING_LABEL" .. standingID)
-    if isFriendship then LABEL = friendTextLevel end
-
-    if hasBonusRepGain and not (isFriendship and not nextFriendThreshold) and not (adjustedId >= 8 and topValue == 0) then
-        LABEL = TITANREP_PARAGON
-    end
-
-    if factionID and C_Reputation.IsMajorFaction(factionID) then
-        local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
-
-        if majorFactionData ~= nil then
-            LABEL = tostring(majorFactionData.renownLevel)
-        end
-        adjustedId = 10
-    end
-
-    if (TitanGetVar(TITANREP_ID, "ShortStanding")) then LABEL = strsub(LABEL, 1, adjustedId == 10 and 2 or 1) end
-
-    TitanReputationSetColor()
-    if ((not isHeader or (isHeader and hasRep)) and (TitanGetVar(TITANREP_ID, "TITANREP_WATCHED_FACTION") == name)) then
-        TITANREP_BUTTON_TEXT = ""
-        local COLOR = nil
-        if (MYBARCOLORS) then
-            COLOR = MYBARCOLORS[(adjustedId)]
-        end
-
-        if (TitanGetVar(TITANREP_ID, "ShowFactionName")) then
-            if (COLOR) then
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TitanUtils_GetColoredText(name, COLOR)
-            else
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. name
-            end
-            if (TitanGetVar(TITANREP_ID, "ShowStanding") or
-                    TitanGetVar(TITANREP_ID, "ShowStanding") or
-                    TitanGetVar(TITANREP_ID, "ShowValue") or
-                    TitanGetVar(TITANREP_ID, "ShowPercent")) then
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " - "
-            end
-        end
-
-        if (TitanGetVar(TITANREP_ID, "ShowStanding")) then
-            if (COLOR) then
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TitanUtils_GetColoredText(LABEL, COLOR) .. " "
-            else
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. LABEL .. " "
-            end
-        end
-        if (TitanGetVar(TITANREP_ID, "ShowValue") and not (isFriendship and not nextFriendThreshold) and not (adjustedId >= 8 and topValue == 0)) then
-            if (COLOR) then
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT ..
-                    "[" .. TitanUtils_GetColoredText(earnedValue .. "/" .. topValue, COLOR) .. "] "
-            else
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. "[" .. earnedValue .. "/" .. topValue .. "] "
-            end
-        end
-
-        if (TitanGetVar(TITANREP_ID, "ShowPercent") and not (isFriendship and not nextFriendThreshold) and not (adjustedId >= 8 and topValue == 0)) then
-            if (COLOR) then
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TitanUtils_GetColoredText(percent .. "%", COLOR)
-            else
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. percent .. "%"
-            end
-        end
-
-        if (TitanGetVar(TITANREP_ID, "ShowSummary")) then
-            local timeonline = GetTime() - TITANREP_TIME
-            local humantime
-
-            if (timeonline < 60) then
-                humantime = "< 1min"
-            else
-                humantime = floor(timeonline / 60)
-                if (humantime < 60) then
-                    humantime = humantime .. "min"
-                else
-                    local hours = floor(humantime / 60)
-                    local mins = floor((timeonline - (hours * 60 * 60)) / 60)
-                    humantime = hours .. "hr " .. mins .. "min"
-                end
-            end
-
-            for f, v in pairs(TITANREP_RTS) do
-                RTS_HAS_ENTRIES = true
-            end
-
-            if RTS_HAS_ENTRIES then
-                if (COLOR) then
-                    TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " - " ..
-                        TitanUtils_GetColoredText(TITANREP_SESSION_SUMMARY_DURATION .. ": ", COLOR) ..
-                        TitanUtils_GetNormalText(humantime)
-                else
-                    TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " - " ..
-                        TitanUtils_GetNormalText(TITANREP_SESSION_SUMMARY_DURATION .. ": " .. humantime)
-                end
-
-                for f, v in pairs(TITANREP_RTS) do
-                    local RPH_STRING = ""
-                    local RPH = floor(v / (timeonline / 60 / 60))
-                    local RPM = floor(v / (timeonline / 60))
-                    if (RPH > 0) then
-                        if (COLOR) then
-                            RPH_STRING = TitanUtils_GetGreenText(RPH) ..
-                                TitanUtils_GetColoredText("/h ", COLOR) ..
-                                TitanUtils_GetGreenText(RPM) .. TitanUtils_GetColoredText("/min", COLOR)
-                        else
-                            RPH_STRING = TitanUtils_GetGreenText(RPH) ..
-                                "/h " .. TitanUtils_GetGreenText(RPM) .. "/min"
-                        end
-                    else
-                        if (COLOR) then
-                            RPH_STRING = TitanUtils_GetRedText(RPH) .. TitanUtils_GetColoredText("/h ", COLOR) ..
-                                TitanUtils_GetRedText(RPM) .. TitanUtils_GetColoredText("/min ", COLOR)
-                        else
-                            RPH_STRING = TitanUtils_GetRedText(RPH) .. "/h " ..
-                                TitanUtils_GetRedText(RPM) .. "/min"
-                        end
-                    end
-                    if (COLOR) then
-                        TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT ..
-                            TitanUtils_GetColoredText(" @ ", COLOR) .. RPH_STRING
-                    else
-                        TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. " @ " .. RPH_STRING
-                    end
-                end
-                TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT
-            end
-        end
-
-        if (not (TitanGetVar(TITANREP_ID, "ShowFactionName") or
-                TitanGetVar(TITANREP_ID, "ShowStanding") or
-                TitanGetVar(TITANREP_ID, "ShowValue") or
-                TitanGetVar(TITANREP_ID, "ShowPercent") or
-                TitanGetVar(TITANREP_ID, "ShowSummary"))) then
-            TITANREP_BUTTON_TEXT = TITANREP_BUTTON_TEXT .. TITANREP_ALL_HIDDEN_LABEL
-        end
     end
 end
 
@@ -1326,10 +1415,11 @@ end
 function TitanPanelReputation_GatherFactions(method)
     local count = GetNumFactions()
     if not count then return end
+
     local done = false
     local index = 1
     local parentName = ""
-    local friendID
+
     while (not done) do
         local name, description, standingID, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus =
             GetFactionInfo(index)
@@ -1360,13 +1450,10 @@ function TitanPanelReputation_GatherFactions(method)
             if (C_Reputation.IsFactionParagon(factionID)) then
                 earnedValue, topValue, rewardQuestID, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID)
 
-                local level                                            = math.floor(earnedValue / topValue) -
-                    (hasRewardPending and 1 or 0)
-                local realValue                                        = level > 0 and
-                    tonumber(string.sub(earnedValue, string.len(level) + 1)) or earnedValue
-
-                earnedValue                                            = realValue
-                hasBonusRepGain                                        = true
+                local level = math.floor(earnedValue / topValue) - (hasRewardPending and 1 or 0)
+                local realValue = level > 0 and tonumber(string.sub(earnedValue, string.len(level) + 1)) or earnedValue
+                earnedValue = realValue
+                hasBonusRepGain = true
             elseif (C_Reputation.IsMajorFaction(factionID)) then
                 local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
 

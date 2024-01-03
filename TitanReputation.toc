@@ -1,6 +1,6 @@
 ## Interface: 100200
 
-## Title: Titan [|cffeda55fReputation Continued|r] |cff00aa00 v10.2.0.0|r
+## Title: Titan [|cffeda55fReputation Continued|r] |cff00aa00 v10.2.0.4|r
 ## Notes: Adds Reputation tracking and monitoring tools to Titan Panel.
 ## IconTexture: Interface\AddOns\TitanReputation\assets\TitanReputation.tga
 ## Authors: PapaSol, Aquator, Kernighan, Lingkan

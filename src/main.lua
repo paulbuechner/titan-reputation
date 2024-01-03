@@ -400,10 +400,12 @@ function TitanPanelReputation_BuildButtonText(name, parentName, standingID, topV
                     end
                 end
 
-                for f, v in pairs(TITANREP_RTS) do
+                local earnedAmount = TITANREP_RTS[name]
+
+                if earnedAmount then
                     local RPH_STRING = ""
-                    local RPH = floor(v / (timeonline / 60 / 60))
-                    local RPM = floor(v / (timeonline / 60))
+                    local RPH = floor(earnedAmount / (timeonline / 60 / 60))
+                    local RPM = floor(earnedAmount / (timeonline / 60))
 
                     if (TitanGetVar(TITANREP_ID, "ShowSessionSummaryDuration")) then
                         if (RPH > 0) then

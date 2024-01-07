@@ -1010,7 +1010,10 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     info.func = function()
         wipe(TITANREP_RTS)
         TITANREP_TIME = GetTime()
-        print("TitanPanelReputation Session Data Reset!")
+
+        TitanPanelPluginHandle_OnUpdate(TITANREP_ID, 1) -- force update button
+
+        TitanDebug("TitanPanelReputation Session Data Reset!")
         TitanPanelRightClickMenu_Close()
     end
     TitanPanelRightClickMenu_AddButton(info, 1)

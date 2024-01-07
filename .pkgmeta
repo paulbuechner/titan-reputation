@@ -1,0 +1,6 @@
+ignore:
+  - LICENSE
+  - README.md
+  - src/globals.lua
+  - "*.png"
+changelog-title: "Titan [Reputation Continued]"

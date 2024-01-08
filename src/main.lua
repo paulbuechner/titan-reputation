@@ -221,7 +221,9 @@ function TitanPanelReputationButton_OnEvent(event, ...)
 
     local EventTime = GetTime()
     local EventTimeDiff = EventTime - TITANREP_EventTime
+
     TitanPanelReputation_GatherFactions(TitanPanelReputation_GetChangedName)
+
     if (EventTimeDiff > .15) then
         TITANREP_HIGHCHANGED = 0
         TITANREP_EventTime = GetTime()
@@ -231,12 +233,16 @@ function TitanPanelReputationButton_OnEvent(event, ...)
             end
         end
     end
+
     TitanPanelReputation_GatherFactions(TitanPanelReputation_GatherValues)
+
     if not TITANREP_TABLE_INIT then
         TITANREP_TABLE_INIT = true
         TitanDebug("<TITANREP> INIT SET")
     end
+
     TitanPanelReputation_Refresh()
+
     TitanPanelButton_UpdateTooltip()
     TitanPanelButton_UpdateButton(TITANREP_ID)
 end
@@ -1011,7 +1017,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         wipe(TITANREP_RTS)
         TITANREP_TIME = GetTime()
 
-        TitanPanelPluginHandle_OnUpdate(TITANREP_ID, 1) -- force update button
+        TitanPanelButton_UpdateButton(TITANREP_ID)
 
         TitanDebug("TitanPanelReputation Session Data Reset!")
         TitanPanelRightClickMenu_Close()
@@ -1024,21 +1030,24 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
 end
 
 function TitanPanelReputationHeaderFactionToggle(name)
-    local value = ""
+    local array = TitanGetVar(TITANREP_ID, "FactionHeaders") or {}
     local found = false
-    local array = TitanGetVar(TITANREP_ID, "FactionHeaders")
+
     for index, value in ipairs(array) do
-        if (value == name) then
+        if value == name then
+            ---@diagnostic disable-next-line: cast-local-type
             found = index
+            break
         end
     end
-    if (found) then
+
+    if found then
         tremove(array, found)
     else
         tinsert(array, name)
     end
+
     TitanSetVar(TITANREP_ID, "FactionHeaders", array)
-    return
 end
 
 -- this method adds a line to the right-click menu (to build up faction headers)
@@ -1053,7 +1062,8 @@ function TitanPanelReputation_BuildRightClickMenu(name, parentName, standingID, 
             command.hasArrow = 1
             command.keepShownOnClick = 1
             command.checked = function()
-                if (tContains(TitanGetVar(TITANREP_ID, "FactionHeaders"), name)) then
+                local factionHeaders = TitanGetVar(TITANREP_ID, "FactionHeaders")
+                if factionHeaders and tContains(factionHeaders, name) then
                     return nil
                 else
                     return true
@@ -1148,7 +1158,7 @@ function TitanPanelReputation_GatherValues(name, parentName, standingID, topValu
                                            hasBonusRepGain)
     if TITANREP_TABLE_INIT then
         if hasBonusRepGain then
-            if TitanRep_Data["BonusRep"] and TitanRep_Data["BonusRep"][factionID] then TitanRep_Data["BonusRep"][factionID] = nil end
+            if TitanRep_Data and TitanRep_Data["BonusRep"] and TitanRep_Data["BonusRep"][factionID] then TitanRep_Data["BonusRep"][factionID] = nil end
         end
 
         if ((not isHeader and name) or (isHeader and hasRep)) then
@@ -1160,9 +1170,10 @@ function TitanPanelReputation_GatherValues(name, parentName, standingID, topValu
                 local LABEL = getglobal("FACTION_STANDING_LABEL" .. standingID)
                 local factionType = "Faction"
 
+                local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold
+
                 if isFriendship then
                     if not TitanGetVar(TITANREP_ID, "ShowFriendsOnBar") then return end
-                    local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold
 
                     local reputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
 
@@ -1489,7 +1500,6 @@ function TitanPanelReputation_GatherFactions(method)
             method(name, parentName, standingID, topValue, earnedValue, percent, isHeader, isCollapsed,
                 IsFactionInactive(index), hasRep, isChild, (friendID > 0) and true or false, factionID, hasBonusRepGain)
         end
-
 
         index = index + 1
 

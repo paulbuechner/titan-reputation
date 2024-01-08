@@ -4,3 +4,8 @@ ignore:
   - src/globals.lua
   - "*.png"
 changelog-title: "Titan [Reputation Continued]"
+externals:
+    libs/UTF8: svn://svn.wowace.com/wow/utf8/mainline/trunk
+    libs/TaintLess:
+        url: https://www.townlong-yak.com/addons.git/taintless
+        commit: default

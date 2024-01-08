@@ -15,5 +15,7 @@
 
 ## SavedVariables: TitanRep_Data
 
+libs/libs.xml
+
 src/utils.lua
 src/main.xml

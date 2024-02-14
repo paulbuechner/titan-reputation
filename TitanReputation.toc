@@ -15,7 +15,25 @@
 
 ## SavedVariables: TitanRep_Data
 
+locale/enUS.lua
+locale/deDE.lua
+# locale/esES.lua
+# locale/frFR.lua
+# locale/itIT.lua
+# locale/ptBR.lua
+# locale/ruRU.lua
+# locale/zhCN.lua
+
 libs/libs.xml
 
+src/globals.lua
+
+src/ui/components.lua
+src/ui/tooltip.lua
+src/ui/button.lua
+src/ui/menu.lua
+
+src/services.lua
 src/utils.lua
+
 src/main.xml

@@ -1,18 +1,6 @@
 local _, TitanPanelReputation = ...
 
 --[[ TitanPanelReputation
-NAME: TitanPanelReputation:Refresh
-DESC: Refreshes the reputation data (rebuilds the button text).
-]]
-function TitanPanelReputation:Refresh()
-    if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
-        TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
-    else
-        TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL")
-    end
-end
-
---[[ TitanPanelReputation
 NAME: TitanPanelReputation.GetChangedName
 DESC: Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
 ]]
@@ -39,7 +27,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
             local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 
             -- Init function local variables
-            local msg = ""
+            local msg -- ""
             local dsc = "You have obtained "
             local tag = " "
             local earnedAmount = 0
@@ -60,7 +48,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
                     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
                         MikSBT.DisplayMessage("|T" ..
                             TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", "Notification", 1)
+                            TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
                     else
                         UIErrorsFrame:AddMessage("|T" ..
                             TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
@@ -111,7 +99,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
                     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
                         MikSBT.DisplayMessage("|T" ..
                             TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", "Notification", 1)
+                            TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
                     else
                         UIErrorsFrame:AddMessage("|T" ..
                             TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
@@ -211,7 +199,7 @@ function TitanPanelReputation.GatherValues(factionDetails)
                 local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 
                 -- Init function local variables
-                local msg = ""
+                local msg -- ""
                 local dsc = "You have obtained "
                 local tag = " "
 
@@ -230,7 +218,7 @@ function TitanPanelReputation.GatherValues(factionDetails)
                     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
                         MikSBT.DisplayMessage("|T" ..
                             TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", "Notification", 1)
+                            TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
                     else
                         UIErrorsFrame:AddMessage("|T" ..
                             TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
@@ -382,5 +370,17 @@ function TitanPanelReputation:FactionDetailsProvider(method)
         index = index + 1
 
         if (index > count) then done = true; end -- If we're done, set done to true
+    end
+end
+
+--[[ TitanPanelReputation
+NAME: TitanPanelReputation:Refresh
+DESC: Refreshes the reputation data (rebuilds the button text).
+]]
+function TitanPanelReputation:Refresh()
+    if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
+        TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
+    else
+        TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL")
     end
 end

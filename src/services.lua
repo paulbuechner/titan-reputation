@@ -16,157 +16,165 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         factionDetails.factionID,
         factionDetails.hasBonusRepGain
 
-    if (not (factionID == TitanPanelReputation.G_FACTION_ID) and TitanPanelReputation.TABLE[factionID]) then
-        if (GetTime() - TitanPanelReputation.INIT_TIME > 30 and (TitanPanelReputation.TABLE[factionID].standingID < standingID) or (TitanPanelReputation.TABLE[factionID].earnedValue ~= earnedValue)) then
-            -- Get adjusted ID and label depending on the faction type
-            local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
-                friendShipReputationInfo, topValue, hasBonusRepGain, true)
-            -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
-            if not adjustedIDAndLabel then return end
-            -- Destructure props from AdjustedIDAndLabel
-            local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
+    -- TODO: Make guild faction an option to track
+    if factionID == TitanPanelReputation.G_FACTION_ID then return end
 
-            -- Init function local variables
-            local msg -- ""
-            local dsc = "You have obtained "
-            local tag = " "
-            local earnedAmount = 0
+    -- Guard: Check if TABLE_INIT is not true or factionID is present in `TitanPanelReputation.TABLE`
+    if not TitanPanelReputation.TABLE_INIT or not TitanPanelReputation.TABLE[factionID] then return end
 
-            if (TitanPanelReputation.TABLE[factionID].standingID < standingID) then
-                if (TitanPanelReputation.BARCOLORS) then
-                    msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-                    dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-                else
-                    msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
-                    dsc = dsc .. TitanUtils_GetGoldText(LABEL)
-                end
+    -- Guard: Check if standingID has not increased and earnedValue has not changed
+    if TitanPanelReputation.TABLE[factionID].standingID == standingID and
+        TitanPanelReputation.TABLE[factionID].earnedValue == earnedValue then
+        return
+    end
 
-                dsc = dsc .. " standing with " .. name .. "."
-                msg = tag .. msg .. tag
+    -- Get adjusted ID and label depending on the faction type
+    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
+        friendShipReputationInfo, topValue, hasBonusRepGain, true)
+    -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
+    if not adjustedIDAndLabel then return end
+    -- Destructure props from AdjustedIDAndLabel
+    local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 
-                if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
-                    if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
-                        MikSBT.DisplayMessage("|T" ..
-                            TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
-                    else
-                        UIErrorsFrame:AddMessage("|T" ..
-                            TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
-                    end
-                end
+    -- Init function local variables
+    local msg -- ""
+    local dsc = "You have obtained "
+    local tag = " "
+    local earnedAmount = 0
 
-                -- TODO: Implement achivement style announcements based on official WoW API
-                -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
-                --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
-                --         local MyData = {}
-                --         MyData.Text = name .. " - " .. LABEL
-                --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
-                --         local color = {}
-                --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
-                --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
-                --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
-                --         MyData.bTitle = factionType .. " Upgrade"
-                --         MyData.Title = ""
-                --         MyData.FrameStyle = "GuildAchievement"
-                --         MyData.BannerColor = color
-                --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-                --     end
-                -- end
+    if (TitanPanelReputation.TABLE[factionID].standingID < standingID) then
+        if (TitanPanelReputation.BARCOLORS) then
+            msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+            dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+        else
+            msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
+            dsc = dsc .. TitanUtils_GetGoldText(LABEL)
+        end
 
-                earnedAmount = TitanPanelReputation.TABLE[factionID].topValue -
-                    TitanPanelReputation.TABLE[factionID].earnedValue
-                -- TitanDebug(
-                --     "<TitanPanelReputation> earnedAmount = TitanPanelReputation.TABLE[factionID].topValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-                --     earnedAmount ..
-                --     " = " .. TitanPanelReputation.TABLE[factionID].topValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
-                earnedAmount = earnedValue + earnedAmount
-                -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue + earnedAmount: " .. earnedAmount .. " = " ..
-                --     earnedValue .. " + " .. earnedAmount)
-            elseif (TitanPanelReputation.TABLE[factionID].standingID > standingID) then
-                if (TitanPanelReputation.BARCOLORS) then
-                    msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-                    dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-                else
-                    msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
-                    dsc = dsc .. TitanUtils_GetGoldText(LABEL)
-                end
+        dsc = dsc .. " standing with " .. name .. "."
+        msg = tag .. msg .. tag
 
-                dsc = dsc .. " standing with " .. name .. "."
-                msg = tag .. msg .. tag
-
-                if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
-                    if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
-                        MikSBT.DisplayMessage("|T" ..
-                            TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
-                    else
-                        UIErrorsFrame:AddMessage("|T" ..
-                            TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
-                    end
-                end
-
-                -- TODO: Implement achivement style announcements based on official WoW API
-                -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
-                --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
-                --         local MyData = {}
-                --         MyData.Text = name .. " - " .. LABEL
-                --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
-                --         local color = {}
-                --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
-                --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
-                --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
-                --         MyData.bTitle = factionType .. " Downgrade"
-                --         MyData.Title = ""
-                --         MyData.FrameStyle = "GuildAchievement"
-                --         MyData.BannerColor = color
-                --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-                --     end
-                -- end
-
-                earnedAmount = earnedValue - topValue
-                -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - topValue: " ..
-                --     earnedAmount .. " = " .. earnedValue .. " - " .. topValue)
-                earnedAmount = earnedAmount - TitanPanelReputation.TABLE[factionID].earnedValue
-                -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-                --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
-            elseif (TitanPanelReputation.TABLE[factionID].standingID == standingID) then
-                -- TitanDebug("<TitanPanelReputation> elseif (TitanPanelReputation.TABLE[factionID].standingID == standingID) then")
-                if (TitanPanelReputation.TABLE[factionID].earnedValue < earnedValue) then
-                    -- TitanDebug("<TitanPanelReputation> if (TitanPanelReputation.TABLE[factionID].earnedValue < earnedValue) then")
-                    earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue
-                    -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-                    --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
-                else
-                    -- TitanDebug("<TitanPanelReputation> else")
-                    earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue
-                    -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-                    --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
-                end
-            end
-
-            if TitanPanelReputation.RTS[name] then
-                -- TitanDebug("<TitanPanelReputation> Reputation Changed: " ..
-                --     name .. " by " .. TitanPanelReputation.RTS[name] + earnedAmount .. ", was: " .. TitanPanelReputation.RTS[name])
-
-                TitanPanelReputation.RTS[name] = TitanPanelReputation.RTS[name] + earnedAmount
+        if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
+            if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
+                MikSBT.DisplayMessage("|T" ..
+                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
+                    TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
             else
-                -- TitanDebug("<TitanPanelReputation> Reputation Changed: " .. name .. " by " .. earnedAmount .. ", was: None / 0")
-                TitanPanelReputation.RTS[name] = earnedAmount
+                UIErrorsFrame:AddMessage("|T" ..
+                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
+                    TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
             end
+        end
 
-            -- Check if the earned amount is a new high or low
-            if (earnedAmount > 0 and earnedAmount > TitanPanelReputation.HIGHCHANGED) or
-                (earnedAmount < 0 and earnedAmount < TitanPanelReputation.HIGHCHANGED) then
-                -- If so, update the highest changed amount to the current earned amount
-                TitanPanelReputation.HIGHCHANGED = earnedAmount
+        -- TODO: Implement achivement style announcements based on official WoW API
+        -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
+        --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
+        --         local MyData = {}
+        --         MyData.Text = name .. " - " .. LABEL
+        --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
+        --         local color = {}
+        --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
+        --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
+        --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
+        --         MyData.bTitle = factionType .. " Upgrade"
+        --         MyData.Title = ""
+        --         MyData.FrameStyle = "GuildAchievement"
+        --         MyData.BannerColor = color
+        --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
+        --     end
+        -- end
+
+        earnedAmount = TitanPanelReputation.TABLE[factionID].topValue -
+            TitanPanelReputation.TABLE[factionID].earnedValue
+        -- TitanDebug(
+        --     "<TitanPanelReputation> earnedAmount = TitanPanelReputation.TABLE[factionID].topValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
+        --     earnedAmount ..
+        --     " = " .. TitanPanelReputation.TABLE[factionID].topValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
+        earnedAmount = earnedValue + earnedAmount
+        -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue + earnedAmount: " .. earnedAmount .. " = " ..
+        --     earnedValue .. " + " .. earnedAmount)
+    elseif (TitanPanelReputation.TABLE[factionID].standingID > standingID) then
+        if (TitanPanelReputation.BARCOLORS) then
+            msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+            dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+        else
+            msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
+            dsc = dsc .. TitanUtils_GetGoldText(LABEL)
+        end
+
+        dsc = dsc .. " standing with " .. name .. "."
+        msg = tag .. msg .. tag
+
+        if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
+            if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
+                MikSBT.DisplayMessage("|T" ..
+                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
+                    TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
+            else
+                UIErrorsFrame:AddMessage("|T" ..
+                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
+                    TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
             end
+        end
 
-            -- Update the current tracked faction when the reputation changes
-            TitanPanelReputation.CHANGED_FACTION = name
+        -- TODO: Implement achivement style announcements based on official WoW API
+        -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
+        --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
+        --         local MyData = {}
+        --         MyData.Text = name .. " - " .. LABEL
+        --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
+        --         local color = {}
+        --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
+        --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
+        --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
+        --         MyData.bTitle = factionType .. " Downgrade"
+        --         MyData.Title = ""
+        --         MyData.FrameStyle = "GuildAchievement"
+        --         MyData.BannerColor = color
+        --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
+        --     end
+        -- end
+
+        earnedAmount = earnedValue - topValue
+        -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - topValue: " ..
+        --     earnedAmount .. " = " .. earnedValue .. " - " .. topValue)
+        earnedAmount = earnedAmount - TitanPanelReputation.TABLE[factionID].earnedValue
+        -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
+        --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
+    elseif (TitanPanelReputation.TABLE[factionID].standingID == standingID) then
+        -- TitanDebug("<TitanPanelReputation> elseif (TitanPanelReputation.TABLE[factionID].standingID == standingID) then")
+        if (TitanPanelReputation.TABLE[factionID].earnedValue < earnedValue) then
+            -- TitanDebug("<TitanPanelReputation> if (TitanPanelReputation.TABLE[factionID].earnedValue < earnedValue) then")
+            earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue
+            -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
+            --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
+        else
+            -- TitanDebug("<TitanPanelReputation> else")
+            earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue
+            -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
+            --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
         end
     end
+
+    if TitanPanelReputation.RTS[name] then
+        -- TitanDebug("<TitanPanelReputation> Reputation Changed: " ..
+        --     name .. " by " .. TitanPanelReputation.RTS[name] + earnedAmount .. ", was: " .. TitanPanelReputation.RTS[name])
+
+        TitanPanelReputation.RTS[name] = TitanPanelReputation.RTS[name] + earnedAmount
+    else
+        -- TitanDebug("<TitanPanelReputation> Reputation Changed: " .. name .. " by " .. earnedAmount .. ", was: None / 0")
+        TitanPanelReputation.RTS[name] = earnedAmount
+    end
+
+    -- Check if the earned amount is a new high or low
+    if (earnedAmount > 0 and earnedAmount > TitanPanelReputation.HIGHCHANGED) or
+        (earnedAmount < 0 and earnedAmount < TitanPanelReputation.HIGHCHANGED) then
+        -- If so, update the highest changed amount to the current earned amount
+        TitanPanelReputation.HIGHCHANGED = earnedAmount
+    end
+
+    -- Update the current tracked faction when the reputation changes
+    TitanPanelReputation.CHANGED_FACTION = name
 end
 
 --[[ TitanPanelReputation
@@ -187,67 +195,66 @@ function TitanPanelReputation.GatherValues(factionDetails)
         factionDetails.factionID,
         factionDetails.hasBonusRepGain
 
-    if TitanPanelReputation.TABLE_INIT then
-        if ((not isHeader and name) or (isHeader and hasRep)) then
-            if not TitanPanelReputation.TABLE[factionID] and GetTime() - TitanPanelReputation.INIT_TIME > 30 then
-                -- Get adjusted ID and label depending on the faction type
-                local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
-                    friendShipReputationInfo, topValue, hasBonusRepGain, true)
-                -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
-                if not adjustedIDAndLabel then return end
-                -- Destructure props from AdjustedIDAndLabel
-                local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
+    local isValidFaction = (not isHeader and name) or (isHeader and hasRep) -- Check if the faction can be tracked
 
-                -- Init function local variables
-                local msg -- ""
-                local dsc = "You have obtained "
-                local tag = " "
+    -- Announce newly discovered faction
+    if TitanPanelReputation.TABLE_INIT and not TitanPanelReputation.TABLE[factionID] and isValidFaction then
+        -- Get adjusted ID and label depending on the faction type
+        local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
+            friendShipReputationInfo, topValue, hasBonusRepGain, true)
+        -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
+        if not adjustedIDAndLabel then return end
+        -- Destructure props from AdjustedIDAndLabel
+        local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 
-                if (TitanPanelReputation.BARCOLORS) then
-                    msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-                    dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-                else
-                    msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
-                    dsc = dsc .. TitanUtils_GetGoldText(LABEL)
-                end
+        -- Init function local variables
+        local msg -- ""
+        local dsc = "You have obtained "
+        local tag = " "
 
-                dsc = dsc .. " standing with " .. name .. "."
-                msg = tag .. msg .. tag
+        if (TitanPanelReputation.BARCOLORS) then
+            msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+            dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+        else
+            msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
+            dsc = dsc .. TitanUtils_GetGoldText(LABEL)
+        end
 
-                if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
-                    if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
-                        MikSBT.DisplayMessage("|T" ..
-                            TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
-                    else
-                        UIErrorsFrame:AddMessage("|T" ..
-                            TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                            TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
-                    end
-                end
+        dsc = dsc .. " standing with " .. name .. "."
+        msg = tag .. msg .. tag
 
-                -- TODO: Implement achivement style announcements based on official WoW API
-                -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
-                --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
-                --         local MyData = {}
-                --         MyData.Text = name .. " - " .. LABEL
-                --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
-                --         local color = {}
-                --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
-                --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
-                --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
-                --         MyData.bTitle = "New " .. factionType .. " Discovered"
-                --         MyData.Title = "You have discovered"
-                --         MyData.FrameStyle = "GuildAchievement"
-                --         MyData.BannerColor = color
-                --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-                --     end
-                -- end
+        if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
+            if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
+                MikSBT.DisplayMessage("|T" ..
+                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
+                    TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
+            else
+                UIErrorsFrame:AddMessage("|T" ..
+                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
+                    TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
             end
         end
+
+        -- TODO: Implement achivement style announcements based on official WoW API
+        -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
+        --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
+        --         local MyData = {}
+        --         MyData.Text = name .. " - " .. LABEL
+        --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
+        --         local color = {}
+        --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
+        --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
+        --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
+        --         MyData.bTitle = "New " .. factionType .. " Discovered"
+        --         MyData.Title = "You have discovered"
+        --         MyData.FrameStyle = "GuildAchievement"
+        --         MyData.BannerColor = color
+        --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
+        --     end
+        -- end
     end
 
-    if ((not isHeader and name) or (isHeader and hasRep)) then
+    if isValidFaction then
         TitanPanelReputation.TABLE[factionID] = {}
         TitanPanelReputation.TABLE[factionID].name = name
         TitanPanelReputation.TABLE[factionID].standingID = standingID

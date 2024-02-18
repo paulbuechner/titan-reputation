@@ -131,31 +131,34 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         if (colorValue == 2) then TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_ARMORY end
         if (colorValue == 3) then TitanPanelReputation.BARCOLORS = nil end
 
-        -- Set init flag
-        TitanPanelReputation.TABLE_INIT = true;
         TitanDebug("<TitanPanelReputation> " .. TitanPanelReputation:GT("LID_INITIALIZED"))
     end
 
     --[[  -------------------------- MAIN ADDON LOOP START -------------------------- ]]
 
-    -- Set the current tracked faction
-    if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
-        TitanPanelReputation.HIGHCHANGED = 0
-        TitanPanelReputation.EVENT_TIME = GetTime()
+    if TitanPanelReputation.INIT_TIME > 0 then
+        -- Set the current tracked faction
+        if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
+            TitanPanelReputation.HIGHCHANGED = 0
+            TitanPanelReputation.EVENT_TIME = GetTime()
 
-        -- If AutoChange is enabled (i.e. not 'none') set the watched faction to the changed faction
-        if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
-            TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
+            -- If AutoChange is enabled (i.e. not 'none') set the watched faction to the changed faction
+            if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
+                TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
+            end
         end
+
+        -- Retrieve the current tracked faction name and earned reputation to populate `TitanPanelReputation.RTS` table
+        TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GetChangedName)
+        -- Collect all reputation data to populate `TitanPanelReputation.TABLE` table
+        TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GatherValues)
+
+        -- Set the TitanPanelReputation table init flag after `TitanPanelReputation.GatherValues` has been called
+        TitanPanelReputation.TABLE_INIT = true
+
+        -- Update the TitanPanelReputation button (Now reflects updated reputation values, both session and total)
+        TitanPanelReputation:Refresh()
     end
-
-    -- Retrieve the current tracked faction name and earned reputation to populate `TitanPanelReputation.RTS` table
-    TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GetChangedName)
-    -- Collect all reputation data to populate `TitanPanelReputation.TABLE` table
-    TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GatherValues)
-
-    -- Update the TitanPanelReputation button (Now reflects updated reputation values, both session and total)
-    TitanPanelReputation:Refresh()
 
     --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]
 

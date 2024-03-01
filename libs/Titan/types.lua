@@ -25,6 +25,21 @@ TitanPanelReputationButton = function(self) end
 -- TITAN API
 -------------------------------------------------------------------------------
 
+---@class TitanPluginRegistryType
+---@field id string: The unique name of the plugin
+---@field category? string: The Titan menu category where this plugin will be placed
+---@field version? string: Plugin version
+---@field menuText? string: Localized string for the menu (right click)
+---@field menuTextFunction? string | function: Plugin function to call on right click
+---@field buttonTextFunction? string | function: Plugin function to call when updating button display
+---@field tooltipTitle? string: Localized string for the menu
+---@field tooltipTextFunction? string | function: Plugin function to call for tooltip (OnEnter)
+---@field icon? string: Path to the plugin icon
+---@field iconWidth? integer: Path to the plugin icon
+---@field notes? string: Brief description shown in Titan > Config > Plugins when this plugin is selected
+---@field controlVariables? table: Show or not on menu - set to true or false - ShowIcon ShowLabelText ShowColoredText DisplayOnRightSide
+---@field savedVariables? table: Initial value of any saved variables for this plugin; should include control variables
+
 -- TitanGlobal.lua ------------------------------------------------------------------------------------------
 
 TitanPlugins = {}; -- Used by plugins

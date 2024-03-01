@@ -65,6 +65,7 @@ DESC: The `OnLoad` event handler for the TitanPanelReputation AddOn.
 ]]
 ---@param self table TODO: Add explicit type
 function TitanPanelReputationButton_OnLoad(self)
+    ---@type TitanPluginRegistryType
     self.registry = {
         id = TitanPanelReputation.ID,
         menuText = TitanPanelReputation.TITLE,

@@ -32,8 +32,6 @@ function TitanPanelReputation.BuildButtonText(factionDetails)
     -- Destructure props from AdjustedIDAndLabel
     local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 
-    -- if topValue == 0 then adjustedID = 8 end -- TODO: Need this?
-
     if (TitanGetVar(TitanPanelReputation.ID, "ShortStanding")) then LABEL = strsub(LABEL, 1, adjustedID == 10 and 2 or 1) end
 
     TitanPanelReputation.BUTTON_TEXT = ""
@@ -174,7 +172,7 @@ function TitanPanelReputation.BuildButtonText(factionDetails)
                                 hrs .. TitanPanelReputation:GT("LID_HOURS_SHORT") .. " " ..
                                 mins .. TitanPanelReputation:GT("LID_MINUTES_SHORT")
                         end
-                    else
+                    elseif (mins > 0) then -- only render minutes if there are any
                         if (COLOR) then
                             TTL_STRING = TitanUtils_GetColoredText("TTL: ", COLOR) ..
                                 mins .. TitanPanelReputation:GT("LID_MINUTES_SHORT")

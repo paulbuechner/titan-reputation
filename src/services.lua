@@ -151,8 +151,8 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         else
             -- TitanDebug("<TitanPanelReputation> else")
 
-            -- Fix for renown rep change showing negative RTS values
-            if C_Reputation.IsMajorFaction(factionID) then
+            -- Fix for renown/friendship rep change showing negative RTS values
+            if adjustedID >= 8 then
                 -- TitanDebug("<TitanPanelReputation> if isMajorFactionHeader then")
                 earnedAmount = earnedValue
                 -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..

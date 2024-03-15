@@ -182,7 +182,9 @@ function TitanPanelReputation.BuildButtonText(factionDetails)
                         end
                     end
 
-                    TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation.BUTTON_TEXT .. " - " .. TTL_STRING
+                    if TTL_STRING ~= "" then
+                        TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation.BUTTON_TEXT .. " - " .. TTL_STRING
+                    end
                 end
             end
 

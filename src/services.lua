@@ -150,18 +150,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
             --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
         else
             -- TitanDebug("<TitanPanelReputation> else")
-
-            -- Fix for renown/friendship rep change showing negative RTS values
-            if adjustedID >= 8 then
-                -- TitanDebug("<TitanPanelReputation> if isMajorFactionHeader then")
-                earnedAmount = earnedValue
-                -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-                --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
-            else
-                earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue
-                -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-                --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
-            end
+            earnedAmount = earnedValue
         end
     end
 

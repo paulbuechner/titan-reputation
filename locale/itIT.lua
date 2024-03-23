@@ -1,6 +1,6 @@
 -- itIT Italien
-local _, MoveAny = ...
-function MoveAny:LangitIT()
+local _, TitanPanelReputation = ...
+function TitanPanelReputation:LangitIT()
     local tab = {
         -- General
         ["LID_INITIALIZED"] = "Initialized",
@@ -75,5 +75,5 @@ function MoveAny:LangitIT()
         ["LID_SESSION_SUMMARY_RESET"] = "Reset Session Data"
     }
 
-    MoveAny:UpdateLanguageTab(tab)
+    TitanPanelReputation:UpdateLanguageTab(tab)
 end

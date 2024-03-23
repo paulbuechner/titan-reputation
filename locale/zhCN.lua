@@ -1,6 +1,6 @@
 -- zhTW Simplified Chinese
-local _, MoveAny = ...
-function MoveAny:LangzhCN()
+local _, TitanPanelReputation = ...
+function TitanPanelReputation:LangzhCN()
     local tab = {
         -- General
         ["LID_INITIALIZED"] = "Initialized",
@@ -75,5 +75,5 @@ function MoveAny:LangzhCN()
         ["LID_SESSION_SUMMARY_RESET"] = "Reset Session Data"
     }
 
-    MoveAny:UpdateLanguageTab(tab)
+    TitanPanelReputation:UpdateLanguageTab(tab)
 end

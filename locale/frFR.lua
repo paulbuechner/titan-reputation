@@ -1,6 +1,6 @@
 -- frFR French
-local _, MoveAny = ...
-function MoveAny:LangfrFR()
+local _, TitanPanelReputation = ...
+function TitanPanelReputation:LangfrFR()
     local tab = {
         -- General
         ["LID_INITIALIZED"] = "Initialized",
@@ -75,5 +75,5 @@ function MoveAny:LangfrFR()
         ["LID_SESSION_SUMMARY_RESET"] = "Reset Session Data"
     }
 
-    MoveAny:UpdateLanguageTab(tab)
+    TitanPanelReputation:UpdateLanguageTab(tab)
 end

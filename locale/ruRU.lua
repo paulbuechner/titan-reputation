@@ -1,6 +1,6 @@
 -- ruRU Russian
-local _, MoveAny = ...
-function MoveAny:LangruRU()
+local _, TitanPanelReputation = ...
+function TitanPanelReputation:LangruRU()
     local tab = {
         -- General
         ["LID_INITIALIZED"] = "Initialized",
@@ -75,5 +75,5 @@ function MoveAny:LangruRU()
         ["LID_SESSION_SUMMARY_RESET"] = "Reset Session Data"
     }
 
-    MoveAny:UpdateLanguageTab(tab)
+    TitanPanelReputation:UpdateLanguageTab(tab)
 end

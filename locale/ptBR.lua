@@ -1,6 +1,6 @@
 -- ptBR Brazilian Portuguese
-local _, MoveAny = ...
-function MoveAny:LangptBR()
+local _, TitanPanelReputation = ...
+function TitanPanelReputation:LangptBR()
     local tab = {
         -- General
         ["LID_INITIALIZED"] = "Initialized",
@@ -75,5 +75,5 @@ function MoveAny:LangptBR()
         ["LID_SESSION_SUMMARY_RESET"] = "Reset Session Data"
     }
 
-    MoveAny:UpdateLanguageTab(tab)
+    TitanPanelReputation:UpdateLanguageTab(tab)
 end

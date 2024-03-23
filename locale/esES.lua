@@ -1,6 +1,6 @@
 -- esES Spanish
-local _, MoveAny = ...
-function MoveAny:LangesES()
+local _, TitanPanelReputation = ...
+function TitanPanelReputation:LangesES()
     local tab = {
         -- General
         ["LID_INITIALIZED"] = "Initialized",
@@ -75,5 +75,5 @@ function MoveAny:LangesES()
         ["LID_SESSION_SUMMARY_RESET"] = "Reset Session Data"
     }
 
-    MoveAny:UpdateLanguageTab(tab)
+    TitanPanelReputation:UpdateLanguageTab(tab)
 end

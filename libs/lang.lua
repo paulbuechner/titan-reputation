@@ -30,16 +30,34 @@ function TitanPanelReputation:UpdateLanguage()
     elseif GetLocale() == "enUS" then
         TitanPanelReputation:LangenUS()
     elseif GetLocale() == "esES" then
+        TitanDebug(
+            "<TitanPanelReputation> Spanish locale not supported. You can help translating by visiting: " ..
+            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/esEs.lua")
         TitanPanelReputation:LangesES()
     elseif GetLocale() == "frFR" then
+        TitanDebug(
+            "<TitanPanelReputation> France locale not supported. You can help translating by visiting: " ..
+            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/frFR.lua")
         TitanPanelReputation:LangfrFR()
     elseif GetLocale() == "itIT" then
+        TitanDebug(
+            "<TitanPanelReputation> Italian locale not supported. You can help translating by visiting: " ..
+            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/itIT.lua")
         TitanPanelReputation:LangitIT()
     elseif GetLocale() == "ptBR" then
+        TitanDebug(
+            "<TitanPanelReputation> Brazilian Portuguese locale not supported. You can help translating by visiting: " ..
+            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/ptBR.lua")
         TitanPanelReputation:LangptBR()
     elseif GetLocale() == "ruRU" then
+        TitanDebug(
+            "<TitanPanelReputation> Russian locale not supported. You can help translating by visiting: " ..
+            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/ruRU.lua")
         TitanPanelReputation:LangruRU()
     elseif GetLocale() == "zhCN" then
+        TitanDebug(
+            "<TitanPanelReputation> Chinese locale not supported. You can help translating by visiting: " ..
+            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/zhCN.lua")
         TitanPanelReputation:LangzhCN()
     end
 end

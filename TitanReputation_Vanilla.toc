@@ -1,0 +1,39 @@
+## Interface: 11502
+
+## Title: Titan [|cffeda55fReputation Continued|r] |cff00aa00 @project-version@|r
+## Notes: Adds Reputation tracking and monitoring tools to Titan Panel.
+## IconTexture: Interface\AddOns\TitanReputation\assets\TitanReputation.tga
+## Authors: PapaSol, Aquator, Kernighan, Lingkan
+## Version: @project-version@
+## Dependencies: TitanClassic
+
+## X-Category: Quests & Leveling
+## X-License: Public Domain
+## X-Website: https://github.com/paulbuechner/titan-reputation
+## X-Curse-Project-ID: 956434
+## X-Child-Of: Titan
+
+## SavedVariables: TitanRep_Data
+
+locale/enUS.lua
+locale/deDE.lua
+locale/esES.lua
+locale/frFR.lua
+locale/itIT.lua
+locale/ptBR.lua
+locale/ruRU.lua
+locale/zhCN.lua
+
+libs/libs.xml
+
+src/globals.lua
+
+src/ui/components.lua
+src/ui/tooltip.lua
+src/ui/button.lua
+src/ui/menu.lua
+
+src/services.lua
+src/utils.lua
+
+src/main.xml

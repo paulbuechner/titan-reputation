@@ -1,5 +1,7 @@
 local _, TitanPanelReputation = ...
 
+local WoW10 = select(4, GetBuildInfo()) >= 100000
+
 --[[ TitanPanelReputation
 NAME: TitanPanelReputation.GetChangedName
 DESC: Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
@@ -290,54 +292,57 @@ function TitanPanelReputation:FactionDetailsProvider(method)
             local friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID).friendshipFactionID > 0 and
                 C_GossipInfo.GetFriendshipReputation(factionID) or nil
 
-            --[[ --------------------------------------------------------
+            if (WoW10) then
+                --[[ --------------------------------------------------------
                     Handle Paragon, Renown and Friendship factions
-            -----------------------------------------------------------]]
-            if (C_Reputation.IsFactionParagon(factionID)) then -- Paragon
-                -- Get faction paragon info
-                local currentValue, threshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID)
+                -----------------------------------------------------------]]
 
-                -- Calculate the offset level to account for the reputation offset caused by the paragon system
-                -- ... The typical paragon threshold is 10000, so we can use that to calculate the offset level
-                -- ... by dividing the current rep value by the thresholds and rounding down to the nearest whole
-                -- ... number. E.g. 20000 / 10000 = 2, 30000 / 10000 = 3, etc. If there's a reward pending, we
-                -- ... subtract 1 from the offset level.
-                local offsetLevel = math.floor(currentValue / threshold)
-                if hasRewardPending then
-                    offsetLevel = offsetLevel - 1
-                end
+                if (C_Reputation.IsFactionParagon(factionID)) then -- Paragon
+                    -- Get faction paragon info
+                    local currentValue, threshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID)
 
-                -- Now adjust the actual paragon reputation value by subtracting the offset level times the threshold
-                -- from the current value. This will give us the actual reputation value for the paragon faction.
-                -- ... E.g. 25000 - (2 * 10000) = 5000, 38000 - (3 * 10000) = 8000, etc.
-                local adjustedValue = currentValue - (offsetLevel * threshold)
-
-                earnedValue, hasBonusRepGain = adjustedValue, true
-            elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
-                -- Get the renown faction data
-                local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
-
-                if majorFactionData then
-                    -- Set the top value to the renown level threshold of the major faction
-                    topValue = majorFactionData.renownLevelThreshold
-
-                    -- If the faction has maximum renown, set the earned value to the renown level threshold of the major faction
-                    if C_MajorFactions.HasMaximumRenown(factionID) then
-                        earnedValue = majorFactionData.renownLevelThreshold
-                    else
-                        -- Otherwise, set the earned value to the renown reputation earned by the major faction
-                        earnedValue = majorFactionData.renownReputationEarned
+                    -- Calculate the offset level to account for the reputation offset caused by the paragon system
+                    -- ... The typical paragon threshold is 10000, so we can use that to calculate the offset level
+                    -- ... by dividing the current rep value by the thresholds and rounding down to the nearest whole
+                    -- ... number. E.g. 20000 / 10000 = 2, 30000 / 10000 = 3, etc. If there's a reward pending, we
+                    -- ... subtract 1 from the offset level.
+                    local offsetLevel = math.floor(currentValue / threshold)
+                    if hasRewardPending then
+                        offsetLevel = offsetLevel - 1
                     end
+
+                    -- Now adjust the actual paragon reputation value by subtracting the offset level times the threshold
+                    -- from the current value. This will give us the actual reputation value for the paragon faction.
+                    -- ... E.g. 25000 - (2 * 10000) = 5000, 38000 - (3 * 10000) = 8000, etc.
+                    local adjustedValue = currentValue - (offsetLevel * threshold)
+
+                    earnedValue, hasBonusRepGain = adjustedValue, true
+                elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
+                    -- Get the renown faction data
+                    local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
+
+                    if majorFactionData then
+                        -- Set the top value to the renown level threshold of the major faction
+                        topValue = majorFactionData.renownLevelThreshold
+
+                        -- If the faction has maximum renown, set the earned value to the renown level threshold of the major faction
+                        if C_MajorFactions.HasMaximumRenown(factionID) then
+                            earnedValue = majorFactionData.renownLevelThreshold
+                        else
+                            -- Otherwise, set the earned value to the renown reputation earned by the major faction
+                            earnedValue = majorFactionData.renownReputationEarned
+                        end
+                    end
+                elseif (friendShipReputationInfo) then -- Friendship
+                    -- Set topValue to the difference between nextFriendThreshold and friendThreshold (reactionThreshold) if
+                    -- nextFriendThreshold exists, otherwise set it to the difference between friendRep (standing) and friendThreshold
+                    if friendShipReputationInfo.nextThreshold then
+                        topValue = friendShipReputationInfo.nextThreshold - friendShipReputationInfo.reactionThreshold
+                    else
+                        topValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
+                    end
+                    earnedValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
                 end
-            elseif (friendShipReputationInfo) then -- Friendship
-                -- Set topValue to the difference between nextFriendThreshold and friendThreshold (reactionThreshold) if
-                -- nextFriendThreshold exists, otherwise set it to the difference between friendRep (standing) and friendThreshold
-                if friendShipReputationInfo.nextThreshold then
-                    topValue = friendShipReputationInfo.nextThreshold - friendShipReputationInfo.reactionThreshold
-                else
-                    topValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
-                end
-                earnedValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
             end
 
             -- Calculate earnedValueRatio based on the earned value and top value. If top value is less than or equal to 0, set it to 0

@@ -1,5 +1,7 @@
 local _, TitanPanelReputation = ...
 
+local WoW10 = select(4, GetBuildInfo()) >= 100000
+
 --[[ ------------------------------ TitanPanelReputation.TABLE Filters ------------------------------ ]]
 
 --[[ TitanPanelReputation
@@ -76,11 +78,21 @@ bonus rep gain factions without affecting the original standingID and label.
 ---@return AdjustedIDAndLabel|nil
 function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue,
                                                     hasBonusRepGain, returnOnNotShowFriendInfo)
-    returnOnNotShowFriendInfo = returnOnNotShowFriendInfo or false
-
     local adjustedID = standingID -- use local variable to avoid overwriting the global one
-
+    local label = getglobal("FACTION_STANDING_LABEL" .. standingID)
     local factionType = "Faction Standing"
+
+    if not WoW10 then
+        local adjustedIDAndLabel = ---@type AdjustedIDAndLabel
+        {
+            adjustedID = adjustedID,
+            label = label,
+            factionType = factionType
+        }
+        return adjustedIDAndLabel
+    end
+
+    returnOnNotShowFriendInfo = returnOnNotShowFriendInfo or false
 
     if friendShipReputationInfo then
         if returnOnNotShowFriendInfo and not TitanGetVar(TitanPanelReputation.ID, "ShowFriendsOnBar") then return end -- if not showing friendsip info, return
@@ -93,20 +105,18 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, frien
 
     if hasBonusRepGain then adjustedID = 9 end
 
-    local LABEL = getglobal("FACTION_STANDING_LABEL" .. standingID)
-
-    if friendShipReputationInfo then LABEL = friendShipReputationInfo.reaction end
+    if friendShipReputationInfo then label = friendShipReputationInfo.reaction end
 
     if hasBonusRepGain and not (friendShipReputationInfo and not friendShipReputationInfo.nextThreshold)
         and not (adjustedID >= 8 and topValue == 0) then
-        LABEL = TitanPanelReputation:GT("LID_PARAGON")
+        label = TitanPanelReputation:GT("LID_PARAGON")
     end
 
     if factionID and C_Reputation.IsMajorFaction(factionID) then
         local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
 
         if majorFactionData ~= nil then
-            LABEL = tostring(majorFactionData.renownLevel)
+            label = tostring(majorFactionData.renownLevel)
         end
         adjustedID = 10
     end
@@ -114,7 +124,7 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, frien
     local adjustedIDAndLabel = ---@type AdjustedIDAndLabel
     {
         adjustedID = adjustedID,
-        label = LABEL,
+        label = label,
         factionType = factionType
     }
     return adjustedIDAndLabel

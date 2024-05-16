@@ -1,5 +1,7 @@
 local _, TitanPanelReputation = ...
 
+local WoW10 = select(4, GetBuildInfo()) >= 100000
+
 --[[ TitanPanelReputation
 NAME: BuildRightClickMenu
 DESC: Builds the faction headers part of the right-click menu.
@@ -121,27 +123,28 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
 
     -- Level 3 menus
     if (TitanPanelRightClickMenu_GetDropdownLevel() == 3) then
-        -- Friendship Rank Settings (Submenu)
-        if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS") then
-            TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
-            -- Toggle Options
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"),
-                TitanPanelReputation.ID, "ShowFriendships", "", 3, true)
-            --
-            TitanPanelRightClickMenu_AddSpacer2(3)
-            --
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BESTFRIEND"),
-                TitanPanelReputation.ID, "ShowBESTFRIEND", "", 3, true)
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_GOODFRIEND"),
-                TitanPanelReputation.ID, "ShowGOODFRIEND", "", 3, true)
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIEND"),
-                TitanPanelReputation.ID, "ShowFRIEND", "", 3, true)
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BUDDY"),
-                TitanPanelReputation.ID, "ShowBUDDY", "", 3, true)
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_ACQUAINTANCE"),
-                TitanPanelReputation.ID, "ShowACQUAINTANCE", "", 3, true)
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_STRANGER"),
-                TitanPanelReputation.ID, "ShowSTRANGER", "", 3, true)
+        if (WoW10) then -- Friendship Rank Settings (Submenu)
+            if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS") then
+                TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
+                -- Toggle Options
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"),
+                    TitanPanelReputation.ID, "ShowFriendships", "", 3, true)
+                --
+                TitanPanelRightClickMenu_AddSpacer2(3)
+                --
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BESTFRIEND"),
+                    TitanPanelReputation.ID, "ShowBESTFRIEND", "", 3, true)
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_GOODFRIEND"),
+                    TitanPanelReputation.ID, "ShowGOODFRIEND", "", 3, true)
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIEND"),
+                    TitanPanelReputation.ID, "ShowFRIEND", "", 3, true)
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BUDDY"),
+                    TitanPanelReputation.ID, "ShowBUDDY", "", 3, true)
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_ACQUAINTANCE"),
+                    TitanPanelReputation.ID, "ShowACQUAINTANCE", "", 3, true)
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_STRANGER"),
+                    TitanPanelReputation.ID, "ShowSTRANGER", "", 3, true)
+            end
         end
 
         -- Reputation Standing Settings (Submenu)
@@ -168,7 +171,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
 
         -- Tooltip Scale (Submenu)
         if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_TOOLTIP_SCALE") then
-            TitanPanelRightClickMenu_AddTitle2(TitanPanelReputation:GT("LID_TOOLTIP_WARNING"), 3)
+            TitanPanelRightClickMenu_AddTitle2(TitanPanelReputation:GT("LID_TOOLTIP_SCALE"), 3)
             -- Toggle Options (Increase Scale)
             info.text = TitanPanelReputation:GT("LID_SCALE_INCREASE")
             info.notCheckable = true
@@ -260,10 +263,11 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             -- Toggle Options
             TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_ICON"),
                 TitanPanelReputation.ID, "ShowIcon", "", 2, true)
-            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDS_ON_BAR"),
-                TitanPanelReputation.ID, "ShowFriendsOnBar", "", 2, true)
-            TitanPanelRightClickMenu_AddToggleVar2(
-                TitanPanelReputation:GT("LID_SHOW_FACTION_NAME_LABEL"),
+            if (WoW10) then
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDS_ON_BAR"),
+                    TitanPanelReputation.ID, "ShowFriendsOnBar", "", 2, true)
+            end
+            TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FACTION_NAME_LABEL"),
                 TitanPanelReputation.ID, "ShowFactionName", "", 2, true)
             TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_STANDING"),
                 TitanPanelReputation.ID, "ShowStanding", "", 2, true)
@@ -293,10 +297,10 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             --
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
-            TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS"),
-                2)
-            TitanPanelRightClickMenu_AddButton2(
-                TitanPanelReputation:GT("LID_REPUTATION_STANDING_SETTINGS"), 2)
+            if (WoW10) then
+                TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS"), 2)
+            end
+            TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_REPUTATION_STANDING_SETTINGS"), 2)
             --
             TitanPanelRightClickMenu_AddSpacer2(2)
             --

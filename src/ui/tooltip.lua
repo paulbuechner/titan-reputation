@@ -271,15 +271,17 @@ DESC: Tooltip scaling hooked ownership check
 ]]
 local function TooltipHook()
     if GameTooltip:GetOwner() == TitanPanelReputationButton then
+        -- Cache initial tooltip scale
         if not isTooltipShowing then
             isTooltipShowing = true
             oldScale = GameTooltip:GetScale()
-            local toolTipScale = TitanGetVar(TitanPanelReputation.ID, "ToolTipScale")
-            if toolTipScale ~= nil then
-                GameTooltip:SetScale(toolTipScale)
-            end
         end
-    elseif isTooltipShowing then
+        -- Set the scale
+        local toolTipScale = TitanGetVar(TitanPanelReputation.ID, "ToolTipScale")
+        if toolTipScale ~= nil then
+            GameTooltip:SetScale(toolTipScale)
+        end
+    elseif isTooltipShowing then -- apply the initial scale for other tooltips
         isTooltipShowing = false
         if oldScale then
             GameTooltip:SetScale(oldScale)
@@ -287,5 +289,5 @@ local function TooltipHook()
         end
     end
 end
-
+--
 hooksecurefunc(GameTooltip, "Show", TooltipHook)

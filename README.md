@@ -4,18 +4,16 @@
 
 <br>
 
-<h1 align="center"><img src="assets/TitanReputation.png" width="22px;" alt="TitanReputation"/> Titan [Reputation Continued]</h1>
+<h1 align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation.png?raw=true" width="22px;" alt="TitanReputation"/> Titan [Reputation Continued]</h1>
 
 Titan Reputation is a reputation plugin for Titan Panel. It allows you to more easily monitor and track your faction
 standings with any faction you may be farming reputation with. 
 
-<div align="center"><img src="assets/TitanReputation_Screenshot_01.png" width="100%;"/></div>
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_01.png?raw=true" width="100%;"/></div>
 
 <br>
 
-<div align="center"><img src="assets/TitanReputation_Screenshot_02.png" width="70%;"/></div>
-
-
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_02.png?raw=true" width="70%;"/></div>
 
 ## Features
 
@@ -35,11 +33,11 @@ standings with any faction you may be farming reputation with.
 
 ### Button Customization Options:
  
-<div align="center"><img src="assets/TitanReputation_Screenshot_03.png" width="70%;"/></div>
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_03.png?raw=true" width="70%;"/></div>
 
 ### Tooltip Customization Options:
 
-<div align="center"><img src="assets/TitanReputation_Screenshot_04.png" width="70%;"/></div>
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_04.png?raw=true" width="70%;"/></div>
 
 ### Additional Feature
 

@@ -11,6 +11,7 @@
 ## X-License: Public Domain
 ## X-Website: https://github.com/paulbuechner/titan-reputation
 ## X-Curse-Project-ID: 956434
+## X-Wago-ID: b6XVgoGp
 ## X-Child-Of: Titan
 
 ## SavedVariables: TitanRep_Data

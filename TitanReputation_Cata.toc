@@ -27,6 +27,7 @@ locale/zhCN.lua
 
 libs/libs.xml
 
+src/blizz-api.lua
 src/globals.lua
 
 src/ui/components.lua

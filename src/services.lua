@@ -269,7 +269,7 @@ DESC: Looks up all factions details, and calls 'method' with faction parameters.
 ]]
 ---@param method function The method to call with @class `FactionDetails` parameters
 function TitanPanelReputation:FactionDetailsProvider(method)
-    local count = GetNumFactions()
+    local count = TitanPanelReputation:BlizzAPI_GetNumFactions()
 
     -- If there are no factions, return
     if not count then return end
@@ -280,7 +280,27 @@ function TitanPanelReputation:FactionDetailsProvider(method)
 
     while (not done) do
         local name, description, standingID, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader,
-        isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(index)
+        isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus =
+            TitanPanelReputation:BlizzAPI_GetFactionInfo(index)
+
+        -- NOTE: If we ever want to filter out addon reputation grouping OR make the reputation selection more nested
+        -- TODO: Alliance specific factions missing
+        -- local skipFactionIDs = {
+        --     -- Shadowlands
+        --     [2445] = true, -- "Der Gluthof"
+        --     -- MOP
+        --     [1272] = true, -- "Die Ackerbauern"
+        --     [1302] = true, -- "Die Angler"
+        --     -- WOLTK
+        --     [1052] = true, -- "Horde Expedition"
+        --     -- TBC
+        --     [936] = true,  -- "Shattrath"
+        --     [169] = true,  -- "Steamwheel Cartell"
+        --     [67] = true,   -- "Horde"
+        --     [892] = true,  -- "Horde Forces"
+        -- }
+        -- if factionID and not skipFactionIDs[factionID] then
+
 
         if factionID then
             -- Normalize values
@@ -289,8 +309,10 @@ function TitanPanelReputation:FactionDetailsProvider(method)
             bottomValue = 0
 
             -- Fetch friendship reputation info
-            local friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID).friendshipFactionID > 0 and
-                C_GossipInfo.GetFriendshipReputation(factionID) or nil
+            local friendShipReputationInfo = nil
+            if C_GossipInfo.GetFriendshipReputation(factionID) and C_GossipInfo.GetFriendshipReputation(factionID).friendshipFactionID > 0 then
+                friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
+            end
 
             if (WoW10) then
                 --[[ --------------------------------------------------------
@@ -366,7 +388,7 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                 percent = percent,
                 isHeader = isHeader or false,
                 isCollapsed = isCollapsed or false,
-                isInactive = IsFactionInactive(index),
+                isInactive = TitanPanelReputation:BlizzAPI_IsFactionInactive(index),
                 hasRep = hasRep or false,
                 isChild = isChild or false,
                 friendShipReputationInfo = friendShipReputationInfo,

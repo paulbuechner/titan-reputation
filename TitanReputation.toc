@@ -1,4 +1,4 @@
-## Interface: 100207
+## Interface: 110000
 
 ## Title: Titan [|cffeda55fReputation Continued|r] |cff00aa00 @project-version@|r
 ## Notes: Adds Reputation tracking and monitoring tools to Titan Panel.
@@ -27,6 +27,7 @@ locale/zhCN.lua
 
 libs/libs.xml
 
+src/blizz-api.lua
 src/globals.lua
 
 src/ui/components.lua

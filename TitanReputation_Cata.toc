@@ -5,7 +5,7 @@
 ## IconTexture: Interface\AddOns\TitanReputation\assets\TitanReputation.tga
 ## Authors: PapaSol, Aquator, Kernighan, Lingkan
 ## Version: @project-version@
-## Dependencies: TitanClassic
+## RequiredDeps: TitanClassic
 
 ## X-Category: Quests & Leveling
 ## X-License: Public Domain

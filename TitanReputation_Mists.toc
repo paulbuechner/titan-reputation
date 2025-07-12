@@ -1,4 +1,4 @@
-## Interface: 20504
+## Interface: 50500
 
 ## Title: Titan [|cffeda55fReputation Continued|r] |cff00aa00 @project-version@|r
 ## Notes: Adds Reputation tracking and monitoring tools to Titan Panel.

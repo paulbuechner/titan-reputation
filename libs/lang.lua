@@ -50,9 +50,6 @@ function TitanPanelReputation:UpdateLanguage()
             "https://github.com/paulbuechner/titan-reputation/blob/main/locale/ptBR.lua")
         TitanPanelReputation:LangptBR()
     elseif GetLocale() == "ruRU" then
-        TitanDebug(
-            "<TitanPanelReputation> Russian locale not supported. You can help translating by visiting: " ..
-            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/ruRU.lua")
         TitanPanelReputation:LangruRU()
     elseif GetLocale() == "zhCN" then
         TitanDebug(

@@ -19,6 +19,7 @@ function TitanPanelReputation:LangruRU()
         ["LID_AUTO_CHANGE"] = "Автоматическое отображение изменений",
         ["LID_FRIENDSHIP_RANK_SETTINGS"] = "Настройки рангов дружбы",
         ["LID_SHOW_FRIENDSHIPS"] = "Показывать дружеские отношения",
+        ["LID_HIDE_MAX_FRIENDSHIPS"] = "Hide Max Friendships",
         ["LID_SHOW_BESTFRIEND"] = "Показывать лучший друг",
         ["LID_SHOW_GOODFRIEND"] = "Показывать хороший друг",
         ["LID_SHOW_FRIEND"] = "Показывать друг",

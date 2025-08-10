@@ -62,7 +62,14 @@ local function BuildFactionTooltipInfo(factionDetails)
             -- NOTE: maxRep values, and amount needed for each level we opt for a simple "SHOW Friendships"
             -- NOTE: toggle, otherwise we would end up in configuration hell.
             if TitanGetVar(TitanPanelReputation.ID, "ShowFriendships") then
-                showrep = 1
+                -- Check if we should hide max friendships (Best Friend level)
+                if TitanGetVar(TitanPanelReputation.ID, "HideMaxFriendships") and
+                    friendShipReputationInfo.nextThreshold == nil then
+                    -- This is a max level friendship (Best Friend), hide it
+                    showrep = 0
+                else
+                    showrep = 1
+                end
             end
 
             -- if TitanGetVar(TitanPanelReputation.ID, "ShowFriendships") == false then

@@ -19,6 +19,7 @@ function TitanPanelReputation:LangdeDE()
         ["LID_AUTO_CHANGE"] = "Fraktion automatisch wechseln",
         ["LID_FRIENDSHIP_RANK_SETTINGS"] = "Freundschaftsrang Einstellungen",
         ["LID_SHOW_FRIENDSHIPS"] = "Freundschaften anzeigen",
+        ["LID_HIDE_MAX_FRIENDSHIPS"] = "Verstecke Max Freundschaften",
         ["LID_SHOW_BESTFRIEND"] = "Bester Freund anzeigen",
         ["LID_SHOW_GOODFRIEND"] = "Guter Freund anzeigen",
         ["LID_SHOW_FRIEND"] = "Freund anzeigen",

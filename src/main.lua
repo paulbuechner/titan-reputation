@@ -31,12 +31,7 @@ local config = {
     MinimalTip = false,                   --
     -- Friendship Rank Settings
     ShowFriendships = true,               --
-    ShowBESTFRIEND = true,                --
-    ShowGOODFRIEND = true,                --
-    ShowFRIEND = true,                    --
-    ShowBUDDY = true,                     --
-    ShowACQUAINTANCE = true,              --
-    ShowSTRANGER = true,                  --
+    HideMaxFriendships = false,           -- Hide Best Friend (max) friendships from tooltip
     -- Reputation Standing Settings
     ShowExalted = true,                   --
     ShowRevered = true,                   --

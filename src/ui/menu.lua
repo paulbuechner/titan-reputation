@@ -129,6 +129,8 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
                 -- Toggle Options
                 TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"),
                     TitanPanelReputation.ID, "ShowFriendships", "", 3, true)
+                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_HIDE_MAX_FRIENDSHIPS"),
+                    TitanPanelReputation.ID, "HideMaxFriendships", "", 3, true)
                 --
                 -- NOTE: Given the many inconsistencies in friendship reputation data, requiring
                 -- NOTE: different total amounts of available standings as well as different

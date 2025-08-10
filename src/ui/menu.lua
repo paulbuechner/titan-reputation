@@ -130,20 +130,24 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
                 TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"),
                     TitanPanelReputation.ID, "ShowFriendships", "", 3, true)
                 --
-                TitanPanelRightClickMenu_AddSpacer2(3)
-                --
-                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BESTFRIEND"),
-                    TitanPanelReputation.ID, "ShowBESTFRIEND", "", 3, true)
-                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_GOODFRIEND"),
-                    TitanPanelReputation.ID, "ShowGOODFRIEND", "", 3, true)
-                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIEND"),
-                    TitanPanelReputation.ID, "ShowFRIEND", "", 3, true)
-                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BUDDY"),
-                    TitanPanelReputation.ID, "ShowBUDDY", "", 3, true)
-                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_ACQUAINTANCE"),
-                    TitanPanelReputation.ID, "ShowACQUAINTANCE", "", 3, true)
-                TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_STRANGER"),
-                    TitanPanelReputation.ID, "ShowSTRANGER", "", 3, true)
+                -- NOTE: Given the many inconsistencies in friendship reputation data, requiring
+                -- NOTE: different total amounts of available standings as well as different
+                -- NOTE: maxRep values, and amount needed for each level we opt for a simple "SHOW Friendships"
+                -- NOTE: toggle, otherwise we would end up in configuration hell.
+                -- TitanPanelRightClickMenu_AddSpacer2(3)
+                -- --
+                -- TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BESTFRIEND"),
+                --     TitanPanelReputation.ID, "ShowBESTFRIEND", "", 3, true)
+                -- TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_GOODFRIEND"),
+                --     TitanPanelReputation.ID, "ShowGOODFRIEND", "", 3, true)
+                -- TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIEND"),
+                --     TitanPanelReputation.ID, "ShowFRIEND", "", 3, true)
+                -- TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_BUDDY"),
+                --     TitanPanelReputation.ID, "ShowBUDDY", "", 3, true)
+                -- TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_ACQUAINTANCE"),
+                --     TitanPanelReputation.ID, "ShowACQUAINTANCE", "", 3, true)
+                -- TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_STRANGER"),
+                --     TitanPanelReputation.ID, "ShowSTRANGER", "", 3, true)
             end
         end
 

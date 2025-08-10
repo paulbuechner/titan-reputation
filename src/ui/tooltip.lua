@@ -57,9 +57,42 @@ local function BuildFactionTooltipInfo(factionDetails)
         showrep = 0
 
         if friendShipReputationInfo then
+            -- NOTE: Given the many inconsistencies in friendship reputation data, requiring
+            -- NOTE: different total amounts of available standings as well as different
+            -- NOTE: maxRep values, and amount needed for each level we opt for a simple "SHOW Friendships"
+            -- NOTE: toggle, otherwise we would end up in configuration hell.
             if TitanGetVar(TitanPanelReputation.ID, "ShowFriendships") then
                 showrep = 1
             end
+
+            -- if TitanGetVar(TitanPanelReputation.ID, "ShowFriendships") == false then
+            --     showrep = 0
+            -- else
+            --     -- DevTools_Dump(friendShipReputationInfo)
+
+            --     -- Map friendship level based on standing value and maxRep
+            --     local maxRep = friendShipReputationInfo.maxRep or 42000 -- Default fallback
+            --     local standing = friendShipReputationInfo.standing or 0
+            --     local levelThreshold = maxRep / 6                       -- 6 total levels: Stranger -> Best Friend
+
+            --     -- Calculate the mapped friendship level (1 = Stranger, 6 = Best Friend)
+            --     local mappedLevel = math.min(6, math.max(1, math.ceil(standing / levelThreshold)))
+
+            --     -- Map levels to reaction names for settings check
+            --     local levelToReaction = {
+            --         [1] = "STRANGER",
+            --         [2] = "ACQUAINTANCE",
+            --         [3] = "BUDDY",
+            --         [4] = "FRIEND",
+            --         [5] = "GOODFRIEND",
+            --         [6] = "BESTFRIEND"
+            --     }
+
+            --     local mappedReaction = levelToReaction[mappedLevel]
+            --     if mappedReaction and TitanGetVar(TitanPanelReputation.ID, "Show" .. mappedReaction) then
+            --         showrep = 1
+            --     end
+            -- end
         else
             if (standingID == 8 and TitanGetVar(TitanPanelReputation.ID, "ShowExalted")) then showrep = 1 end
             if (standingID == 8 and hasBonusRepGain) then showrep = 1 end

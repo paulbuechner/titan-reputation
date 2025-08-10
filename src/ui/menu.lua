@@ -1,6 +1,6 @@
 local _, TitanPanelReputation = ...
 
-local WoW10 = select(4, GetBuildInfo()) >= 100000
+local WoW5 = select(4, GetBuildInfo()) >= 50000
 
 --[[ TitanPanelReputation
 NAME: BuildRightClickMenu
@@ -123,7 +123,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
 
     -- Level 3 menus
     if (TitanPanelRightClickMenu_GetDropdownLevel() == 3) then
-        if (WoW10) then -- Friendship Rank Settings (Submenu)
+        if (WoW5) then -- Friendship Rank Settings (Submenu)
             if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS") then
                 TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
                 -- Toggle Options
@@ -267,7 +267,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             -- Toggle Options
             TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_ICON"),
                 TitanPanelReputation.ID, "ShowIcon", "", 2, true)
-            if (WoW10) then
+            if (WoW5) then
                 TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDS_ON_BAR"),
                     TitanPanelReputation.ID, "ShowFriendsOnBar", "", 2, true)
             end
@@ -301,7 +301,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             --
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
-            if (WoW10) then
+            if (WoW5) then
                 TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS"), 2)
             end
             TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_REPUTATION_STANDING_SETTINGS"), 2)

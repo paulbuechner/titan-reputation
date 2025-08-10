@@ -1,5 +1,6 @@
 local _, TitanPanelReputation = ...
 
+local WoW5 = select(4, GetBuildInfo()) >= 50000
 local WoW10 = select(4, GetBuildInfo()) >= 100000
 
 --[[ TitanPanelReputation
@@ -314,11 +315,10 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                 friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
             end
 
-            if (WoW10) then
-                --[[ --------------------------------------------------------
+            --[[ --------------------------------------------------------
                     Handle Paragon, Renown and Friendship factions
                 -----------------------------------------------------------]]
-
+            if (WoW10) then
                 if (C_Reputation.IsFactionParagon(factionID)) then -- Paragon
                     -- Get faction paragon info
                     local currentValue, threshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID)
@@ -355,11 +355,16 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                             earnedValue = majorFactionData.renownReputationEarned
                         end
                     end
-                elseif (friendShipReputationInfo) then -- Friendship
+                end
+            end
+
+            if (WoW5) then -- Friendship Reputation is available with MoP
+                if (friendShipReputationInfo) then
                     -- Set topValue to the difference between nextFriendThreshold and friendThreshold (reactionThreshold) if
                     -- nextFriendThreshold exists, otherwise set it to the difference between friendRep (standing) and friendThreshold
                     if friendShipReputationInfo.nextThreshold then
-                        topValue = friendShipReputationInfo.nextThreshold - friendShipReputationInfo.reactionThreshold
+                        topValue = friendShipReputationInfo.nextThreshold -
+                            friendShipReputationInfo.reactionThreshold
                     else
                         topValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
                     end

@@ -10,14 +10,13 @@ DESC: Retrieve the faction name where reputation changed to populate the `TitanP
 ---@param factionDetails FactionDetails
 function TitanPanelReputation.GetChangedName(factionDetails)
     -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID, hasBonusRepGain =
+    local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID =
         factionDetails.name,
         factionDetails.standingID,
         factionDetails.topValue,
         factionDetails.earnedValue,
         factionDetails.friendShipReputationInfo,
-        factionDetails.factionID,
-        factionDetails.hasBonusRepGain
+        factionDetails.factionID
 
     -- TODO: Make guild faction an option to track
     if factionID == TitanPanelReputation.G_FACTION_ID then return end
@@ -32,8 +31,8 @@ function TitanPanelReputation.GetChangedName(factionDetails)
     end
 
     -- Get adjusted ID and label depending on the faction type
-    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
-        friendShipReputationInfo, topValue, hasBonusRepGain, true)
+    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
+        factionID, standingID, friendShipReputationInfo, topValue, true)
     -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
     if not adjustedIDAndLabel then return end
     -- Destructure props from AdjustedIDAndLabel
@@ -185,7 +184,7 @@ DESC: Gathers all reputation values for each faction to populate the `TitanPanel
 ---@param factionDetails FactionDetails
 function TitanPanelReputation.GatherValues(factionDetails)
     -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, isHeader, hasRep, friendShipReputationInfo, factionID, hasBonusRepGain =
+    local name, standingID, topValue, earnedValue, isHeader, hasRep, friendShipReputationInfo, factionID =
         factionDetails.name,
         factionDetails.standingID,
         factionDetails.topValue,
@@ -193,16 +192,15 @@ function TitanPanelReputation.GatherValues(factionDetails)
         factionDetails.isHeader,
         factionDetails.hasRep,
         factionDetails.friendShipReputationInfo,
-        factionDetails.factionID,
-        factionDetails.hasBonusRepGain
+        factionDetails.factionID
 
     local isValidFaction = (not isHeader and name) or (isHeader and hasRep) -- Check if the faction can be tracked
 
     -- Announce newly discovered faction
     if TitanPanelReputation.TABLE_INIT and not TitanPanelReputation.TABLE[factionID] and isValidFaction then
         -- Get adjusted ID and label depending on the faction type
-        local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
-            friendShipReputationInfo, topValue, hasBonusRepGain, true)
+        local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
+            factionID, standingID, friendShipReputationInfo, topValue, true)
         -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
         if not adjustedIDAndLabel then return end
         -- Destructure props from AdjustedIDAndLabel
@@ -323,6 +321,9 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                     -- Get faction paragon info
                     local currentValue, threshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID)
                     if currentValue then -- May be nil
+                        -- Set the top value to the paragon threshold
+                        topValue = threshold
+
                         -- Calculate the offset level to account for the reputation offset caused by the paragon system
                         -- ... The typical paragon threshold is 10000, so we can use that to calculate the offset level
                         -- ... by dividing the current rep value by the thresholds and rounding down to the nearest whole
@@ -337,7 +338,7 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                         -- from the current value. This will give us the actual reputation value for the paragon faction.
                         -- ... E.g. 25000 - (2 * 10000) = 5000, 38000 - (3 * 10000) = 8000, etc.
                         local adjustedValue = currentValue - (offsetLevel * threshold)
-                        earnedValue, hasBonusRepGain = adjustedValue, true
+                        earnedValue = adjustedValue
                     end
                 elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
                     -- Get the renown faction data

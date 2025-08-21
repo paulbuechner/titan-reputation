@@ -24,8 +24,8 @@ local function BuildFactionTooltipInfo(factionDetails)
         factionDetails.hasBonusRepGain
 
     -- Get adjusted ID and label depending on the faction type
-    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
-        friendShipReputationInfo, topValue, hasBonusRepGain)
+    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
+        factionID, standingID, friendShipReputationInfo, topValue)
     -- Destructure props from AdjustedIDAndLabel
     local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 
@@ -102,7 +102,6 @@ local function BuildFactionTooltipInfo(factionDetails)
             -- end
         else
             if (standingID == 8 and TitanGetVar(TitanPanelReputation.ID, "ShowExalted")) then showrep = 1 end
-            if (standingID == 8 and hasBonusRepGain) then showrep = 1 end
             if (standingID == 7 and TitanGetVar(TitanPanelReputation.ID, "ShowRevered")) then showrep = 1 end
             if (standingID == 6 and TitanGetVar(TitanPanelReputation.ID, "ShowHonored")) then showrep = 1 end
             if (standingID == 5 and TitanGetVar(TitanPanelReputation.ID, "ShowFriendly")) then showrep = 1 end
@@ -132,7 +131,7 @@ local function BuildFactionTooltipInfo(factionDetails)
 
             if (TitanPanelReputation.BARCOLORS) then
                 TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. preface
-                if ((standingID == 8 and not hasBonusRepGain) or topValue == 1000 or topValue == 0) then
+                if (adjustedID == 8 or topValue == 1000 or topValue == 0) then
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
                         TitanUtils_GetColoredText(name, TitanPanelReputation.BARCOLORS[8]) .. postface .. "\t"
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
@@ -157,7 +156,7 @@ local function BuildFactionTooltipInfo(factionDetails)
                 end
             else
                 TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. preface
-                if (standingID == 8) then
+                if (adjustedID == 8 or topValue == 1000 or topValue == 0) then
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. name .. postface .. "\t"
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. LABEL
                 else

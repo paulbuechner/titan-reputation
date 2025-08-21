@@ -73,11 +73,10 @@ bonus rep gain factions without affecting the original standingID and label.
 ---@param standingID (number) The current standingID for the given faction
 ---@param friendShipReputationInfo (FriendshipReputationInfo|nil) The friendship reputation info for the given faction
 ---@param topValue (number) The top value for the given faction
----@param hasBonusRepGain (boolean) Whether the given faction has bonus rep gain
 ---@param returnOnNotShowFriendInfo? (boolean) Whether to return if not showing friendship info (optional, default false)
 ---@return AdjustedIDAndLabel|nil
 function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue,
-                                                    hasBonusRepGain, returnOnNotShowFriendInfo)
+                                                    returnOnNotShowFriendInfo)
     local adjustedID = standingID -- use local variable to avoid overwriting the global one
     local label = getglobal("FACTION_STANDING_LABEL" .. standingID)
     local factionType = "Faction Standing"
@@ -103,15 +102,19 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, frien
         factionType = "Friendship Ranking"
     end
 
-    if hasBonusRepGain then adjustedID = 9 end
-
     if friendShipReputationInfo then label = friendShipReputationInfo.reaction end
 
-    if hasBonusRepGain and not (friendShipReputationInfo and not friendShipReputationInfo.nextThreshold)
-        and not (adjustedID >= 8 and topValue == 0) then
-        label = TitanPanelReputation:GT("LID_PARAGON")
+    -- Paragon - AdjustedID = 9
+    if factionID and C_Reputation.IsFactionParagon(factionID) then
+        -- If topValue is 0 or 1000, that individual faction is paragon but their paragon
+        -- rep is tracked on another faction (e.g. "Azj Kahet" Sentinals)
+        if topValue ~= 0 and topValue ~= 1000 then
+            label = TitanPanelReputation:GT("LID_PARAGON")
+        end
+        adjustedID = 9
     end
 
+    -- Renown -> AdjustedID = 10
     if factionID and C_Reputation.IsMajorFaction(factionID) then
         local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
 

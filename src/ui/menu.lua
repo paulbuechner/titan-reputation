@@ -64,7 +64,7 @@ DESC: Builds the faction headers sub menu part of the right-click menu.
 ---@param factionDetails FactionDetails
 local function BuildFactionHeaderSubMenu(factionDetails)
     -- Destructure props from FactionDetails
-    local name, parentName, standingID, topValue, isHeader, hasRep, friendShipReputationInfo, factionID, hasBonusRepGain =
+    local name, parentName, standingID, topValue, isHeader, hasRep, friendShipReputationInfo, factionID =
         factionDetails.name,
         factionDetails.parentName,
         factionDetails.standingID,
@@ -72,12 +72,11 @@ local function BuildFactionHeaderSubMenu(factionDetails)
         factionDetails.isHeader,
         factionDetails.hasRep,
         factionDetails.friendShipReputationInfo,
-        factionDetails.factionID,
-        factionDetails.hasBonusRepGain
+        factionDetails.factionID
 
     -- Get adjusted ID and label depending on the faction type
-    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID,
-        friendShipReputationInfo, topValue, hasBonusRepGain)
+    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
+        factionID, standingID, friendShipReputationInfo, topValue)
     -- Destructure props from AdjustedIDAndLabel
     local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 

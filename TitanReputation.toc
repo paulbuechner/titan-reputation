@@ -1,4 +1,4 @@
-## Interface: 11507, 50500, 110200
+## Interface: 11507, 50501, 110205
 
 ## Title: Titan [|cffeda55fReputation Continued|r] |cff00aa00 @project-version@|r
 ## Notes: Adds Reputation tracking and monitoring tools to Titan Panel.

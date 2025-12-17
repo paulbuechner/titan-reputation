@@ -29,6 +29,7 @@ libs/libs.xml
 
 src/blizz-api.lua
 src/globals.lua
+src/mapping.lua
 
 src/ui/components.lua
 src/ui/tooltip.lua

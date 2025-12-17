@@ -7,6 +7,7 @@
 ---@field topValue number: The top value of the faction
 ---@field earnedValue number: The earned value of the faction
 ---@field percent string: The percentage of the current faction standing progress
+---@field headerLevel number: The indentation level used when grouping factions
 ---@field isHeader boolean: Whether the faction is a header
 ---@field isCollapsed boolean: Whether the faction is collapsed
 ---@field isInactive boolean: Whether the faction is inactive

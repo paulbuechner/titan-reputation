@@ -399,8 +399,11 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                 isChild = isChild or false,
                 friendShipReputationInfo = friendShipReputationInfo,
                 factionID = factionID,
-                hasBonusRepGain = hasBonusRepGain or false
+                hasBonusRepGain = hasBonusRepGain or false,
+                headerLevel = (isHeader and 0) or (isChild and 2 or 1)
             }
+            -- Apply optional faction mapping overrides before consumers use the data
+            factionDetails = TitanPanelReputation:ApplyFactionMapping(factionDetails)
             -- Call the method with the faction details
             method(factionDetails)
         end

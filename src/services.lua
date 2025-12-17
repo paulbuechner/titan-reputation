@@ -24,12 +24,64 @@ local function WriteHiddenLookupToSavedVar(lookup)
     TitanSetVar(TitanPanelReputation.ID, "FactionHeaders", serialized)
 end
 
+local function BuildOverrideLookup(savedList)
+    local lookup = {}
+    if type(savedList) == "table" then
+        for _, name in ipairs(savedList) do
+            if type(name) == "string" and name ~= "" then
+                lookup[name] = true
+            end
+        end
+    end
+    return lookup
+end
+
+local function WriteOverrideLookupToSavedVar(lookup)
+    local serialized = {}
+    for name in pairs(lookup) do
+        serialized[#serialized + 1] = name
+    end
+    table.sort(serialized)
+    TitanSetVar(TitanPanelReputation.ID, "FactionShowOverrides", serialized)
+end
+
+local function IsAncestor(target, headerPath)
+    if not headerPath then return false end
+    for _, ancestor in ipairs(headerPath) do
+        if ancestor == target then
+            return true
+        end
+    end
+    return false
+end
+
+local function CollectBranchNames(rootName)
+    local names = {}
+    if not rootName or rootName == "" then
+        return names
+    end
+    TitanPanelReputation:FactionDetailsProvider(function(details)
+        if details.name == rootName or IsAncestor(rootName, details.headerPath) then
+            names[#names + 1] = details.name
+        end
+    end)
+    return names
+end
+
 function TitanPanelReputation:GetHiddenFactionLookup()
     if not self.hiddenFactionLookup then
         local saved = TitanGetVar(TitanPanelReputation.ID, "FactionHeaders") or {}
         self.hiddenFactionLookup = BuildHiddenLookup(saved)
     end
     return self.hiddenFactionLookup
+end
+
+function TitanPanelReputation:GetShownFactionOverrideLookup()
+    if not self.shownFactionOverrideLookup then
+        local saved = TitanGetVar(TitanPanelReputation.ID, "FactionShowOverrides") or {}
+        self.shownFactionOverrideLookup = BuildOverrideLookup(saved)
+    end
+    return self.shownFactionOverrideLookup
 end
 
 function TitanPanelReputation:IsNodeExplicitlyHidden(name)
@@ -45,12 +97,16 @@ function TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
         return false
     end
     local lookup = self:GetHiddenFactionLookup()
-    if not next(lookup) then
+    local shownOverrides = self:GetShownFactionOverrideLookup()
+
+    if factionDetails.name and shownOverrides[factionDetails.name] then
         return false
     end
+
     if factionDetails.name and lookup[factionDetails.name] then
         return true
     end
+
     if factionDetails.headerPath then
         for _, ancestor in ipairs(factionDetails.headerPath) do
             if lookup[ancestor] then
@@ -58,7 +114,51 @@ function TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
             end
         end
     end
+
     return false
+end
+
+function TitanPanelReputation:HasHiddenAncestor(factionDetails)
+    if not factionDetails or not factionDetails.headerPath then
+        return false
+    end
+    local lookup = self:GetHiddenFactionLookup()
+    for _, ancestor in ipairs(factionDetails.headerPath) do
+        if lookup[ancestor] then
+            return true
+        end
+    end
+    return false
+end
+
+function TitanPanelReputation:IsBranchVisible(rootName)
+    if not rootName or rootName == "" then
+        return false
+    end
+    local visible = false
+    self:FactionDetailsProvider(function(details)
+        if visible then return end
+        if details.name == rootName or IsAncestor(rootName, details.headerPath) then
+            if not TitanPanelReputation:IsFactionEffectivelyHidden(details) then
+                visible = true
+            end
+        end
+    end)
+    return visible
+end
+
+function TitanPanelReputation:ClearShownOverridesForBranch(rootName)
+    if not rootName or rootName == "" then
+        return
+    end
+    local overrides = self:GetShownFactionOverrideLookup()
+    if not next(overrides) then
+        return
+    end
+    for _, name in ipairs(CollectBranchNames(rootName)) do
+        overrides[name] = nil
+    end
+    WriteOverrideLookupToSavedVar(overrides)
 end
 
 function TitanPanelReputation:SetFactionHiddenState(factionDetails, hidden)
@@ -67,21 +167,38 @@ function TitanPanelReputation:SetFactionHiddenState(factionDetails, hidden)
     end
 
     local lookup = self:GetHiddenFactionLookup()
+    local overrides = self:GetShownFactionOverrideLookup()
     if hidden then
         if factionDetails.name ~= "" then
             lookup[factionDetails.name] = true
         end
+        overrides[factionDetails.name] = nil
+        TitanPanelReputation:ClearShownOverridesForBranch(factionDetails.name)
     else
         lookup[factionDetails.name] = nil
-        if factionDetails.headerPath then
-            for _, ancestor in ipairs(factionDetails.headerPath) do
-                lookup[ancestor] = nil
+        overrides[factionDetails.name] = nil
+        if factionDetails.isHeader then
+            local branchNames = CollectBranchNames(factionDetails.name)
+            if #branchNames > 0 then
+                for _, branchName in ipairs(branchNames) do
+                    lookup[branchName] = nil
+                    overrides[branchName] = nil
+                end
+                if TitanPanelReputation:HasHiddenAncestor(factionDetails) then
+                    for _, branchName in ipairs(branchNames) do
+                        overrides[branchName] = true
+                    end
+                end
             end
+        elseif TitanPanelReputation:HasHiddenAncestor(factionDetails) then
+            overrides[factionDetails.name] = true
         end
     end
 
     WriteHiddenLookupToSavedVar(lookup)
+    WriteOverrideLookupToSavedVar(overrides)
     self.hiddenFactionLookup = lookup
+    self.shownFactionOverrideLookup = overrides
 end
 
 function TitanPanelReputation:ToggleFactionVisibility(factionDetails)

@@ -1,5 +1,30 @@
 local _, TitanPanelReputation = ...
 
+local function EnsureHeaderPathPrinted(headerPath)
+    TitanPanelReputation.LAST_HEADER_PATH = TitanPanelReputation.LAST_HEADER_PATH or {}
+
+    if not headerPath or #headerPath == 0 then
+        wipe(TitanPanelReputation.LAST_HEADER_PATH)
+        return
+    end
+
+    for level, headerName in ipairs(headerPath) do
+        if TitanPanelReputation.LAST_HEADER_PATH[level] ~= headerName then
+            local indent = string.rep("  ", level - 1)
+            TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
+                "\n" .. indent .. TitanUtils_GetHighlightText(headerName) .. "\n"
+            TitanPanelReputation.LAST_HEADER_PATH[level] = headerName
+            for trim = level + 1, #TitanPanelReputation.LAST_HEADER_PATH do
+                TitanPanelReputation.LAST_HEADER_PATH[trim] = nil
+            end
+        end
+    end
+
+    for trim = #headerPath + 1, #TitanPanelReputation.LAST_HEADER_PATH do
+        TitanPanelReputation.LAST_HEADER_PATH[trim] = nil
+    end
+end
+
 --[[ TitanPanelReputation
 NAME: BuildFactionTooltipInfo
 DESC:
@@ -9,7 +34,7 @@ tooltip text (`TitanPanelReputation.TOOLTIP_TEXT`).
 ---@param factionDetails FactionDetails
 local function BuildFactionTooltipInfo(factionDetails)
     -- Destructure props from FactionDetails
-    local name, parentName, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, hasBonusRepGain =
+    local name, parentName, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, hasBonusRepGain, headerLevel, headerPath =
         factionDetails.name,
         factionDetails.parentName,
         factionDetails.standingID,
@@ -21,7 +46,9 @@ local function BuildFactionTooltipInfo(factionDetails)
         factionDetails.hasRep,
         factionDetails.friendShipReputationInfo,
         factionDetails.factionID,
-        factionDetails.hasBonusRepGain
+        factionDetails.hasBonusRepGain,
+        factionDetails.headerLevel,
+        factionDetails.headerPath
 
     -- Get adjusted ID and label depending on the faction type
     local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
@@ -36,9 +63,8 @@ local function BuildFactionTooltipInfo(factionDetails)
         TitanPanelReputation.TOTAL_EXALTED = TitanPanelReputation.TOTAL_EXALTED + 1
     end
 
-    -- Check if the faction is a header and if it should be shown. If not, return
-    local factionHeaders = TitanGetVar(TitanPanelReputation.ID, "FactionHeaders")
-    if factionHeaders and tContains(factionHeaders, parentName) then
+    -- Skip nodes hidden by the user's menu selections (handles ancestors automatically)
+    if TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails) then
         return
     end
 
@@ -46,10 +72,14 @@ local function BuildFactionTooltipInfo(factionDetails)
     local preface = TitanUtils_GetHighlightText(" - ")
     local postface = ""
     local showrep = isInactive and 0 or 1
+    local indentDepth = headerLevel or 0
+    if not isHeader and indentDepth > 0 then
+        indentDepth = indentDepth - 1
+    end
+    local indentPrefix = indentDepth > 0 and string.rep("  ", indentDepth) or ""
 
 
     if (isHeader) then
-        TitanPanelReputation.LAST_HEADER = { name, 0 }
         showrep = hasRep and 1 or 0 -- Show header if it has rep
     end
 
@@ -113,24 +143,13 @@ local function BuildFactionTooltipInfo(factionDetails)
 
 
         if (showrep == 1) then
+            EnsureHeaderPathPrinted(headerPath)
             if TitanGetVar(TitanPanelReputation.ID, "ShortTipStanding") then
                 LABEL = LABEL and strsub(LABEL, 1, adjustedID == 10 and 2 or 1) or ""
             end
 
-            if (TitanPanelReputation.LAST_HEADER[2] == 0) then
-                --if(TitanPanelReputation.LAST_HEADER[1] == TitanPanelReputation_GUILDLOCAL) then
-                if (factionID == TitanPanelReputation.G_FACTION_ID) then
-                    TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
-                        "\n" .. TitanUtils_GetHighlightText(TitanPanelReputation.LAST_HEADER[1])
-                else
-                    TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
-                        "\n" .. TitanUtils_GetHighlightText(TitanPanelReputation.LAST_HEADER[1]) .. "\n"
-                end
-                TitanPanelReputation.LAST_HEADER[2] = 1
-            end
-
             if (TitanPanelReputation.BARCOLORS) then
-                TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. preface
+                TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. indentPrefix .. preface
                 if (adjustedID == 8 or topValue == 1000 or topValue == 0) then
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
                         TitanUtils_GetColoredText(name, TitanPanelReputation.BARCOLORS[8]) .. postface .. "\t"
@@ -155,7 +174,7 @@ local function BuildFactionTooltipInfo(factionDetails)
                     end
                 end
             else
-                TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. preface
+                TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. indentPrefix .. preface
                 if (adjustedID == 8 or topValue == 1000 or topValue == 0) then
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. name .. postface .. "\t"
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. LABEL
@@ -192,7 +211,7 @@ function TitanPanelReputation:BuildTooltipText()
     TitanPanelReputation.TOOLTIP_TEXT = ""
     TitanPanelReputation.TOTAL_EXALTED = 0
     TitanPanelReputation.TOTAL_BESTFRIENDS = 0
-    TitanPanelReputation.LAST_HEADER = { "HEADER", 1 }
+    TitanPanelReputation.LAST_HEADER_PATH = {}
 
     -- Add the faction details to the tooltip text
     TitanPanelReputation:FactionDetailsProvider(BuildFactionTooltipInfo)

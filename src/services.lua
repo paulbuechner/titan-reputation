@@ -3,6 +3,92 @@ local _, TitanPanelReputation = ...
 local WoW5 = select(4, GetBuildInfo()) >= 50000
 local WoW10 = select(4, GetBuildInfo()) >= 100000
 
+local function BuildHiddenLookup(savedList)
+    local lookup = {}
+    if type(savedList) == "table" then
+        for _, name in ipairs(savedList) do
+            if type(name) == "string" and name ~= "" then
+                lookup[name] = true
+            end
+        end
+    end
+    return lookup
+end
+
+local function WriteHiddenLookupToSavedVar(lookup)
+    local serialized = {}
+    for name in pairs(lookup) do
+        serialized[#serialized + 1] = name
+    end
+    table.sort(serialized)
+    TitanSetVar(TitanPanelReputation.ID, "FactionHeaders", serialized)
+end
+
+function TitanPanelReputation:GetHiddenFactionLookup()
+    if not self.hiddenFactionLookup then
+        local saved = TitanGetVar(TitanPanelReputation.ID, "FactionHeaders") or {}
+        self.hiddenFactionLookup = BuildHiddenLookup(saved)
+    end
+    return self.hiddenFactionLookup
+end
+
+function TitanPanelReputation:IsNodeExplicitlyHidden(name)
+    if not name or name == "" then
+        return false
+    end
+    local lookup = self:GetHiddenFactionLookup()
+    return lookup[name] or false
+end
+
+function TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
+    if not factionDetails then
+        return false
+    end
+    local lookup = self:GetHiddenFactionLookup()
+    if not next(lookup) then
+        return false
+    end
+    if factionDetails.name and lookup[factionDetails.name] then
+        return true
+    end
+    if factionDetails.headerPath then
+        for _, ancestor in ipairs(factionDetails.headerPath) do
+            if lookup[ancestor] then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function TitanPanelReputation:SetFactionHiddenState(factionDetails, hidden)
+    if not factionDetails or not factionDetails.name then
+        return
+    end
+
+    local lookup = self:GetHiddenFactionLookup()
+    if hidden then
+        if factionDetails.name ~= "" then
+            lookup[factionDetails.name] = true
+        end
+    else
+        lookup[factionDetails.name] = nil
+        if factionDetails.headerPath then
+            for _, ancestor in ipairs(factionDetails.headerPath) do
+                lookup[ancestor] = nil
+            end
+        end
+    end
+
+    WriteHiddenLookupToSavedVar(lookup)
+    self.hiddenFactionLookup = lookup
+end
+
+function TitanPanelReputation:ToggleFactionVisibility(factionDetails)
+    local shouldHide = not self:IsFactionEffectivelyHidden(factionDetails)
+    self:SetFactionHiddenState(factionDetails, shouldHide)
+end
+
 --[[ TitanPanelReputation
 NAME: TitanPanelReputation.GetChangedName
 DESC: Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
@@ -275,7 +361,8 @@ function TitanPanelReputation:FactionDetailsProvider(method)
 
     local done = false
     local index = 1
-    local parentName = ""
+    local rootHeader = ""
+    local nestedHeader = ""
 
     while (not done) do
         local name, description, standingID, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader,
@@ -379,15 +466,59 @@ function TitanPanelReputation:FactionDetailsProvider(method)
             -- Calculate the percentage and format it to 2 decimal places (e.g. 12.33334 -> 12.33)
             local percent = format("%.2f", earnedValueRatio * 100)
 
-            -- If it's a header and name exists, set the parent name to name
-            if (isHeader) and name then parentName = name; end
+            local headerPath = {}
+            local currentParent = ""
+            if isHeader then
+                if isChild then
+                    currentParent = rootHeader
+                    if rootHeader ~= "" then
+                        tinsert(headerPath, rootHeader)
+                    end
+                    tinsert(headerPath, name)
+                else
+                    currentParent = ""
+                    wipe(headerPath)
+                    tinsert(headerPath, name)
+                end
+            else
+                if nestedHeader ~= "" then
+                    currentParent = nestedHeader
+                    if rootHeader ~= "" then
+                        tinsert(headerPath, rootHeader)
+                    end
+                    tinsert(headerPath, nestedHeader)
+                else
+                    currentParent = rootHeader
+                    if rootHeader ~= "" then
+                        tinsert(headerPath, rootHeader)
+                    end
+                end
+            end
+
+            local headerLevel
+            if isHeader then
+                headerLevel = math.max(#headerPath - 1, 0)
+            else
+                headerLevel = #headerPath
+            end
+
+            local resolvedParentName = ""
+            if isHeader then
+                if #headerPath > 1 then
+                    resolvedParentName = headerPath[#headerPath - 1]
+                end
+            else
+                if #headerPath > 0 then
+                    resolvedParentName = headerPath[#headerPath]
+                end
+            end
 
             -- NOTE: Uses default initialization because `GetFactionInfo` WOW API is not strictly typed,
             -- NOTE: but should always return valid values so defaults won't be used.
             local factionDetails = ---@type FactionDetails
             {
                 name = name or "",
-                parentName = parentName,
+                parentName = resolvedParentName,
                 standingID = standingID or -69,
                 topValue = topValue,
                 earnedValue = earnedValue,
@@ -400,10 +531,22 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                 friendShipReputationInfo = friendShipReputationInfo,
                 factionID = factionID,
                 hasBonusRepGain = hasBonusRepGain or false,
-                headerLevel = (isHeader and 0) or (isChild and 2 or 1)
+                headerLevel = headerLevel,
+                headerPath = headerPath
             }
             -- Apply optional faction mapping overrides before consumers use the data
             factionDetails = TitanPanelReputation:ApplyFactionMapping(factionDetails)
+
+            if isHeader then
+                if isChild then
+                    nestedHeader = name or ""
+                else
+                    rootHeader = name or ""
+                    nestedHeader = ""
+                end
+            elseif not isChild then
+                nestedHeader = ""
+            end
             -- Call the method with the faction details
             method(factionDetails)
         end

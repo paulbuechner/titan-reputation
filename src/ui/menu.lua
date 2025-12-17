@@ -2,6 +2,24 @@ local _, TitanPanelReputation = ...
 
 local WoW5 = select(4, GetBuildInfo()) >= 50000
 
+local reservedMenuLabels
+local function IsReservedMenuValue(value)
+    if not value then return false end
+    if not reservedMenuLabels then
+        reservedMenuLabels = {
+            [TitanPanelReputation:GT("LID_BUTTON_OPTIONS")] = true,
+            [TitanPanelReputation:GT("LID_TOOLTIP_OPTIONS")] = true,
+            [TitanPanelReputation:GT("LID_COLOR_OPTIONS")] = true,
+            [TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS")] = true,
+            [TitanPanelReputation:GT("LID_REPUTATION_STANDING_SETTINGS")] = true,
+            [TitanPanelReputation:GT("LID_TOOLTIP_SCALE")] = true,
+            [TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS")] = true,
+            [TitanPanelReputation:GT("LID_TIP_SESSION_SUMMARY_SETTINGS")] = true,
+        }
+    end
+    return reservedMenuLabels[value] or false
+end
+
 --[[ TitanPanelReputation
 NAME: BuildRightClickMenu
 DESC: Builds the faction headers part of the right-click menu.
@@ -9,47 +27,23 @@ DESC: Builds the faction headers part of the right-click menu.
 ---@param factionDetails FactionDetails
 local function BuildFactionHeaderMenu(factionDetails)
     -- Destructure props from FactionDetails
-    local name, isHeader, isCollapsed, isInactive =
+    local name, isHeader, isCollapsed, isInactive, headerLevel =
         factionDetails.name,
         factionDetails.isHeader,
         factionDetails.isCollapsed,
-        factionDetails.isInactive
+        factionDetails.isInactive,
+        factionDetails.headerLevel
 
-    if (not isInactive) then
-        if (isHeader and not isCollapsed) then
+    if (not isInactive) and isHeader and (headerLevel or 0) == 0 then
+        if not isCollapsed then
             local command = {}
             command.text = name
             command.value = name
             command.hasArrow = 1
             command.keepShownOnClick = 1
-            command.checked = function()
-                local factionHeaders = TitanGetVar(TitanPanelReputation.ID, "FactionHeaders")
-                if factionHeaders and tContains(factionHeaders, name) then
-                    return nil
-                else
-                    return true
-                end
-            end
+            command.checked = not TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
             command.func = function()
-                local array = TitanGetVar(TitanPanelReputation.ID, "FactionHeaders") or {}
-                local found = false
-
-                for index, value in ipairs(array) do
-                    if value == name then
-                        ---@diagnostic disable-next-line: cast-local-type
-                        found = index
-                        break
-                    end
-                end
-
-                if found then
-                    tremove(array, found)
-                else
-                    tinsert(array, name)
-                end
-
-                TitanSetVar(TitanPanelReputation.ID, "FactionHeaders", array)
-
+                TitanPanelReputation:ToggleFactionVisibility(factionDetails)
                 TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
             end
             TitanPanelRightClickMenu_AddButton(command)
@@ -64,7 +58,7 @@ DESC: Builds the faction headers sub menu part of the right-click menu.
 ---@param factionDetails FactionDetails
 local function BuildFactionHeaderSubMenu(factionDetails)
     -- Destructure props from FactionDetails
-    local name, parentName, standingID, topValue, isHeader, hasRep, friendShipReputationInfo, factionID =
+    local name, parentName, standingID, topValue, isHeader, hasRep, friendShipReputationInfo, factionID, headerLevel =
         factionDetails.name,
         factionDetails.parentName,
         factionDetails.standingID,
@@ -72,7 +66,8 @@ local function BuildFactionHeaderSubMenu(factionDetails)
         factionDetails.isHeader,
         factionDetails.hasRep,
         factionDetails.friendShipReputationInfo,
-        factionDetails.factionID
+        factionDetails.factionID,
+        factionDetails.headerLevel
 
     -- Get adjusted ID and label depending on the faction type
     local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
@@ -82,23 +77,50 @@ local function BuildFactionHeaderSubMenu(factionDetails)
 
     if TitanGetVar(TitanPanelReputation.ID, "ShortTipStanding") then LABEL = strsub(LABEL, 1, adjustedID == 10 and 2 or 1) end
 
-    if (parentName == TitanPanelRightClickMenu_GetDropdMenuValue() and (not isHeader or (isHeader and hasRep))) then
+    local dropdownValue = TitanPanelRightClickMenu_GetDropdMenuValue()
+    if parentName ~= dropdownValue then
+        return
+    end
+
+    if isHeader then
         local command = {}
-        if (TitanPanelReputation.BARCOLORS) then
-            command.text = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS
-                [(adjustedID)])
-        else
-            command.text = name .. " - " .. LABEL
-        end
+        command.text = name
         command.value = name
+        command.hasArrow = 1
+        command.keepShownOnClick = 1
+        command.checked = not TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
         command.func = function()
-            TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", name)
-            TitanPanelReputation:Refresh()
+            TitanPanelReputation:ToggleFactionVisibility(factionDetails)
             TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
         end
-        command.notCheckable = true
         TitanPanelRightClickMenu_AddButton(command, TitanPanelRightClickMenu_GetDropdownLevel())
+        return
     end
+
+    local canSelectFaction = (not isHeader) or (isHeader and hasRep)
+    if not canSelectFaction then
+        return
+    end
+
+    local command = {}
+    if (TitanPanelReputation.BARCOLORS) then
+        command.text = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+    else
+        command.text = name .. " - " .. LABEL
+    end
+    command.value = name
+    command.keepShownOnClick = 1
+    command.checked = not TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
+    command.func = function()
+        if IsShiftKeyDown() then
+            TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", name)
+            TitanPanelReputation:Refresh()
+        else
+            TitanPanelReputation:ToggleFactionVisibility(factionDetails)
+        end
+        TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
+    end
+    TitanPanelRightClickMenu_AddButton(command, TitanPanelRightClickMenu_GetDropdownLevel())
 end
 
 --[[ TitanPanelReputation
@@ -110,6 +132,9 @@ of this method is important and should read `TitanPanelRightClickMenu_Prepare${T
 :NOTE
 ]]
 function TitanPanelRightClickMenu_PrepareReputationMenu()
+    local dropdownLevel = TitanPanelRightClickMenu_GetDropdownLevel()
+    local dropdownValue = TitanPanelRightClickMenu_GetDropdMenuValue()
+
     -- Initialize button defaults
     local info = {}
     info.hasArrow = nil
@@ -120,10 +145,16 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     info.disabled = nil
     info.checked = nil
 
+    if (dropdownLevel >= 2) and not IsReservedMenuValue(dropdownValue) then
+        TitanPanelRightClickMenu_AddTitle2(dropdownValue, dropdownLevel)
+        TitanPanelReputation:FactionDetailsProvider(BuildFactionHeaderSubMenu)
+        return
+    end
+
     -- Level 3 menus
-    if (TitanPanelRightClickMenu_GetDropdownLevel() == 3) then
+    if (dropdownLevel == 3) then
         if (WoW5) then -- Friendship Rank Settings (Submenu)
-            if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS") then
+            if dropdownValue == TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS") then
                 TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
                 -- Toggle Options
                 TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"),
@@ -153,7 +184,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         end
 
         -- Reputation Standing Settings (Submenu)
-        if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_REPUTATION_STANDING_SETTINGS") then
+        if dropdownValue == TitanPanelReputation:GT("LID_REPUTATION_STANDING_SETTINGS") then
             TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
             -- Toggle Options
             TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_EXALTED"),
@@ -175,7 +206,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         end
 
         -- Tooltip Scale (Submenu)
-        if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_TOOLTIP_SCALE") then
+        if dropdownValue == TitanPanelReputation:GT("LID_TOOLTIP_SCALE") then
             TitanPanelRightClickMenu_AddTitle2(TitanPanelReputation:GT("LID_TOOLTIP_SCALE"), 3)
             -- Toggle Options (Increase Scale)
             info.text = TitanPanelReputation:GT("LID_SCALE_INCREASE")
@@ -211,7 +242,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         end
 
         -- Button Options (Submenu) Button Options // Session Summary Settings //
-        if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS") then
+        if dropdownValue == TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS") then
             TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
             -- Toggle Options
             TitanPanelRightClickMenu_AddToggleVar2(TitanPanelReputation:GT("LID_SHOW_SUMMARY_DURATION"),
@@ -221,7 +252,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         end
 
         -- Tooltip Options (Submenu) Tooltip Options // Session Summary Settings //
-        if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_TIP_SESSION_SUMMARY_SETTINGS") then
+        if dropdownValue == TitanPanelReputation:GT("LID_TIP_SESSION_SUMMARY_SETTINGS") then
             -- NOTE: Using same title as the button options, but different value
             TitanPanelRightClickMenu_AddTitle2(TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS"),
                 3)
@@ -237,11 +268,8 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     end
 
     -- Level 2 menus
-    if (TitanPanelRightClickMenu_GetDropdownLevel() == 2) then
-        TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 2)
-        -- ${FACTION_PARENT_HEADER} // ${FACTION_NAME} (Submenu)
-        -- e.g. "The Burning Crusade" // "Thrallmar .. Sporeggar .. etc." (Submenu)
-        TitanPanelReputation:FactionDetailsProvider(BuildFactionHeaderSubMenu)
+    if (dropdownLevel == 2) then
+        TitanPanelRightClickMenu_AddTitle2(dropdownValue, 2)
 
         -- Button Options (Submenu) Button Options //
         if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_BUTTON_OPTIONS") then

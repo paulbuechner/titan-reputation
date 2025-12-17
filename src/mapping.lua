@@ -20,12 +20,22 @@ from the default Blizzard data.
 ---@field isHeader boolean|nil Force header flag
 ---@field isChild boolean|nil Force child flag
 ---@field hasRep boolean|nil Force reputation flag on headers
+---@field path string[]|nil Explicit header lineage to display (e.g. {"Dragonflight", "Dragonscale Expedition"})
 ---@type table<number, TitanReputationFactionMapping>
 TitanPanelReputation.FACTION_MAPPING = TitanPanelReputation.FACTION_MAPPING or {
-    [2600] = { -- Die Durchtrennten Fäden
-        level = 2,
-    },
+    -- [2600] = { -- Die Durchtrennten Fäden
+    --     level = 2,
+    -- },
 }
+
+local function ClonePath(path)
+    if not path then return nil end
+    local copy = {}
+    for index = 1, #path do
+        copy[index] = path[index]
+    end
+    return copy
+end
 
 ---Returns the override definition for a factionID, if one exists.
 ---@param factionID number|nil
@@ -86,6 +96,10 @@ function TitanPanelReputation:ApplyFactionMapping(factionDetails)
 
     if override.hasRep ~= nil then
         factionDetails.hasRep = override.hasRep
+    end
+
+    if override.path then
+        factionDetails.headerPath = ClonePath(override.path)
     end
 
     if override.level ~= nil then

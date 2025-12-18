@@ -68,6 +68,127 @@ local function CollectBranchNames(rootName)
     return names
 end
 
+--[[ TitanPanelReputation
+NAME: DetermineRootHeaderKey
+DESC: Resolves the bucket key used when regrouping the reputation tree. For root headers
+it returns their own name, for child nodes it walks up the cached headerPath so every
+entry produced by `FactionDetailsProvider` can be associated with the correct top-level
+header before reordering the results.
+]]
+---@param factionDetails FactionDetails|nil
+---@return string
+local function DetermineRootHeaderKey(factionDetails)
+    if not factionDetails then
+        return ""
+    end
+
+    if factionDetails.headerLevel == 0 then
+        return factionDetails.name or ""
+    end
+
+    if factionDetails.headerPath and #factionDetails.headerPath > 0 then
+        return factionDetails.headerPath[1] or ""
+    end
+
+    if factionDetails.parentName and factionDetails.parentName ~= "" then
+        return factionDetails.parentName
+    end
+
+    return ""
+end
+
+--[[ TitanPanelReputation
+NAME: OrderFactionDetails
+DESC: Given the raw faction list produced by the Blizzard API, rebuilds it so each root
+header emits its direct factions first and then any nested header buckets. This keeps
+the UI grouped as Main Header → direct factions → sub-header groups → sub-factions regardless
+of the order Blizzard returns rows in.
+]]
+---@param detailsList FactionDetails[]|nil
+---@return FactionDetails[]
+local function OrderFactionDetails(detailsList)
+    if not detailsList or #detailsList == 0 then
+        return detailsList or {}
+    end
+
+    local orderedRoots = {}
+    local buckets = {}
+
+    local function EnsureBucket(key)
+        key = key or ""
+        if not buckets[key] then
+            buckets[key] = {
+                header = nil,
+                rootFactions = {},
+                nestedHeaders = {},
+                nestedOrder = {},
+            }
+            tinsert(orderedRoots, key)
+        end
+        return buckets[key]
+    end
+
+    for _, details in ipairs(detailsList) do
+        local bucket = EnsureBucket(DetermineRootHeaderKey(details))
+        local level = details.headerLevel
+        if level == nil then
+            level = details.isHeader and 0 or (details.isChild and 2 or 1)
+        end
+
+        if level == 0 and details.isHeader then
+            bucket.header = details
+        elseif details.isHeader then
+            local nestedKey = details.name or ""
+            if nestedKey == "" then
+                nestedKey = "__nested__" .. tostring(#bucket.nestedOrder + 1)
+            end
+            if not bucket.nestedHeaders[nestedKey] then
+                bucket.nestedHeaders[nestedKey] = { header = details, children = {} }
+                tinsert(bucket.nestedOrder, nestedKey)
+            else
+                bucket.nestedHeaders[nestedKey].header = bucket.nestedHeaders[nestedKey].header or details
+            end
+        else
+            if level <= 1 then
+                tinsert(bucket.rootFactions, details)
+            else
+                local parentKey = details.parentName or ""
+                if parentKey ~= "" then
+                    if not bucket.nestedHeaders[parentKey] then
+                        bucket.nestedHeaders[parentKey] = { header = nil, children = {} }
+                        tinsert(bucket.nestedOrder, parentKey)
+                    end
+                    tinsert(bucket.nestedHeaders[parentKey].children, details)
+                else
+                    tinsert(bucket.rootFactions, details)
+                end
+            end
+        end
+    end
+
+    local ordered = {}
+    for _, key in ipairs(orderedRoots) do
+        local bucket = buckets[key]
+        if bucket.header then
+            tinsert(ordered, bucket.header)
+        end
+        for _, faction in ipairs(bucket.rootFactions) do
+            tinsert(ordered, faction)
+        end
+        for _, nestedKey in ipairs(bucket.nestedOrder) do
+            local nestedBucket = bucket.nestedHeaders[nestedKey]
+            if nestedBucket.header then
+                tinsert(ordered, nestedBucket.header)
+            end
+            for _, child in ipairs(nestedBucket.children) do
+                tinsert(ordered, child)
+            end
+        end
+    end
+
+    return ordered
+end
+
 function TitanPanelReputation:GetHiddenFactionLookup()
     if not self.hiddenFactionLookup then
         local saved = TitanGetVar(TitanPanelReputation.ID, "FactionHeaders") or {}
@@ -480,6 +601,7 @@ function TitanPanelReputation:FactionDetailsProvider(method)
     local index = 1
     local rootHeader = ""
     local nestedHeader = ""
+    local collectedDetails = {}
 
     while (not done) do
         local name, description, standingID, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader,
@@ -598,7 +720,8 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                     tinsert(headerPath, name)
                 end
             else
-                if nestedHeader ~= "" then
+                local shouldAttachToNested = (nestedHeader ~= "" and isChild)
+                if shouldAttachToNested then
                     currentParent = nestedHeader
                     if rootHeader ~= "" then
                         tinsert(headerPath, rootHeader)
@@ -608,6 +731,9 @@ function TitanPanelReputation:FactionDetailsProvider(method)
                     currentParent = rootHeader
                     if rootHeader ~= "" then
                         tinsert(headerPath, rootHeader)
+                    end
+                    if not isChild then
+                        nestedHeader = ""
                     end
                 end
             end
@@ -664,13 +790,18 @@ function TitanPanelReputation:FactionDetailsProvider(method)
             elseif not isChild then
                 nestedHeader = ""
             end
-            -- Call the method with the faction details
-            method(factionDetails)
+            -- Collect the faction details for ordering after we finish scanning
+            tinsert(collectedDetails, factionDetails)
         end
 
         index = index + 1
 
         if (index > count) then done = true; end -- If we're done, set done to true
+    end
+
+    local orderedDetails = OrderFactionDetails(collectedDetails)
+    for _, details in ipairs(orderedDetails) do
+        method(details)
     end
 end
 

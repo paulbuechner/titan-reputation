@@ -21,6 +21,18 @@ local function EnsureDropDownSeeded()
     dropdownSeeded = true
 end
 
+local function RefreshOpenDropdown(level, shouldRefresh)
+    if shouldRefresh == false or not UIDROPDOWNMENU_OPEN_MENU then
+        return
+    end
+    local refreshLevel = level or UIDROPDOWNMENU_MENU_LEVEL or 1
+    if type(UIDropDownMenu_RefreshAll) == "function" then
+        UIDropDownMenu_RefreshAll(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
+    elseif type(UIDropDownMenu_Refresh) == "function" then
+        UIDropDownMenu_Refresh(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
+    end
+end
+
 local reservedMenuLabels
 local function IsReservedMenuValue(value)
     if not value then return false end
@@ -37,18 +49,6 @@ local function IsReservedMenuValue(value)
         }
     end
     return reservedMenuLabels[value] or false
-end
-
-local function RefreshOpenDropdown(level, shouldRefresh)
-    if shouldRefresh == false or not UIDROPDOWNMENU_OPEN_MENU then
-        return
-    end
-    local refreshLevel = level or UIDROPDOWNMENU_MENU_LEVEL or 1
-    if type(UIDropDownMenu_RefreshAll) == "function" then
-        UIDropDownMenu_RefreshAll(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
-    elseif type(UIDropDownMenu_Refresh) == "function" then
-        UIDropDownMenu_Refresh(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
-    end
 end
 
 local function AddMenuToggle(options)

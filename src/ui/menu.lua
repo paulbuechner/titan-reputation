@@ -21,18 +21,6 @@ local function EnsureDropDownSeeded()
     dropdownSeeded = true
 end
 
-local function RefreshOpenDropdown(level, shouldRefresh)
-    if shouldRefresh == false or not UIDROPDOWNMENU_OPEN_MENU then
-        return
-    end
-    local refreshLevel = level or UIDROPDOWNMENU_MENU_LEVEL or 1
-    if type(UIDropDownMenu_RefreshAll) == "function" then
-        UIDropDownMenu_RefreshAll(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
-    elseif type(UIDropDownMenu_Refresh) == "function" then
-        UIDropDownMenu_Refresh(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
-    end
-end
-
 local reservedMenuLabels
 local function IsReservedMenuValue(value)
     if not value then return false end
@@ -51,50 +39,6 @@ local function IsReservedMenuValue(value)
     return reservedMenuLabels[value] or false
 end
 
-local function AddMenuToggle(options)
-    if type(options) ~= "table" then
-        return
-    end
-
-    local level = options.level or 1
-    local refreshLevel = options.refreshLevel or level
-    local command = {}
-    command.text = options.label
-    if options.value then
-        command.value = options.value
-    elseif options.savedVar then
-        command.value = { TitanPanelReputation.ID, options.savedVar, options.toggleTable }
-    end
-    command.hasArrow = options.hasArrow
-    command.notCheckable = options.notCheckable
-    command.disabled = options.disabled
-    if options.keepShownOnClick ~= nil then
-        command.keepShownOnClick = options.keepShownOnClick and 1 or nil
-    else
-        command.keepShownOnClick = 1
-    end
-
-    if options.checked then
-        command.checked = options.checked
-    elseif options.savedVar then
-        command.checked = function()
-            return TitanGetVar(TitanPanelReputation.ID, options.savedVar)
-        end
-    end
-
-    if options.func then
-        command.func = options.func
-    elseif options.savedVar then
-        command.func = function()
-            TitanPanelRightClickMenu_ToggleVar({ TitanPanelReputation.ID, options.savedVar, options.toggleTable })
-            TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
-            RefreshOpenDropdown(refreshLevel)
-        end
-    end
-
-    TitanPanelRightClickMenu_AddButton(command, level)
-end
-
 --[[ TitanPanelReputation
 NAME: BuildRightClickMenu
 DESC: Builds the faction headers part of the right-click menu.
@@ -111,7 +55,7 @@ local function BuildFactionHeaderMenu(factionDetails)
 
     if (not isInactive) and isHeader and (headerLevel or 0) == 0 then
         if not isCollapsed then
-            AddMenuToggle({
+            TitanPanelRightClickMenu_AddToggleVar2({
                 label = name,
                 value = name,
                 hasArrow = 1,
@@ -122,9 +66,9 @@ local function BuildFactionHeaderMenu(factionDetails)
                 func = function()
                     TitanPanelReputation:ToggleFactionVisibility(factionDetails)
                     TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
-                    RefreshOpenDropdown(1, true)
+                    TitanPanelRightClickMenu_RefreshOpenDropdown(1, true)
                     if UIDROPDOWNMENU_MENU_VALUE == name then
-                        RefreshOpenDropdown(2, true)
+                        TitanPanelRightClickMenu_RefreshOpenDropdown(2, true)
                     end
                 end,
             })
@@ -165,7 +109,7 @@ local function BuildFactionHeaderSubMenu(factionDetails)
 
     if isHeader then
         local currentLevel = TitanPanelRightClickMenu_GetDropdownLevel()
-        AddMenuToggle({
+        TitanPanelRightClickMenu_AddToggleVar2({
             label = name,
             value = name,
             hasArrow = 1,
@@ -176,7 +120,7 @@ local function BuildFactionHeaderSubMenu(factionDetails)
             func = function()
                 TitanPanelReputation:ToggleFactionVisibility(factionDetails)
                 TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
-                RefreshOpenDropdown(currentLevel, true)
+                TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
             end,
         })
         return
@@ -194,7 +138,7 @@ local function BuildFactionHeaderSubMenu(factionDetails)
     else
         displayText = name .. " - " .. LABEL
     end
-    AddMenuToggle({
+    TitanPanelRightClickMenu_AddToggleVar2({
         label = displayText,
         value = name,
         level = currentLevel,
@@ -209,14 +153,14 @@ local function BuildFactionHeaderSubMenu(factionDetails)
                 TitanPanelReputation:ToggleFactionVisibility(factionDetails)
             end
             TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
-            RefreshOpenDropdown(currentLevel, true)
+            TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
         end,
     })
 end
 
 local function AddColorOption(level, label, colorValue, colors)
     local targetLevel = level or 2
-    AddMenuToggle({
+    TitanPanelRightClickMenu_AddToggleVar2({
         level = targetLevel,
         label = label,
         keepShownOnClick = true,
@@ -227,7 +171,7 @@ local function AddColorOption(level, label, colorValue, colors)
             TitanSetVar(TitanPanelReputation.ID, "ColorValue", colorValue)
             TitanPanelReputation.BARCOLORS = colors
             TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
-            RefreshOpenDropdown(targetLevel)
+            TitanPanelRightClickMenu_RefreshOpenDropdown(targetLevel)
         end,
     })
 end
@@ -269,8 +213,8 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             if dropdownValue == TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS") then
                 TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
                 -- Toggle Options
-                AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"), savedVar = "ShowFriendships" })
-                AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_HIDE_MAX_FRIENDSHIPS"), savedVar = "HideMaxFriendships" })
+                TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"), savedVar = "ShowFriendships" })
+                TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_HIDE_MAX_FRIENDSHIPS"), savedVar = "HideMaxFriendships" })
                 --
                 -- NOTE: Given the many inconsistencies in friendship reputation data, requiring
                 -- NOTE: different total amounts of available standings as well as different
@@ -297,14 +241,14 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         if dropdownValue == TitanPanelReputation:GT("LID_REPUTATION_STANDING_SETTINGS") then
             TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
             -- Toggle Options
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_EXALTED"), savedVar = "ShowExalted" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_REVERED"), savedVar = "ShowRevered" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_HONORED"), savedVar = "ShowHonored" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_FRIENDLY"), savedVar = "ShowFriendly" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_NEUTRAL"), savedVar = "ShowNeutral" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_UNFRIENDLY"), savedVar = "ShowUnfriendly" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_HOSTILE"), savedVar = "ShowHostile" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_HATED"), savedVar = "ShowHated" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_EXALTED"), savedVar = "ShowExalted" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_REVERED"), savedVar = "ShowRevered" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_HONORED"), savedVar = "ShowHonored" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_FRIENDLY"), savedVar = "ShowFriendly" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_NEUTRAL"), savedVar = "ShowNeutral" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_UNFRIENDLY"), savedVar = "ShowUnfriendly" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_HOSTILE"), savedVar = "ShowHostile" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_HATED"), savedVar = "ShowHated" })
         end
 
         -- Tooltip Scale (Submenu)
@@ -347,8 +291,8 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         if dropdownValue == TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS") then
             TitanPanelRightClickMenu_AddTitle2(TitanPanelRightClickMenu_GetDropdMenuValue(), 3)
             -- Toggle Options
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_SUMMARY_DURATION"), savedVar = "ShowSessionSummaryDuration" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_SUMMARY_TTL"), savedVar = "ShowSessionSummaryTTL" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_SUMMARY_DURATION"), savedVar = "ShowSessionSummaryDuration" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_SHOW_SUMMARY_TTL"), savedVar = "ShowSessionSummaryTTL" })
         end
 
         -- Tooltip Options (Submenu) Tooltip Options // Session Summary Settings //
@@ -357,8 +301,8 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             TitanPanelRightClickMenu_AddTitle2(TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS"),
                 3)
             -- Toggle Options
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_TIP_SHOW_SUMMARY_DURATION"), savedVar = "ShowTipSessionSummaryDuration" })
-            AddMenuToggle({ level = 3, label = TitanPanelReputation:GT("LID_TIP_SHOW_SUMMARY_TTL"), savedVar = "ShowTipSessionSummaryTTL" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_TIP_SHOW_SUMMARY_DURATION"), savedVar = "ShowTipSessionSummaryDuration" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 3, label = TitanPanelReputation:GT("LID_TIP_SHOW_SUMMARY_TTL"), savedVar = "ShowTipSessionSummaryTTL" })
         end
 
         return -- Return when we are done with the level 3 menus
@@ -371,7 +315,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
         -- Button Options (Submenu) Button Options //
         if TitanPanelRightClickMenu_GetDropdMenuValue() == TitanPanelReputation:GT("LID_BUTTON_OPTIONS") then
             -- Display on Right Side
-            AddMenuToggle({
+            TitanPanelRightClickMenu_AddToggleVar2({
                 level = 2,
                 label = TitanPanelReputation:GT("LID_DISPLAY_ON_RIGHT_SIDE"),
                 keepShownOnClick = false,
@@ -392,20 +336,19 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
             -- Toggle Options
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_ICON"), savedVar = "ShowIcon" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_ICON"), savedVar = "ShowIcon" })
             if (WoW5) then
-                AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_FRIENDS_ON_BAR"), savedVar = "ShowFriendsOnBar" })
+                TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_FRIENDS_ON_BAR"), savedVar = "ShowFriendsOnBar" })
             end
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_FACTION_NAME_LABEL"), savedVar = "ShowFactionName" })
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_STANDING"), savedVar = "ShowStanding" })
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHORT_STANDING"), savedVar = "ShortStanding" })
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_VALUE"), savedVar = "ShowValue" })
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_PERCENT"), savedVar = "ShowPercent" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_FACTION_NAME_LABEL"), savedVar = "ShowFactionName" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_STANDING"), savedVar = "ShowStanding" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHORT_STANDING"), savedVar = "ShortStanding" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_VALUE"), savedVar = "ShowValue" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_PERCENT"), savedVar = "ShowPercent" })
             --
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
-            TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS"),
-                2)
+            TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS"), 2)
         end
 
         -- Tooltip Options (Submenu) Tooltip Options //
@@ -416,7 +359,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
                 TitanPanelReputation:GT("LID_TOOLTIP_SCALE") .. " (" .. (scale) .. "%)", 2,
                 TitanPanelReputation:GT("LID_TOOLTIP_SCALE"))
             -- Use minimal tooltip scale toggle
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_MINIMAL"), savedVar = "MinimalTip" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_MINIMAL"), savedVar = "MinimalTip" })
             --
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
@@ -428,19 +371,18 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
             -- Toggle Options
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_VALUE"), savedVar = "ShowTipReputationValue" })
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_PERCENT"), savedVar = "ShowTipPercent" })
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_STANDING"), savedVar = "ShowTipStanding" })
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHORT_STANDING"), savedVar = "ShortTipStanding" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_VALUE"), savedVar = "ShowTipReputationValue" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_PERCENT"), savedVar = "ShowTipPercent" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_STANDING"), savedVar = "ShowTipStanding" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHORT_STANDING"), savedVar = "ShortTipStanding" })
             --
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
-            AddMenuToggle({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_STATS"), savedVar = "ShowTipExaltedTotal" })
+            TitanPanelRightClickMenu_AddToggleVar2({ level = 2, label = TitanPanelReputation:GT("LID_SHOW_STATS"), savedVar = "ShowTipExaltedTotal" })
             --
             TitanPanelRightClickMenu_AddSpacer2(2)
             --
-            TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS"),
-                2)
+            TitanPanelRightClickMenu_AddButton2(TitanPanelReputation:GT("LID_SESSION_SUMMARY_SETTINGS"), 2)
         end
 
         -- Color Options (Submenu) Color Options //
@@ -464,11 +406,11 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     -- Level 1 menu
     TitanPanelRightClickMenu_AddTitle2(TitanPlugins[TitanPanelReputation.ID].menuText)
     -- Toggle Options
-    AddMenuToggle({ label = TitanPanelReputation:GT("LID_AUTO_CHANGE"), savedVar = "AutoChange" })
-    AddMenuToggle({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE"), savedVar = "ShowAnnounce" })
+    TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_AUTO_CHANGE"), savedVar = "AutoChange" })
+    TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE"), savedVar = "ShowAnnounce" })
 
     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText")) then
-        AddMenuToggle({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_MIK"), savedVar = "ShowAnnounceMik" })
+        TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_MIK"), savedVar = "ShowAnnounceMik" })
     end
 
     -- TODO: Implement achivement style announcements based on official WoW API

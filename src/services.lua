@@ -68,6 +68,23 @@ local function CollectBranchNames(rootName)
     return names
 end
 
+local function DispatchReputationAnnouncement(message)
+    if not message or message == "" then
+        return
+    end
+
+    if not TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce") then
+        return
+    end
+
+    local decorated = "|T" .. TitanPanelReputation.ICON .. ":32|t" .. message .. "|T" .. TitanPanelReputation.ICON .. ":32|t"
+    if C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik") and MikSBT then
+        MikSBT.DisplayMessage(decorated, MikSBT.DISPLAYTYPE_NOTIFICATION, true)
+    else
+        UIErrorsFrame:AddMessage(decorated, 2.0, 2.0, 0.0, 1.0, 53, 30)
+    end
+end
+
 --[[ TitanPanelReputation
 NAME: DetermineRootHeaderKey
 DESC: Resolves the bucket key used when regrouping the reputation tree. For root headers
@@ -342,9 +359,6 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         factionDetails.friendShipReputationInfo,
         factionDetails.factionID
 
-    -- TODO: Make guild faction an option to track
-    if factionID == TitanPanelReputation.G_FACTION_ID then return end
-
     -- Guard: Check if TABLE_INIT is not true or factionID is present in `TitanPanelReputation.TABLE`
     if not TitanPanelReputation.TABLE_INIT or not TitanPanelReputation.TABLE[factionID] then return end
 
@@ -380,35 +394,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         dsc = dsc .. " standing with " .. name .. "."
         msg = tag .. msg .. tag
 
-        if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
-            if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
-                MikSBT.DisplayMessage("|T" ..
-                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                    TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
-            else
-                UIErrorsFrame:AddMessage("|T" ..
-                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                    TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
-            end
-        end
-
-        -- TODO: Implement achivement style announcements based on official WoW API
-        -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
-        --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
-        --         local MyData = {}
-        --         MyData.Text = name .. " - " .. LABEL
-        --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
-        --         local color = {}
-        --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
-        --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
-        --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
-        --         MyData.bTitle = factionType .. " Upgrade"
-        --         MyData.Title = ""
-        --         MyData.FrameStyle = "GuildAchievement"
-        --         MyData.BannerColor = color
-        --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-        --     end
-        -- end
+        DispatchReputationAnnouncement(msg)
 
         earnedAmount = TitanPanelReputation.TABLE[factionID].topValue -
             TitanPanelReputation.TABLE[factionID].earnedValue
@@ -431,35 +417,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         dsc = dsc .. " standing with " .. name .. "."
         msg = tag .. msg .. tag
 
-        if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
-            if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
-                MikSBT.DisplayMessage("|T" ..
-                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                    TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
-            else
-                UIErrorsFrame:AddMessage("|T" ..
-                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                    TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
-            end
-        end
-
-        -- TODO: Implement achievement style announcements based on official WoW API
-        -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
-        --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
-        --         local MyData = {}
-        --         MyData.Text = name .. " - " .. LABEL
-        --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
-        --         local color = {}
-        --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
-        --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
-        --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
-        --         MyData.bTitle = factionType .. " Downgrade"
-        --         MyData.Title = ""
-        --         MyData.FrameStyle = "GuildAchievement"
-        --         MyData.BannerColor = color
-        --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-        --     end
-        -- end
+        DispatchReputationAnnouncement(msg)
 
         earnedAmount = earnedValue - topValue
         -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - topValue: " ..
@@ -546,35 +504,7 @@ function TitanPanelReputation.GatherValues(factionDetails)
         dsc = dsc .. " standing with " .. name .. "."
         msg = tag .. msg .. tag
 
-        if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce")) then
-            if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")) then
-                MikSBT.DisplayMessage("|T" ..
-                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                    TitanPanelReputation.ICON .. ":32|t", MikSBT.DISPLAYTYPE_NOTIFICATION, true)
-            else
-                UIErrorsFrame:AddMessage("|T" ..
-                    TitanPanelReputation.ICON .. ":32|t" .. msg .. "|T" ..
-                    TitanPanelReputation.ICON .. ":32|t", 2.0, 2.0, 0.0, 1.0, 53, 30)
-            end
-        end
-
-        -- TODO: Implement achievement style announcements based on official WoW API
-        -- if (TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame")) then
-        --     if (C_AddOns.IsAddOnLoaded("Glamour")) then
-        --         local MyData = {}
-        --         MyData.Text = name .. " - " .. LABEL
-        --         MyData.Icon = "Interface\\ICONS\\Achievement_Reputation_" .. TitanPanelReputation_ICONS[(adjustedID)]
-        --         local color = {}
-        --         color.r = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].r
-        --         color.g = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].g
-        --         color.b = TitanPanelReputation.COLORS_ARMORY[(adjustedID)].b
-        --         MyData.bTitle = "New " .. factionType .. " Discovered"
-        --         MyData.Title = "You have discovered"
-        --         MyData.FrameStyle = "GuildAchievement"
-        --         MyData.BannerColor = color
-        --         local LastAlertFrame = GlamourShowAlert(400, MyData, color, color)
-        --     end
-        -- end
+        DispatchReputationAnnouncement(msg)
     end
 
     if isValidFaction then
@@ -607,26 +537,6 @@ function TitanPanelReputation:FactionDetailsProvider(method)
         local name, description, standingID, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader,
         isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus =
             TitanPanelReputation:BlizzAPI_GetFactionInfo(index)
-
-        -- NOTE: If we ever want to filter out addon reputation grouping OR make the reputation selection more nested
-        -- TODO: Alliance specific factions missing
-        -- local skipFactionIDs = {
-        --     -- Shadowlands
-        --     [2445] = true, -- "Der Gluthof"
-        --     -- MOP
-        --     [1272] = true, -- "Die Ackerbauern"
-        --     [1302] = true, -- "Die Angler"
-        --     -- WOLTK
-        --     [1052] = true, -- "Horde Expedition"
-        --     -- TBC
-        --     [936] = true,  -- "Shattrath"
-        --     [169] = true,  -- "Steamwheel Cartell"
-        --     [67] = true,   -- "Horde"
-        --     [892] = true,  -- "Horde Forces"
-        -- }
-        -- if factionID and not skipFactionIDs[factionID] then
-
-
         if factionID then
             -- Normalize values
             topValue = topValue - bottomValue

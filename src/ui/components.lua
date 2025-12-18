@@ -1,3 +1,17 @@
+local _, TitanPanelReputation = ...
+
+function TitanPanelRightClickMenu_RefreshOpenDropdown(level, shouldRefresh)
+    if shouldRefresh == false or not UIDROPDOWNMENU_OPEN_MENU then
+        return
+    end
+    local refreshLevel = level or UIDROPDOWNMENU_MENU_LEVEL or 1
+    if type(UIDropDownMenu_RefreshAll) == "function" then
+        UIDropDownMenu_RefreshAll(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
+    elseif type(UIDropDownMenu_Refresh) == "function" then
+        UIDropDownMenu_Refresh(UIDROPDOWNMENU_OPEN_MENU, nil, refreshLevel)
+    end
+end
+
 function TitanPanelRightClickMenu_AddTitle2(title, level)
     if (title) then
         local info = {}
@@ -23,23 +37,48 @@ function TitanPanelRightClickMenu_AddButton2(text, level, value)
     end
 end
 
-function TitanPanelRightClickMenu_AddToggleVar2(text, id, var, toggleTable, level, noclose)
-    if not level then level = 2 end
-    local info = {}
-    info.text = text
-    info.value = { id, var, toggleTable }
-    if noclose then
-        info.func = function()
-            TitanPanelRightClickMenu_ToggleVar({ id, var, toggleTable })
-        end
+function TitanPanelRightClickMenu_AddToggleVar2(options)
+    if type(options) ~= "table" then
+        return
+    end
+
+    local level = options.level or 1
+    local refreshLevel = options.refreshLevel or level
+    local command = {}
+    command.text = options.label
+    if options.value then
+        command.value = options.value
+    elseif options.savedVar then
+        command.value = { TitanPanelReputation.ID, options.savedVar, options.toggleTable }
+    end
+    command.hasArrow = options.hasArrow
+    command.notCheckable = options.notCheckable
+    command.disabled = options.disabled
+    if options.keepShownOnClick ~= nil then
+        command.keepShownOnClick = options.keepShownOnClick and 1 or nil
     else
-        info.func = function()
-            TitanPanelRightClickMenu_ToggleVar({ id, var, toggleTable })
-            TitanPanelRightClickMenu_Close()
+        command.keepShownOnClick = 1
+    end
+
+    if options.checked then
+        command.checked = options.checked
+    elseif options.savedVar then
+        command.checked = function()
+            return TitanGetVar(TitanPanelReputation.ID, options.savedVar)
         end
     end
-    info.checked = TitanGetVar(id, var)
-    TitanPanelRightClickMenu_AddButton(info, level)
+
+    if options.func then
+        command.func = options.func
+    elseif options.savedVar then
+        command.func = function()
+            TitanPanelRightClickMenu_ToggleVar({ TitanPanelReputation.ID, options.savedVar, options.toggleTable })
+            TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
+            TitanPanelRightClickMenu_RefreshOpenDropdown(refreshLevel)
+        end
+    end
+
+    TitanPanelRightClickMenu_AddButton(command, level)
 end
 
 function TitanPanelRightClickMenu_AddSpacer2(level)

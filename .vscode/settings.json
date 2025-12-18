@@ -28,7 +28,11 @@
     "HIDE",
     "ReloadUI",
     "OrderHallCommandBar",
-    "NAME"
+    "NAME",
+    "UIDROPDOWNMENU_MENU_VALUE",
+    "UIDropDownMenu_RefreshAll",
+    "UIDROPDOWNMENU_OPEN_MENU",
+    "UIDropDownMenu_Refresh"
   ],
   "Lua.runtime.version": "Lua 5.1",
   "Lua.runtime.builtin": {
@@ -51,12 +55,14 @@
     "Blizz",
     "Cartell",
     "DISPLAYTYPE",
+    "Dropd",
     "Gluthof",
     "HIGHCHANGED",
     "postface",
     "Shattrath",
     "showrep",
     "Steamwheel",
+    "UIDROPDOWNMENU",
     "WOLTK"
   ]
 }

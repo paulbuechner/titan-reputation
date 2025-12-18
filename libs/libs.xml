@@ -1,11 +1,5 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
-
-	<Include file="TaintLess\TaintLess.xml" />
-
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 	<Script file="UTF8\utf8.lua" />
 	<Script file="UTF8\utf8data.lua" />
 	<Script file="lang.lua" />
-
 </Ui>

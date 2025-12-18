@@ -130,6 +130,9 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         TitanDebug("<TitanPanelReputation> " .. TitanPanelReputation:GT("LID_INITIALIZED"))
     end
 
+    -- Only process data on reputation updates (https://warcraft.wiki.gg/wiki/UPDATE_FACTION)
+    if event ~= "UPDATE_FACTION" then return end
+
     --[[  -------------------------- MAIN ADDON LOOP START -------------------------- ]]
 
     if TitanPanelReputation.INIT_TIME > 0 then
@@ -145,7 +148,9 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         end
 
         -- Retrieve the current tracked faction name and earned reputation to populate `TitanPanelReputation.RTS` table
-        TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GetChangedName)
+        if TitanPanelReputation.TABLE_INIT then
+            TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GetChangedName)
+        end
         -- Collect all reputation data to populate `TitanPanelReputation.TABLE` table
         TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GatherValues)
 

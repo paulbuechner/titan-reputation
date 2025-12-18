@@ -2,6 +2,25 @@ local _, TitanPanelReputation = ...
 
 local WoW5 = select(4, GetBuildInfo()) >= 50000
 
+local dropdownSeedFrame
+local dropdownSeeded
+
+local function EnsureDropDownSeeded()
+    if dropdownSeeded then
+        return
+    end
+    if type(UIDropDownMenu_Initialize) ~= "function" or type(CreateFrame) ~= "function" then
+        return
+    end
+
+    dropdownSeedFrame = dropdownSeedFrame or CreateFrame("Frame", "TitanPanelReputationDropDownSeeder", UIParent, "UIDropDownMenuTemplate")
+    dropdownSeedFrame:Hide()
+
+    UIDropDownMenu_Initialize(dropdownSeedFrame, function() end, "DROPDOWN_MENU_LEVEL")
+
+    dropdownSeeded = true
+end
+
 local reservedMenuLabels
 local function IsReservedMenuValue(value)
     if not value then return false end
@@ -222,6 +241,9 @@ of this method is important and should read `TitanPanelRightClickMenu_Prepare${T
 :NOTE
 ]]
 function TitanPanelRightClickMenu_PrepareReputationMenu()
+    -- Ensure the Blizzard dropdown lists exist before Titan tries to add entries
+    EnsureDropDownSeeded()
+
     local dropdownLevel = TitanPanelRightClickMenu_GetDropdownLevel()
     local dropdownValue = TitanPanelRightClickMenu_GetDropdMenuValue()
 

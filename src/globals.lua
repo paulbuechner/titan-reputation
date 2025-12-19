@@ -119,6 +119,12 @@ DESC: The name of the faction last changed (reputation earned for).
 TitanPanelReputation.CHANGED_FACTION = "none"
 
 --[[ TitanPanelReputation
+NAME: TitanPanelReputation.DebugMode
+DESC: Flag that toggles extra developer tooling (e.g. ctrl+click faction testing).
+]]
+TitanPanelReputation.DebugMode = false
+
+--[[ TitanPanelReputation
 NAME: TitanPanelReputation.ICONS
 DESC: The icons to use for achivement standings announcements.
 ]]

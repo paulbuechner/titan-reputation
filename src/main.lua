@@ -9,7 +9,6 @@ local config = {
     AutoChange = true,                    -- Auto Show Changed
     WatchedFaction = "none",              --
     -- Announcement Settings
-    ShowAnnounce = true,                  -- Announce Standing Changes
     ShowAnnounceFrame = true,             --
     ShowAnnounceMik = true,               --
     --
@@ -115,7 +114,9 @@ DESC: The `OnEvent` event handler for the TitanPanelReputation AddOn.
 function TitanPanelReputationButton_OnEvent(event, ...)
     if event == "ADDON_LOADED" and ... == ADDON_NAME then
         -- Initialize the saved variables
-        -- if not TitanRep_Data then TitanRep_Data = {} end  -- TODO: currently not in use
+        if not TitanRep_Data or type(TitanRep_Data) ~= "table" then
+            TitanRep_Data = {}
+        end
 
         -- Set addon in init time (uptime of pc in seconds, with millisecond precision)
         TitanPanelReputation.INIT_TIME = GetTime();
@@ -127,7 +128,11 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         if (colorValue == 2) then TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_ARMORY end
         if (colorValue == 3) then TitanPanelReputation.BARCOLORS = nil end
 
+        TitanPanelReputation:SetDebugMode(TitanRep_Data.DebugMode, true)
+
         TitanDebug("<TitanPanelReputation> " .. TitanPanelReputation:GT("LID_INITIALIZED"))
+
+        return
     end
 
     -- Only process data on reputation updates (https://warcraft.wiki.gg/wiki/UPDATE_FACTION)
@@ -153,8 +158,7 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         end
         -- Collect all reputation data to populate `TitanPanelReputation.TABLE` table
         TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GatherValues)
-
-        -- Set the TitanPanelReputation table init flag after `TitanPanelReputation.GatherValues` has been called
+        --
         TitanPanelReputation.TABLE_INIT = true
 
         -- Update the TitanPanelReputation button (Now reflects updated reputation values, both session and total)

@@ -132,3 +132,10 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, frien
     }
     return adjustedIDAndLabel
 end
+
+function TitanPanelReputation:TrimString(value)
+    if type(value) ~= "string" then
+        return ""
+    end
+    return value:match("^%s*(.-)%s*$") or ""
+end

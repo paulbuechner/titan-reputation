@@ -32,7 +32,8 @@
     "UIDROPDOWNMENU_MENU_VALUE",
     "UIDropDownMenu_RefreshAll",
     "UIDROPDOWNMENU_OPEN_MENU",
-    "UIDropDownMenu_Refresh"
+    "UIDropDownMenu_Refresh",
+    "ACHIEVEMENT_UNLOCKED"
   ],
   "Lua.runtime.version": "Lua 5.1",
   "Lua.runtime.builtin": {
@@ -49,20 +50,36 @@
   "Lua.workspace.library": [
     "~\\.vscode\\extensions\\ketho.wow-api-0.21.0\\Annotations\\Core"
   ],
+  "cSpell.language": "en,de",
   "cSpell.words": [
-    "Ackerbauern",
+    "Arathi",
     "BESTFRIENDS",
+    "Bilgewasserkartell",
     "Blizz",
+    "Brann",
     "Cartell",
     "DISPLAYTYPE",
+    "Dornogal",
+    "Dragonflight",
+    "Dragonscale",
     "Dropd",
+    "Düsternisverschmolzene",
+    "Garbagio",
     "Gluthof",
+    "Heilsturz",
     "HIGHCHANGED",
+    "K'aresh",
+    "Karesh",
+    "Lorenhall",
+    "Manaforge",
+    "Manaschmiede",
     "postface",
     "Shattrath",
     "showrep",
     "Steamwheel",
     "tinsert",
+    "titanrep",
+    "TITANREPUTATION",
     "UIDROPDOWNMENU",
     "WOLTK"
   ]

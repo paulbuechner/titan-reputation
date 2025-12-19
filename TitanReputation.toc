@@ -29,14 +29,15 @@ libs/libs.xml
 
 src/blizz-api.lua
 src/globals.lua
+src/services.lua
+src/utils.lua
 src/mapping.lua
+src/commandline.lua
 
 src/ui/components.lua
+src/ui/achievement-popup.lua
 src/ui/tooltip.lua
 src/ui/button.lua
 src/ui/menu.lua
-
-src/services.lua
-src/utils.lua
 
 src/main.xml

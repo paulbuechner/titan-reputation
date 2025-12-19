@@ -118,6 +118,11 @@ local function BuildFactionHeaderSubMenu(factionDetails)
                 return TitanPanelReputation:IsBranchVisible(name)
             end,
             func = function()
+                if hasRep and IsControlKeyDown() and TitanPanelReputation:IsDebugEnabled() then
+                    TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
+                    TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
+                    return
+                end
                 TitanPanelReputation:ToggleFactionVisibility(factionDetails)
                 TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
                 TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
@@ -146,6 +151,11 @@ local function BuildFactionHeaderSubMenu(factionDetails)
             return not TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
         end,
         func = function()
+            if IsControlKeyDown() and TitanPanelReputation:IsDebugEnabled() then
+                TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
+                TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
+                return
+            end
             if IsShiftKeyDown() then
                 TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", name)
                 TitanPanelReputation:Refresh()
@@ -407,16 +417,10 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     TitanPanelRightClickMenu_AddTitle2(TitanPlugins[TitanPanelReputation.ID].menuText)
     -- Toggle Options
     TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_AUTO_CHANGE"), savedVar = "AutoChange" })
-    TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE"), savedVar = "ShowAnnounce" })
-
+    TitanPanelRightClickMenu_AddToggleVar(TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), TitanPanelReputation.ID, "ShowAnnounceFrame")
     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText")) then
         TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_MIK"), savedVar = "ShowAnnounceMik" })
     end
-
-    -- TODO: Implement achivement style announcements based on official WoW API
-    -- if (C_AddOns.IsAddOnLoaded("Glamour")) then
-    --     TitanPanelRightClickMenu_AddToggleVar(TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), TitanPanelReputation.ID, "ShowAnnounceFrame")
-    -- end
     --
     TitanPanelRightClickMenu_AddSpacer2()
     --

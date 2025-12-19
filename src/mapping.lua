@@ -4,28 +4,86 @@ local _, TitanPanelReputation = ...
 NAME: TitanPanelReputation.FACTION_MAPPING
 DESC:
 User-editable overrides keyed by factionID. Each entry can optionally redefine the
-display name (`name`), the header/group (`header`), and the hierarchy level (`level`).
+display name (`name`), the header/group (`header`), the hierarchy level (`level`),
+and even provide a custom texture path (`icon`) for use in achievement toasts.
 Levels follow the Blizzard reputation UI semantics:
     0 = Header at the root level
     1 = Root-level faction (no indentation)
     2+ = Child faction (indented)
 You can also force flags (isHeader, isChild, hasRep) if a faction behaves differently
 from the default Blizzard data.
+
+Buzz Words to lookup icon texture paths: Faction, Zone, Notoriety
 :DESC
 ]]
 ---@class TitanReputationFactionMapping
 ---@field name string|nil Display name override
 ---@field header string|nil Parent header label override
 ---@field level number|nil Hierarchy level (0 = header, 1 = root faction, 2+ = child)
+---@field icon string|nil Custom texture path for popups
 ---@field isHeader boolean|nil Force header flag
 ---@field isChild boolean|nil Force child flag
 ---@field hasRep boolean|nil Force reputation flag on headers
 ---@field path string[]|nil Explicit header lineage to display (e.g. {"Dragonflight", "Dragonscale Expedition"})
 ---@type table<number, TitanReputationFactionMapping>
 TitanPanelReputation.FACTION_MAPPING = TitanPanelReputation.FACTION_MAPPING or {
-    -- [2600] = { -- Die Durchtrennten Fäden
-    --     level = 2,
-    -- },
+    -- ****************************
+    --       The War Within
+    -- ****************************
+    [2570] = { -- Arathi von Heilsturz
+        icon = "Interface\\ICONS\\UI_MajorFaction_Flame.tga",
+    },
+    [2658] = { -- Der Bund von K'aresh
+        icon = "Interface\\ICONS\\UI_MajorFaction_ Karesh.tga",
+    },
+    [2594] = { -- Der Konvent der Tiefen
+        icon = "Interface\\ICONS\\UI_MajorFaction_Candle.tga",
+    },
+    [2688] = { -- Die Strahlen der Flamme
+        icon = "Interface\\ICONS\\UI_MajorFaction_ Nightfall.tga",
+    },
+    [2590] = { -- Rat von Dornogal
+        icon = "Interface\\ICONS\\UI_MajorFaction_Storm.tga",
+    },
+    [2736] = { -- Vandalen der Manaschmiede
+        icon = "Interface\\ICONS\\INV_112_Achievement_Raid_ManaforgeOmega.tga",
+    },
+    [2640] = { -- Brann Bronzebart
+        icon = "Interface\\ICONS\\UI_Delves.tga",
+    },
+    [2600] = { -- Die Durchtrennten Fäden
+        icon = "Interface\\ICONS\\UI_MajorFaction_Web.tga",
+    },
+    [2605] = { -- Der General
+        icon = "Interface\\ICONS\\UI_Notoriety_TheGeneral.tga",
+    },
+    [2607] = { -- Der Wesir
+        icon = "Interface\\ICONS\\UI_Notoriety_TheVizier.tga",
+    },
+    [2601] = { -- Die Weberin
+        icon = "Interface\\ICONS\\UI_Notoriety_TheWeaver.tga",
+    },
+    [2653] = { -- Die Kartelle von Lorenhall
+        icon = "Interface\\ICONS\\UI_MajorFaction_Rocket.tga",
+    },
+    [2685] = { -- Garbagio Treueclub
+        icon = "Interface\\ICONS\\INV_Achievement_Zone_Undermine.tga",
+    },
+    [2673] = { -- Bilgewasserkartell
+        icon = "Interface\\ICONS\\INV_Chicken2_Mechanical.tga",
+    },
+    [2677] = { -- Dampfdruckkartell
+        icon = "Interface\\ICONS\\INV_Chicken2_Mechanical.tga",
+    },
+    [2675] = { -- Schwarzmeer AG
+        icon = "Interface\\ICONS\\INV_Chicken2_Mechanical.tga",
+    },
+    [2671] = { -- Venture Company
+        icon = "Interface\\ICONS\\INV_Chicken2_Mechanical.tga",
+    },
+    [2669] = { -- Düsternisverschmolzene Lösungen
+        icon = "Interface\\ICONS\\INV_Misc_Bomb_06.tga",
+    },
 }
 
 local function ClonePath(path)
@@ -84,6 +142,10 @@ function TitanPanelReputation:ApplyFactionMapping(factionDetails)
 
     if override.header then
         factionDetails.parentName = override.header
+    end
+
+    if override.icon then
+        factionDetails.icon = override.icon
     end
 
     if override.isHeader ~= nil then

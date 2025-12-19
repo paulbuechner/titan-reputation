@@ -68,20 +68,79 @@ local function CollectBranchNames(rootName)
     return names
 end
 
-local function DispatchReputationAnnouncement(message)
+local function BuildStandingAlertPayload(params)
+    if type(params) ~= "table" then
+        return nil
+    end
+
+    local payloadText = params.text or params.name or ""
+    if payloadText == "" then
+        return nil
+    end
+
+    local icon = params.icon
+    if not icon and params.factionID then
+        local mapping = TitanPanelReputation:GetFactionMapping(params.factionID)
+        if mapping and mapping.icon then
+            icon = mapping.icon
+        end
+    end
+
+    local payload = {
+        text = payloadText,
+        factionID = params.factionID,
+        icon = icon or TitanPanelReputation.ICON,
+    }
+
+    payload.title = ACHIEVEMENT_UNLOCKED
+    payload.standingText = params.label or ""
+
+    return payload
+end
+
+local function DispatchReputationAnnouncement(message, alertPayload)
+    if TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") and alertPayload then
+        TitanPanelReputation:ShowStandingAchievement(alertPayload)
+    end
+
     if not message or message == "" then
         return
     end
 
-    if not TitanGetVar(TitanPanelReputation.ID, "ShowAnnounce") then
+    if C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik") and MikSBT then
+        local decorated = "|T" .. TitanPanelReputation.ICON .. ":32|t" .. message .. "|T" .. TitanPanelReputation.ICON .. ":32|t"
+        MikSBT.DisplayMessage(decorated, MikSBT.DISPLAYTYPE_NOTIFICATION, true)
+    end
+end
+
+function TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
+    if not factionDetails or not TitanPanelReputation:IsDebugEnabled() then
         return
     end
 
-    local decorated = "|T" .. TitanPanelReputation.ICON .. ":32|t" .. message .. "|T" .. TitanPanelReputation.ICON .. ":32|t"
-    if C_AddOns.IsAddOnLoaded("MikScrollingBattleText") and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik") and MikSBT then
-        MikSBT.DisplayMessage(decorated, MikSBT.DISPLAYTYPE_NOTIFICATION, true)
-    else
-        UIErrorsFrame:AddMessage(decorated, 2.0, 2.0, 0.0, 1.0, 53, 30)
+    if factionDetails.isHeader and not factionDetails.hasRep then
+        return
+    end
+
+    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(
+        factionDetails.factionID,
+        factionDetails.standingID,
+        factionDetails.friendShipReputationInfo,
+        factionDetails.topValue,
+        true
+    )
+    if not adjusted then
+        return
+    end
+
+    local payload = BuildStandingAlertPayload({
+        name = factionDetails.name,
+        label = adjusted.label,
+        adjustedID = adjusted.adjustedID,
+        factionID = factionDetails.factionID,
+    })
+    if payload then
+        TitanPanelReputation:ShowStandingAchievement(payload)
     end
 end
 
@@ -375,6 +434,16 @@ function TitanPanelReputation.GetChangedName(factionDetails)
     if not adjustedIDAndLabel then return end
     -- Destructure props from AdjustedIDAndLabel
     local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
+    local standingChanged = TitanPanelReputation.TABLE[factionID].standingID ~= standingID
+    local alertPayload
+    if standingChanged then
+        alertPayload = BuildStandingAlertPayload({
+            name = name,
+            label = LABEL,
+            adjustedID = adjustedID,
+            factionID = factionID,
+        })
+    end
 
     -- Init function local variables
     local msg -- ""
@@ -383,6 +452,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
     local earnedAmount = 0
 
     if (TitanPanelReputation.TABLE[factionID].standingID < standingID) then
+        -- Standing increased: update internal tracking
         if (TitanPanelReputation.BARCOLORS) then
             msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
             dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
@@ -394,7 +464,9 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         dsc = dsc .. " standing with " .. name .. "."
         msg = tag .. msg .. tag
 
-        DispatchReputationAnnouncement(msg)
+        if alertPayload then
+            DispatchReputationAnnouncement(msg, alertPayload)
+        end
 
         earnedAmount = TitanPanelReputation.TABLE[factionID].topValue -
             TitanPanelReputation.TABLE[factionID].earnedValue
@@ -406,19 +478,7 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue + earnedAmount: " .. earnedAmount .. " = " ..
         --     earnedValue .. " + " .. earnedAmount)
     elseif (TitanPanelReputation.TABLE[factionID].standingID > standingID) then
-        if (TitanPanelReputation.BARCOLORS) then
-            msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-            dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-        else
-            msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
-            dsc = dsc .. TitanUtils_GetGoldText(LABEL)
-        end
-
-        dsc = dsc .. " standing with " .. name .. "."
-        msg = tag .. msg .. tag
-
-        DispatchReputationAnnouncement(msg)
-
+        -- Standing decreased: update internal tracking
         earnedAmount = earnedValue - topValue
         -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - topValue: " ..
         --     earnedAmount .. " = " .. earnedValue .. " - " .. topValue)
@@ -487,6 +547,12 @@ function TitanPanelReputation.GatherValues(factionDetails)
         if not adjustedIDAndLabel then return end
         -- Destructure props from AdjustedIDAndLabel
         local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
+        local alertPayload = BuildStandingAlertPayload({
+            name = name,
+            label = LABEL,
+            adjustedID = adjustedID,
+            factionID = factionID,
+        })
 
         -- Init function local variables
         local msg -- ""
@@ -504,7 +570,9 @@ function TitanPanelReputation.GatherValues(factionDetails)
         dsc = dsc .. " standing with " .. name .. "."
         msg = tag .. msg .. tag
 
-        DispatchReputationAnnouncement(msg)
+        if alertPayload then
+            DispatchReputationAnnouncement(msg, alertPayload)
+        end
     end
 
     if isValidFaction then

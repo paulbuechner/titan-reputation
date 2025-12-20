@@ -65,7 +65,8 @@ function TitanPanelReputationButton_OnLoad(self)
         menuText = TitanPanelReputation.TITLE,
         version = TitanPanelReputation.VERSION,
         buttonTextFunction = function()
-            TitanPanelReputation:Refresh(); return TitanPanelReputation.BUTTON_TEXT
+            TitanPanelReputation:RefreshButtonText()
+            return TitanPanelReputation.BUTTON_TEXT
         end,
         tooltipCustomFunction = function()
             if not TitanGetVar(TitanPanelReputation.ID, "MinimalTip") then
@@ -152,17 +153,8 @@ function TitanPanelReputationButton_OnEvent(event, ...)
             end
         end
 
-        -- Retrieve the current tracked faction name and earned reputation to populate `TitanPanelReputation.RTS` table
-        if TitanPanelReputation.TABLE_INIT then
-            TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GetChangedName)
-        end
-        -- Collect all reputation data to populate `TitanPanelReputation.TABLE` table
-        TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.GatherValues)
-        --
-        TitanPanelReputation.TABLE_INIT = true
-
-        -- Update the TitanPanelReputation button (Now reflects updated reputation values, both session and total)
-        TitanPanelReputation:Refresh()
+        TitanPanelReputation:HandleUpdateFaction()
+        TitanPanelReputation:RefreshButtonText()
     end
 
     --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]

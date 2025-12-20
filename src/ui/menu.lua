@@ -140,7 +140,7 @@ local function BuildFactionHeaderSubMenu(factionDetails)
                     end
                     if IsShiftKeyDown() then
                         TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", name)
-                        TitanPanelReputation:Refresh()
+                        TitanPanelReputation:RefreshButtonText()
                     else
                         -- When toggling from the header's own submenu, hide/unhide ONLY this header,
                         -- while keeping descendants' visibility unchanged.
@@ -215,7 +215,7 @@ local function BuildFactionHeaderSubMenu(factionDetails)
             end
             if IsShiftKeyDown() then
                 TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", name)
-                TitanPanelReputation:Refresh()
+                TitanPanelReputation:RefreshButtonText()
             else
                 TitanPanelReputation:ToggleFactionVisibility(factionDetails)
             end

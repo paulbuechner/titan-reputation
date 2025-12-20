@@ -68,12 +68,6 @@ The table of reputation values for each faction.
 TitanPanelReputation.TABLE = {}
 
 --[[ TitanPanelReputation
-NAME: TitanPanelReputation.TABLE_INIT
-DESC: Whether the `TitanPanelReputation.TABLE` has been initialized.
-]]
-TitanPanelReputation.TABLE_INIT = false
-
---[[ TitanPanelReputation
 NAME: TitanPanelReputation.RTS
 DESC:
 The table of reputation values for each faction for the current session.

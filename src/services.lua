@@ -174,6 +174,30 @@ local function DispatchReputationAnnouncement(message, alertPayload)
     end
 end
 
+---@param name string
+---@param factionID number
+---@param adjusted AdjustedIDAndLabel
+local function ShowReputationAnnouncement(name, factionID, adjusted)
+    local msg
+    local dsc = "You have obtained "
+    local tag = " "
+
+    if (TitanPanelReputation.BARCOLORS) then
+        msg = TitanUtils_GetColoredText(name .. " - " .. adjusted.label, TitanPanelReputation.BARCOLORS[(adjusted.adjustedID)])
+        dsc = dsc .. TitanUtils_GetColoredText(adjusted.label, TitanPanelReputation.BARCOLORS[(adjusted.adjustedID)])
+    else
+        msg = TitanUtils_GetGoldText(name .. " - " .. adjusted.label)
+        dsc = dsc .. TitanUtils_GetGoldText(adjusted.label)
+    end
+
+    dsc = dsc .. " standing with " .. name .. "."
+    msg = tag .. msg .. tag
+
+    local alertPayload = BuildStandingAlertPayload({ name = name, label = adjusted.label, adjustedID = adjusted.adjustedID, factionID = factionID })
+
+    DispatchReputationAnnouncement(msg, alertPayload)
+end
+
 function TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
     if not factionDetails or not TitanPanelReputation:IsDebugEnabled() then
         return
@@ -586,11 +610,11 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
 end
 
 --[[ TitanPanelReputation
-NAME: TitanPanelReputation.GetChangedName
+NAME: HandleFactionUpdate
 DESC: Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
 ]]
 ---@param factionDetails FactionDetails
-function TitanPanelReputation.GetChangedName(factionDetails)
+local function HandleFactionUpdate(factionDetails)
     -- Destructure props from FactionDetails
     local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID =
         factionDetails.name,
@@ -600,8 +624,19 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         factionDetails.friendShipReputationInfo,
         factionDetails.factionID
 
-    -- Guard: Check if TABLE_INIT is not true or factionID is present in `TitanPanelReputation.TABLE`
-    if not TitanPanelReputation.TABLE_INIT or not TitanPanelReputation.TABLE[factionID] then return end
+    -- Get adjusted ID and label depending on the faction type
+    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue, true)
+    if not adjusted then return end -- Return if adjusted is nil (is friendship && 'ShowFriendsOnBar' is disabled)
+
+    -- Guard: Check if factionID is present in `TitanPanelReputation.TABLE`
+    if not TitanPanelReputation.TABLE[factionID] then
+        -- If the faction has an earned amount and is not in the table yet, announce a newly discovered faction
+        if earnedValue > 0 then
+            ShowReputationAnnouncement(name, factionID, adjusted)
+        end
+
+        return
+    end
 
     -- Guard: Check if standingID has not increased and earnedValue has not changed
     if TitanPanelReputation.TABLE[factionID].standingID == standingID and
@@ -609,84 +644,34 @@ function TitanPanelReputation.GetChangedName(factionDetails)
         return
     end
 
-    -- Get adjusted ID and label depending on the faction type
-    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
-        factionID, standingID, friendShipReputationInfo, topValue, true)
-    -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
-    if not adjustedIDAndLabel then return end
-    -- Destructure props from AdjustedIDAndLabel
-    local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
-    local standingChanged = TitanPanelReputation.TABLE[factionID].standingID ~= standingID
-    local alertPayload
-    if standingChanged then
-        alertPayload = BuildStandingAlertPayload({
-            name = name,
-            label = LABEL,
-            adjustedID = adjustedID,
-            factionID = factionID,
-        })
-    end
-
-    -- Init function local variables
-    local msg -- ""
-    local dsc = "You have obtained "
-    local tag = " "
+    -- Calculate the earned amount
     local earnedAmount = 0
-
     if (TitanPanelReputation.TABLE[factionID].standingID < standingID) then
-        -- Standing increased: update internal tracking
-        if (TitanPanelReputation.BARCOLORS) then
-            msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-            dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-        else
-            msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
-            dsc = dsc .. TitanUtils_GetGoldText(LABEL)
-        end
-
-        dsc = dsc .. " standing with " .. name .. "."
-        msg = tag .. msg .. tag
-
-        if alertPayload then
-            DispatchReputationAnnouncement(msg, alertPayload)
-        end
-
-        earnedAmount = TitanPanelReputation.TABLE[factionID].topValue -
-            TitanPanelReputation.TABLE[factionID].earnedValue
-        -- TitanDebug(
-        --     "<TitanPanelReputation> earnedAmount = TitanPanelReputation.TABLE[factionID].topValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-        --     earnedAmount ..
-        --     " = " .. TitanPanelReputation.TABLE[factionID].topValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
+        -- Standing increased
+        earnedAmount = TitanPanelReputation.TABLE[factionID].topValue - TitanPanelReputation.TABLE[factionID].earnedValue
         earnedAmount = earnedValue + earnedAmount
-        -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue + earnedAmount: " .. earnedAmount .. " = " ..
-        --     earnedValue .. " + " .. earnedAmount)
+
+        ShowReputationAnnouncement(name, factionID, adjusted)
     elseif (TitanPanelReputation.TABLE[factionID].standingID > standingID) then
-        -- Standing decreased: update internal tracking
+        -- Standing decreased
         earnedAmount = earnedValue - topValue
-        -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - topValue: " ..
-        --     earnedAmount .. " = " .. earnedValue .. " - " .. topValue)
         earnedAmount = earnedAmount - TitanPanelReputation.TABLE[factionID].earnedValue
-        -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-        --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
+
+        ShowReputationAnnouncement(name, factionID, adjusted)
     elseif (TitanPanelReputation.TABLE[factionID].standingID == standingID) then
-        -- TitanDebug("<TitanPanelReputation> elseif (TitanPanelReputation.TABLE[factionID].standingID == standingID) then")
+        -- Standing remained the same
         if (TitanPanelReputation.TABLE[factionID].earnedValue < earnedValue) then
-            -- TitanDebug("<TitanPanelReputation> if (TitanPanelReputation.TABLE[factionID].earnedValue < earnedValue) then")
+            -- Earned value increased
             earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue
-            -- TitanDebug("<TitanPanelReputation> earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue: " ..
-            --     earnedAmount .. " = " .. earnedValue .. " - " .. TitanPanelReputation.TABLE[factionID].earnedValue)
         else
-            -- TitanDebug("<TitanPanelReputation> else")
+            -- Earned value remained the same
             earnedAmount = earnedValue
         end
     end
 
     if TitanPanelReputation.RTS[name] then
-        -- TitanDebug("<TitanPanelReputation> Reputation Changed: " ..
-        --     name .. " by " .. TitanPanelReputation.RTS[name] + earnedAmount .. ", was: " .. TitanPanelReputation.RTS[name])
-
         TitanPanelReputation.RTS[name] = TitanPanelReputation.RTS[name] + earnedAmount
     else
-        -- TitanDebug("<TitanPanelReputation> Reputation Changed: " .. name .. " by " .. earnedAmount .. ", was: None / 0")
         TitanPanelReputation.RTS[name] = earnedAmount
     end
 
@@ -699,71 +684,6 @@ function TitanPanelReputation.GetChangedName(factionDetails)
 
     -- Update the current tracked faction when the reputation changes
     TitanPanelReputation.CHANGED_FACTION = name
-end
-
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.GatherValues
-DESC: Gathers all reputation values for each faction to populate the `TitanPanelReputation.TABLE` table.
-]]
----@param factionDetails FactionDetails
-function TitanPanelReputation.GatherValues(factionDetails)
-    -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, isHeader, hasRep, friendShipReputationInfo, factionID =
-        factionDetails.name,
-        factionDetails.standingID,
-        factionDetails.topValue,
-        factionDetails.earnedValue,
-        factionDetails.isHeader,
-        factionDetails.hasRep,
-        factionDetails.friendShipReputationInfo,
-        factionDetails.factionID
-
-    local isValidFaction = (not isHeader and name) or (isHeader and hasRep) -- Check if the faction can be tracked
-
-    -- Announce newly discovered faction
-    if TitanPanelReputation.TABLE_INIT and not TitanPanelReputation.TABLE[factionID] and isValidFaction then
-        -- Get adjusted ID and label depending on the faction type
-        local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
-            factionID, standingID, friendShipReputationInfo, topValue, true)
-        -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
-        if not adjustedIDAndLabel then return end
-        -- Destructure props from AdjustedIDAndLabel
-        local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
-        local alertPayload = BuildStandingAlertPayload({
-            name = name,
-            label = LABEL,
-            adjustedID = adjustedID,
-            factionID = factionID,
-        })
-
-        -- Init function local variables
-        local msg -- ""
-        local dsc = "You have obtained "
-        local tag = " "
-
-        if (TitanPanelReputation.BARCOLORS) then
-            msg = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-            dsc = dsc .. TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
-        else
-            msg = TitanUtils_GetGoldText(name .. " - " .. LABEL)
-            dsc = dsc .. TitanUtils_GetGoldText(LABEL)
-        end
-
-        dsc = dsc .. " standing with " .. name .. "."
-        msg = tag .. msg .. tag
-
-        if alertPayload then
-            DispatchReputationAnnouncement(msg, alertPayload)
-        end
-    end
-
-    if isValidFaction then
-        TitanPanelReputation.TABLE[factionID] = {}
-        TitanPanelReputation.TABLE[factionID].name = name
-        TitanPanelReputation.TABLE[factionID].standingID = standingID
-        TitanPanelReputation.TABLE[factionID].earnedValue = earnedValue
-        TitanPanelReputation.TABLE[factionID].topValue = topValue
-    end
 end
 
 --[[ TitanPanelReputation
@@ -866,29 +786,24 @@ function TitanPanelReputation:FactionDetailsProvider(method)
             local percent = format("%.2f", earnedValueRatio * 100)
 
             local headerPath = {}
-            local currentParent = ""
             if isHeader then
                 if isChild then
-                    currentParent = rootHeader
                     if rootHeader ~= "" then
                         tinsert(headerPath, rootHeader)
                     end
                     tinsert(headerPath, name)
                 else
-                    currentParent = ""
                     wipe(headerPath)
                     tinsert(headerPath, name)
                 end
             else
                 local shouldAttachToNested = (nestedHeader ~= "" and isChild)
                 if shouldAttachToNested then
-                    currentParent = nestedHeader
                     if rootHeader ~= "" then
                         tinsert(headerPath, rootHeader)
                     end
                     tinsert(headerPath, nestedHeader)
                 else
-                    currentParent = rootHeader
                     if rootHeader ~= "" then
                         tinsert(headerPath, rootHeader)
                     end
@@ -966,10 +881,32 @@ function TitanPanelReputation:FactionDetailsProvider(method)
 end
 
 --[[ TitanPanelReputation
+NAME: TitanPanelReputation.HandleUpdateFaction
+DESC: Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
+]]
+function TitanPanelReputation:HandleUpdateFaction()
+    TitanPanelReputation:FactionDetailsProvider(function(details)
+        -- Check if the faction can be tracked
+        if (not details.isHeader and details.name) or (details.isHeader and details.hasRep) then
+            -- 1. Handle the faction update
+            HandleFactionUpdate(details)
+
+            -- 2. Persist the faction update
+            TitanPanelReputation.TABLE[details.factionID] = {
+                name = details.name,
+                standingID = details.standingID,
+                earnedValue = details.earnedValue,
+                topValue = details.topValue,
+            }
+        end
+    end)
+end
+
+--[[ TitanPanelReputation
 NAME: TitanPanelReputation:Refresh
 DESC: Refreshes the reputation data (rebuilds the button text).
 ]]
-function TitanPanelReputation:Refresh()
+function TitanPanelReputation:RefreshButtonText()
     if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
         TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
     else

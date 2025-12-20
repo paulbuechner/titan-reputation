@@ -54,6 +54,7 @@ local function BuildFactionHeaderMenu(factionDetails)
         factionDetails.headerLevel
 
     if (not isInactive) and isHeader and (headerLevel or 0) == 0 then
+        local headerKey = TitanPanelReputation:GetNodeKey(factionDetails)
         if not isCollapsed then
             TitanPanelRightClickMenu_AddToggleVar2({
                 label = name,
@@ -61,7 +62,7 @@ local function BuildFactionHeaderMenu(factionDetails)
                 hasArrow = 1,
                 level = 1,
                 checked = function()
-                    return TitanPanelReputation:IsBranchVisible(name)
+                    return TitanPanelReputation:IsBranchVisibleByKey(headerKey)
                 end,
                 func = function()
                     TitanPanelReputation:ToggleFactionVisibility(factionDetails)
@@ -103,31 +104,87 @@ local function BuildFactionHeaderSubMenu(factionDetails)
     if TitanGetVar(TitanPanelReputation.ID, "ShortTipStanding") then LABEL = strsub(LABEL, 1, adjustedID == 10 and 2 or 1) end
 
     local dropdownValue = TitanPanelRightClickMenu_GetDropdMenuValue()
-    if parentName ~= dropdownValue then
-        return
-    end
 
     if isHeader then
         local currentLevel = TitanPanelRightClickMenu_GetDropdownLevel()
-        TitanPanelRightClickMenu_AddToggleVar2({
-            label = name,
-            value = name,
-            hasArrow = 1,
-            level = currentLevel,
-            checked = function()
-                return TitanPanelReputation:IsBranchVisible(name)
-            end,
-            func = function()
-                if hasRep and IsControlKeyDown() and TitanPanelReputation:IsDebugEnabled() then
-                    TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
+        local headerKey = TitanPanelReputation:GetNodeKey(factionDetails)
+
+        -- If we're viewing this header's own submenu, show the "name - standing" toggle
+        -- Only show it if the header has reputation to track (hasRep)
+        -- Otherwise, if we're viewing a parent's submenu, show only the header toggle with arrow
+        if dropdownValue == name then
+            -- Only show the toggle if the header has reputation to track
+            if not hasRep then
+                return
+            end
+
+            -- We're viewing this header's own submenu, so show the faction toggle
+            local displayText
+            if (TitanPanelReputation.BARCOLORS) then
+                displayText = TitanUtils_GetColoredText(name .. " - " .. LABEL, TitanPanelReputation.BARCOLORS[(adjustedID)])
+            else
+                displayText = name .. " - " .. LABEL
+            end
+            TitanPanelRightClickMenu_AddToggleVar2({
+                label = displayText,
+                value = name,
+                level = currentLevel,
+                checked = function()
+                    return not TitanPanelReputation:IsNodeExplicitlyHiddenByKey(headerKey)
+                end,
+                func = function()
+                    if IsControlKeyDown() and TitanPanelReputation:IsDebugEnabled() then
+                        TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
+                        TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
+                        return
+                    end
+                    if IsShiftKeyDown() then
+                        TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", name)
+                        TitanPanelReputation:Refresh()
+                    else
+                        -- When toggling from the header's own submenu, hide/unhide ONLY this header,
+                        -- while keeping descendants' visibility unchanged.
+                        local shouldHide = not TitanPanelReputation:IsNodeExplicitlyHiddenByKey(headerKey)
+                        TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, shouldHide)
+                    end
+                    TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
                     TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
-                    return
-                end
-                TitanPanelReputation:ToggleFactionVisibility(factionDetails)
-                TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
-                TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
-            end,
-        })
+                end,
+            })
+            return
+        elseif dropdownValue == parentName then
+            -- We're viewing a parent's submenu, so show only the header toggle with arrow
+            TitanPanelRightClickMenu_AddToggleVar2({
+                label = name,
+                value = name,
+                hasArrow = hasRep and 1 or nil,
+                level = currentLevel,
+                checked = function()
+                    return TitanPanelReputation:IsBranchVisibleByKey(headerKey)
+                end,
+                func = function()
+                    if hasRep and IsControlKeyDown() and TitanPanelReputation:IsDebugEnabled() then
+                        TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
+                        TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
+                        return
+                    end
+                    TitanPanelReputation:ToggleFactionVisibility(factionDetails)
+                    TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
+                    TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel, true)
+                    if hasRep and UIDROPDOWNMENU_MENU_VALUE == name then
+                        TitanPanelRightClickMenu_RefreshOpenDropdown(currentLevel + 1, true)
+                    end
+                end,
+            })
+            return
+        else
+            -- Header doesn't match current dropdown context, skip it
+            return
+        end
+    end
+
+    -- For non-headers, check if they belong to the current dropdown
+    if parentName ~= dropdownValue then
         return
     end
 

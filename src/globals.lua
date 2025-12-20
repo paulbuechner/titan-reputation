@@ -86,15 +86,6 @@ The table of reputation values for each faction for the current session.
 TitanPanelReputation.RTS = {}
 
 --[[ TitanPanelReputation
-NAME: TitanPanelReputation.G_FACTION_ID
-DESC:
-The guild faction ID, used to filter out the guild reputation.
-TODO: Make this an option in the settings.
-:DESC
-]]
-TitanPanelReputation.G_FACTION_ID = 1168
-
---[[ TitanPanelReputation
 NAME: TitanPanelReputation.BUTTON_TEXT
 DESC: The text to display on the Titan Panel button.
 ]]

@@ -474,7 +474,7 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     TitanPanelRightClickMenu_AddTitle2(TitanPlugins[TitanPanelReputation.ID].menuText)
     -- Toggle Options
     TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_AUTO_CHANGE"), savedVar = "AutoChange" })
-    TitanPanelRightClickMenu_AddToggleVar(TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), TitanPanelReputation.ID, "ShowAnnounceFrame")
+    TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), savedVar = "ShowAnnounceFrame" })
     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText")) then
         TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_MIK"), savedVar = "ShowAnnounceMik" })
     end

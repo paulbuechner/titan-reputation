@@ -2,15 +2,19 @@ local _, TitanPanelReputation = ...
 
 local TextureKitConstants = _G.TextureKitConstants
 
-if not _G.AchievementFrame then _G.AchievementFrame_LoadUI() end
-
-local AlertFrame = _G.AlertFrame
-local AchievementShield_SetPoints = _G.AchievementShield_SetPoints
+local function EnsureAchievementUI()
+    if not _G.AchievementFrame and _G.AchievementFrame_LoadUI then
+        _G.AchievementFrame_LoadUI()
+    end
+end
 
 local function GetAchievementAlertSystem()
     if TitanPanelReputation.AchievementAlertSystem then
         return TitanPanelReputation.AchievementAlertSystem
     end
+
+    -- Make sure the AchievementFrame is loaded to access AlertFrame methods
+    EnsureAchievementUI()
 
     local function SetupFrame(frame, payload)
         if not payload or type(payload) ~= "table" then
@@ -34,7 +38,7 @@ local function GetAchievementAlertSystem()
         frame.Icon.Texture:SetTexture(payload.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
         frame:EnableMouse(false)
 
-        AchievementShield_SetPoints(0, shieldPoints, GameFontNormal, GameFontNormalSmall)
+        _G.AchievementShield_SetPoints(0, shieldPoints, GameFontNormal, GameFontNormalSmall)
 
         if frame.guildDisplay or frame.oldCheevo then
             frame.oldCheevo = nil
@@ -79,7 +83,7 @@ local function GetAchievementAlertSystem()
         return true
     end
 
-    TitanPanelReputation.AchievementAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem(
+    TitanPanelReputation.AchievementAlertSystem = _G.AlertFrame:AddQueuedAlertFrameSubSystem(
         "AchievementAlertFrameTemplate",
         SetupFrame,
         2,

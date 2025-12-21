@@ -24,6 +24,8 @@ local function GetAchievementAlertSystem()
         local displayName = frame.Name
         local shieldPoints = frame.Shield.Points
         local shieldIcon = frame.Shield.Icon
+        local icon = frame.Icon
+        local iconBorder = frame.Icon.Overlay
         local unlocked = frame.Unlocked
         local oldCheevo = frame.OldAchievement
 
@@ -52,7 +54,6 @@ local function GetAchievementAlertSystem()
             background:SetTexCoord(0, 0.605, 0, 0.703)
             background:SetPoint("TOPLEFT", 0, 0)
             background:SetPoint("BOTTOMRIGHT", 0, 0)
-            local iconBorder = frame.Icon.Overlay
             iconBorder:SetAtlas("ui-achievement-guild-iconframe", TextureKitConstants.UseAtlasSize)
             iconBorder:SetPoint("CENTER", -1, 2)
             frame.Icon:SetPoint("TOPLEFT", -26, 16)
@@ -72,6 +73,8 @@ local function GetAchievementAlertSystem()
         end
 
         shieldIcon:SetAtlas("UI-Achievement-Shield-NoPoints", TextureKitConstants.UseAtlasSize)
+        icon:SetPoint("TOPLEFT", -2, -12)
+        iconBorder:SetPoint("CENTER", -1, -1)
 
         C_Timer.After(10, function()
             unlocked:SetText(ACHIEVEMENT_UNLOCKED)

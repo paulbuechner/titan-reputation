@@ -965,6 +965,18 @@ function TitanPanelReputation:FactionDetailsProvider(method)
 end
 
 --[[ TitanPanelReputation
+NAME: TitanPanelReputation:Refresh
+DESC: Refreshes the reputation data (rebuilds the button text).
+]]
+function TitanPanelReputation:RefreshButtonText()
+    if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
+        self:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
+    else
+        TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL")
+    end
+end
+
+--[[ TitanPanelReputation
 NAME: TitanPanelReputation.HandleUpdateFaction
 DESC: Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
 ]]
@@ -984,16 +996,7 @@ function TitanPanelReputation:HandleUpdateFaction()
             }
         end
     end)
-end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation:Refresh
-DESC: Refreshes the reputation data (rebuilds the button text).
-]]
-function TitanPanelReputation:RefreshButtonText()
-    if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
-        self:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
-    else
-        TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL")
-    end
+    -- 3. Refresh the button
+    self:RefreshButtonText()
 end

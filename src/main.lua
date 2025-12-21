@@ -86,6 +86,7 @@ function TitanPanelReputationButton_OnLoad(self)
         iconWidth = 16,
         savedVariables = config
     }
+
     self:RegisterEvent("UPDATE_FACTION")
     self:RegisterEvent("ADDON_LOADED")
 
@@ -136,30 +137,30 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         return
     end
 
-    -- Only process data on reputation updates (https://warcraft.wiki.gg/wiki/UPDATE_FACTION)
-    if event ~= "UPDATE_FACTION" then return end
+    if event == "UPDATE_FACTION" then
+        --[[  -------------------------- MAIN ADDON LOOP START -------------------------- ]]
 
-    --[[  -------------------------- MAIN ADDON LOOP START -------------------------- ]]
+        if TitanPanelReputation.INIT_TIME > 0 then
+            -- Set the current tracked faction
+            if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
+                TitanPanelReputation.HIGHCHANGED = 0
+                TitanPanelReputation.EVENT_TIME = GetTime()
 
-    if TitanPanelReputation.INIT_TIME > 0 then
-        -- Set the current tracked faction
-        if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
-            TitanPanelReputation.HIGHCHANGED = 0
-            TitanPanelReputation.EVENT_TIME = GetTime()
-
-            -- If AutoChange is enabled (i.e. not 'none') set the watched faction to the changed faction
-            if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
-                TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
+                -- If AutoChange is enabled (i.e. not 'none') set the watched faction to the changed faction
+                if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
+                    TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
+                end
             end
+
+            TitanPanelReputation:HandleUpdateFaction()
         end
 
-        TitanPanelReputation:HandleUpdateFaction()
-        TitanPanelReputation:RefreshButtonText()
+        --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]
+
+        -- Call TitanPanel API to render updates
+        TitanPanelButton_UpdateTooltip()
+        TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
+
+        return
     end
-
-    --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]
-
-    -- Call TitanPanel API to render updates
-    TitanPanelButton_UpdateTooltip()
-    TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
 end

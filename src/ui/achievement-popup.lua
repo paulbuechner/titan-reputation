@@ -36,7 +36,7 @@ local function GetAchievementAlertSystem()
 
         unlocked:SetText(payload.title or ACHIEVEMENT_UNLOCKED)
         frame.Icon.Texture:SetTexture(payload.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
-        frame:EnableMouse(false)
+        frame:EnableMouse(true)
 
         _G.AchievementShield_SetPoints(0, shieldPoints, GameFontNormal, GameFontNormalSmall)
 
@@ -75,7 +75,6 @@ local function GetAchievementAlertSystem()
 
         C_Timer.After(10, function()
             unlocked:SetText(ACHIEVEMENT_UNLOCKED)
-            frame:EnableMouse(true)
         end)
 
         frame.id = payload.factionID

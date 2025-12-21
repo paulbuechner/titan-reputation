@@ -113,6 +113,28 @@ function TitanPanelReputation:IsDescendantOfKey(rootKey, factionDetails)
     return false
 end
 
+-- Returns true if any factionDetails exists whose nodeKey is under `headerKey` (prefix match).
+-- Used by the menu to decide whether to show an arrow/submenu for headers that have no reputation
+-- themselves but do have children.
+---@param headerKey string
+---@return boolean
+function TitanPanelReputation:HasDescendantsByKey(headerKey)
+    if not headerKey or headerKey == "" then
+        return false
+    end
+    local prefix = headerKey .. "/"
+    local found = false
+    self:FactionDetailsProvider(function(details)
+        if found then return end
+        if not details then return end
+        local k = self:GetNodeKey(details)
+        if k and k ~= headerKey and string.sub(k, 1, #prefix) == prefix then
+            found = true
+        end
+    end)
+    return found
+end
+
 local function CollectBranchKeys(rootKey)
     local keys = {}
     if not rootKey or rootKey == "" then
@@ -518,6 +540,52 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
     local overrides = self:GetShownFactionOverrideLookup()
     local selfOverrides = self:GetHeaderSelfOverrideLookup()
 
+    -- Helper: determine if a nodeKey has any hidden ancestor purely from the key string,
+    -- without relying on the current `FactionDetailsProvider` scan state.
+    local function KeyHasHiddenAncestor(nodeKey)
+        if not nodeKey or nodeKey == "" then
+            return false
+        end
+        local prefix = nil
+        for segment in string.gmatch(nodeKey, "([^/]+)") do
+            if not prefix then
+                prefix = segment
+            else
+                prefix = prefix .. "/" .. segment
+            end
+            -- Stop before checking the key itself; ancestors are prefixes only.
+            if prefix == nodeKey then
+                break
+            end
+            if lookup[prefix] then
+                return true
+            end
+        end
+        return false
+    end
+
+    -- Helper: determine if a nodeKey has any hidden ancestor OTHER than `excludeKey`.
+    local function KeyHasOtherHiddenAncestor(nodeKey, excludeKey)
+        if not nodeKey or nodeKey == "" then
+            return false
+        end
+        local prefix = nil
+        for segment in string.gmatch(nodeKey, "([^/]+)") do
+            if not prefix then
+                prefix = segment
+            else
+                prefix = prefix .. "/" .. segment
+            end
+            if prefix == nodeKey then
+                break
+            end
+            if prefix ~= excludeKey and lookup[prefix] then
+                return true
+            end
+        end
+        return false
+    end
+
     -- Helper: find details by key (menu clicks are rare, linear scan is fine)
     local function FindDetailsByKey(targetKey)
         local found = nil
@@ -561,9 +629,16 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
         overrides[headerKey] = nil
         selfOverrides[headerKey] = recorded
     else
+        -- If THIS header was explicitly hidden (not merely hidden by an ancestor),
+        -- preserve descendants that were hidden due to this header being hidden.
+        local wasExplicitlyHidden = lookup[headerKey] and true or false
+
         -- If descendants are currently hidden (often because this header was used to hide the whole branch),
         -- explicitly keep them hidden so "enable only this header" doesn't re-enable all children.
         self:FactionDetailsProvider(function(details)
+            if not wasExplicitlyHidden then
+                return
+            end
             if not details or not details.name or details.name == "" then
                 return
             end
@@ -572,7 +647,9 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
                 return
             end
             if self:IsDescendantOfKey(headerKey, details) then
-                if self:IsFactionEffectivelyHidden(details) then
+                -- Only persist hidden state if the node is hidden *because of this header*,
+                -- not because some other ancestor (e.g. the root header) is hidden.
+                if self:IsFactionEffectivelyHidden(details) and not KeyHasOtherHiddenAncestor(detailsKey, headerKey) then
                     lookup[detailsKey] = true
                     overrides[detailsKey] = nil
                 end
@@ -582,13 +659,20 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
         lookup[headerKey] = nil
         overrides[headerKey] = nil
 
+        -- If this header lives under a hidden ancestor, it will still be effectively hidden unless we
+        -- add a show-override for the header itself (same behavior as branch toggles).
+        local headerDetails = FindDetailsByKey(headerKey)
+        if (headerDetails and self:HasHiddenAncestor(headerDetails)) or (not headerDetails and KeyHasHiddenAncestor(headerKey)) then
+            overrides[headerKey] = true
+        end
+
         local recorded = selfOverrides[headerKey] or {}
         for _, descendantKey in ipairs(recorded) do
             if overrides[descendantKey] then
                 local keep = false
                 if not lookup[descendantKey] then
                     local details = FindDetailsByKey(descendantKey)
-                    if details and self:HasHiddenAncestor(details) then
+                    if (details and self:HasHiddenAncestor(details)) or (not details and KeyHasHiddenAncestor(descendantKey)) then
                         keep = true
                     end
                 end
@@ -885,7 +969,7 @@ NAME: TitanPanelReputation.HandleUpdateFaction
 DESC: Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
 ]]
 function TitanPanelReputation:HandleUpdateFaction()
-    TitanPanelReputation:FactionDetailsProvider(function(details)
+    self:FactionDetailsProvider(function(details)
         -- Check if the faction can be tracked
         if (not details.isHeader and details.name) or (details.isHeader and details.hasRep) then
             -- 1. Handle the faction update
@@ -908,7 +992,7 @@ DESC: Refreshes the reputation data (rebuilds the button text).
 ]]
 function TitanPanelReputation:RefreshButtonText()
     if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
-        TitanPanelReputation:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
+        self:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
     else
         TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL")
     end

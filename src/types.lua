@@ -1,3 +1,7 @@
+---@meta _
+---@diagnostic disable: duplicate-doc-field
+---@diagnostic disable: duplicate-doc-alias
+
 --[[ ------------------------------ CUSTOM TYPES ------------------------------ ]]
 
 ---@class FactionDetails
@@ -24,3 +28,47 @@
 ---@field adjustedID number: The adjusted standing ID
 ---@field label string|nil: The adjusted label
 ---@field factionType string: The faction type
+
+--[[ ------------------------------ UI / Globals ------------------------------ ]]
+
+---@class TextureKitConstants
+---@field UseAtlasSize number
+
+---@class AlertFrameSubSystem
+---@field SetCanShowMoreConditionFunc fun(self: AlertFrameSubSystem, fn: fun(): boolean)
+---@field AddAlert fun(self: AlertFrameSubSystem, ...)
+
+---@class AlertFrame
+---@field AddQueuedAlertFrameSubSystem fun(self: AlertFrame, alertFrameTemplate: string, setUpFunction: function, maxAlerts: number, maxQueue: number, coalesceFunction: function|nil): AlertFrameSubSystem
+
+---@class _G
+---@field TextureKitConstants TextureKitConstants
+---@field AlertFrame AlertFrame
+---@field AchievementFrame table|nil
+---@field AchievementFrame_LoadUI fun()
+---@field AchievementShield_SetPoints fun(points: number, pointString: string, normalFont: Font, smallFont: Font)
+
+---@type AlertFrame
+AlertFrame = _G.AlertFrame
+
+---
+--- Sets the points and point string for the achievement shield.
+---
+---[Documentation](https://github.com/Gethe/wow-ui-source/blob/9851483e3df93d33143103db99bad8e9542c2b65/Interface/AddOns/Blizzard_AchievementUI/Mainline/Blizzard_AchievementUI.lua#L1655)
+---@param points number: The points to set
+---@param pointString string: The point string to set
+---@param normalFont Font: The normal font to use
+---@param smallFont Font: The small font to use
+function AchievementShield_SetPoints(points, pointString, normalFont, smallFont) end
+
+---
+--- Adds a queued alert frame sub system to the alert frame.
+---
+---[Documentation](https://github.com/Gethe/wow-ui-source/blob/9851483e3df93d33143103db99bad8e9542c2b65/Interface/AddOns/Blizzard_FrameXML/Mainline/AlertFrames.lua#L347)
+---@param alertFrameTemplate string: The alert frame template to use
+---@param setUpFunction function: The function to use to set up the alert frame
+---@param maxAlerts number: The maximum number of alerts to show
+---@param maxQueue number: The maximum number of alerts to queue
+---@param coalesceFunction function|nil: The function to use to coalesce the alerts
+---@return AlertFrameSubSystem: The alert frame sub system
+function AlertFrame:AddQueuedAlertFrameSubSystem(alertFrameTemplate, setUpFunction, maxAlerts, maxQueue, coalesceFunction) end

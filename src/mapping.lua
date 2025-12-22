@@ -1,32 +1,26 @@
 local _, TitanPanelReputation = ...
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.FACTION_MAPPING
-DESC:
-User-editable overrides keyed by factionID. Each entry can optionally redefine the
-display name (`name`), the header/group (`header`), the hierarchy level (`level`),
-and even provide a custom texture path (`icon`) for use in achievement toasts.
-Levels follow the Blizzard reputation UI semantics:
-    0 = Header at the root level
-    1 = Root-level faction (no indentation)
-    2+ = Child faction (indented)
-You can also force flags (isHeader, isChild, hasRep) if a faction behaves differently
-from the default Blizzard data.
-
-Buzz Words to lookup icon texture paths: Faction, Zone, Notoriety
-:DESC
-]]
----@class TitanReputationFactionMapping
----@field name string|nil Display name override
----@field header string|nil Parent header label override
----@field level number|nil Hierarchy level (0 = header, 1 = root faction, 2+ = child)
----@field icon string|nil Custom texture path for popups
----@field isHeader boolean|nil Force header flag
----@field isChild boolean|nil Force child flag
----@field hasRep boolean|nil Force reputation flag on headers
----@field path string[]|nil Explicit header lineage to display (e.g. {"Dragonflight", "Dragonscale Expedition"})
----@type table<number, TitanReputationFactionMapping>
+---
+--- User-editable overrides keyed by factionID. Each entry can optionally redefine the
+--- display name (`name`), the header/group (`header`), the hierarchy level (`level`),
+--- and even provide a custom texture path (`icon`) for use in achievement toasts.
+--- Levels follow the Blizzard reputation UI semantics:
+---     0 = Header at the root level
+---     1 = Root-level faction (no indentation)
+---     2+ = Child faction (indented)
+--- You can also force flags (isHeader, isChild, hasRep) if a faction behaves differently
+--- from the default Blizzard data.
+---
+--- Buzz Words to lookup icon texture paths: Faction, Zone, Notoriety
+---
+---@type {[number]: TitanReputationFactionMapping}
 TitanPanelReputation.FACTION_MAPPING = TitanPanelReputation.FACTION_MAPPING or {
+    -- ****************************
+    --        Dragonflight
+    -- ****************************
+    [2564] = { -- Niffen von Loamm
+        icon = "Interface\\ICONS\\UI_MajorFaction_Niffen.tga",
+    },
     -- ****************************
     --       The War Within
     -- ****************************
@@ -49,7 +43,8 @@ TitanPanelReputation.FACTION_MAPPING = TitanPanelReputation.FACTION_MAPPING or {
         icon = "Interface\\ICONS\\INV_112_Achievement_Raid_ManaforgeOmega.tga",
     },
     [2640] = { -- Brann Bronzebart
-        icon = "Interface\\ICONS\\UI_Delves.tga",
+        -- icon = "Interface\\ICONS\\UI_Delves.tga",
+        icon = "Interface\\ICONS\\INV_Helm_Armor_BuckledHat_B_01_Brown.tga",
     },
     [2600] = { -- Die Durchtrennten Fäden
         icon = "Interface\\ICONS\\UI_MajorFaction_Web.tga",

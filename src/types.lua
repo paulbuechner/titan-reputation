@@ -23,11 +23,20 @@
 ---@field hasBonusRepGain boolean: Whether the faction has bonus reputation gain
 ---@field icon string|nil: The icon texture path for the faction
 
-
 ---@class AdjustedIDAndLabel
 ---@field adjustedID number: The adjusted standing ID
 ---@field label string|nil: The adjusted label
 ---@field factionType string: The faction type
+
+---@class TitanReputationFactionMapping
+---@field name string|nil Display name override
+---@field header string|nil Parent header label override
+---@field level number|nil Hierarchy level (0 = header, 1 = root faction, 2+ = child)
+---@field icon string|nil Custom texture path for popups
+---@field isHeader boolean|nil Force header flag
+---@field isChild boolean|nil Force child flag
+---@field hasRep boolean|nil Force reputation flag on headers
+---@field path string[]|nil Explicit header lineage to display (e.g. `{"Dragonflight", "Dragonscale Expedition"}`)
 
 --[[ ------------------------------ UI / Globals ------------------------------ ]]
 
@@ -52,7 +61,7 @@
 AlertFrame = _G.AlertFrame
 
 ---
---- Sets the points and point string for the achievement shield.
+---Sets the points and point string for the achievement shield.
 ---
 ---[Documentation](https://github.com/Gethe/wow-ui-source/blob/9851483e3df93d33143103db99bad8e9542c2b65/Interface/AddOns/Blizzard_AchievementUI/Mainline/Blizzard_AchievementUI.lua#L1655)
 ---@param points number: The points to set
@@ -62,7 +71,7 @@ AlertFrame = _G.AlertFrame
 function AchievementShield_SetPoints(points, pointString, normalFont, smallFont) end
 
 ---
---- Adds a queued alert frame sub system to the alert frame.
+---Adds a queued alert frame sub system to the alert frame.
 ---
 ---[Documentation](https://github.com/Gethe/wow-ui-source/blob/9851483e3df93d33143103db99bad8e9542c2b65/Interface/AddOns/Blizzard_FrameXML/Mainline/AlertFrames.lua#L347)
 ---@param alertFrameTemplate string: The alert frame template to use

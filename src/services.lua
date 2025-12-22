@@ -113,11 +113,14 @@ function TitanPanelReputation:IsDescendantOfKey(rootKey, factionDetails)
     return false
 end
 
--- Returns true if any factionDetails exists whose nodeKey is under `headerKey` (prefix match).
--- Used by the menu to decide whether to show an arrow/submenu for headers that have no reputation
--- themselves but do have children.
+---
+--- Returns true if any factionDetails exists whose nodeKey is under `headerKey` (prefix match).
+---Used by the menu to decide whether to show an arrow/submenu for headers that have no reputation
+---themselves but do have children.
+---
 ---@param headerKey string
 ---@return boolean
+---@nodiscard
 function TitanPanelReputation:HasDescendantsByKey(headerKey)
     if not headerKey or headerKey == "" then
         return false
@@ -251,15 +254,15 @@ function TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
     end
 end
 
---[[ TitanPanelReputation
-NAME: DetermineRootHeaderKey
-DESC: Resolves the bucket key used when regrouping the reputation tree. For root headers
-it returns their own name, for child nodes it walks up the cached headerPath so every
-entry produced by `FactionDetailsProvider` can be associated with the correct top-level
-header before reordering the results.
-]]
+---
+---Resolves the bucket key used when regrouping the reputation tree. For root headers
+---it returns their own name, for child nodes it walks up the cached headerPath so every
+---entry produced by `FactionDetailsProvider` can be associated with the correct top-level
+---header before reordering the results.
+---
 ---@param factionDetails FactionDetails|nil
 ---@return string
+---@nodiscard
 local function DetermineRootHeaderKey(factionDetails)
     if not factionDetails then
         return ""
@@ -280,15 +283,15 @@ local function DetermineRootHeaderKey(factionDetails)
     return ""
 end
 
---[[ TitanPanelReputation
-NAME: OrderFactionDetails
-DESC: Given the raw faction list produced by the Blizzard API, rebuilds it so each root
-header emits its direct factions first and then any nested header buckets. This keeps
-the UI grouped as Main Header → direct factions → sub-header groups → sub-factions regardless
-of the order Blizzard returns rows in.
-]]
+---
+---Given the raw faction list produced by the Blizzard API, rebuilds it so each root
+---header emits its direct factions first and then any nested header buckets. This keeps
+---the UI grouped as Main Header → direct factions → sub-header groups → sub-factions regardless
+---of the order Blizzard returns rows in.
+---
 ---@param detailsList FactionDetails[]|nil
 ---@return FactionDetails[]
+---@nodiscard
 local function OrderFactionDetails(detailsList)
     if not detailsList or #detailsList == 0 then
         return detailsList or {}
@@ -529,8 +532,12 @@ function TitanPanelReputation:ToggleFactionVisibility(factionDetails)
     self:SetFactionHiddenState(factionDetails, shouldHide)
 end
 
--- Hide/unhide a header node without changing its descendants' effective visibility state.
--- Used by the "header - standing" toggle inside a header's own submenu.
+---
+---Hide/unhide a header node without changing its descendants' effective visibility state.
+---Used by the "header - standing" toggle inside a header's own submenu.
+---
+---@param headerKey string
+---@param hidden boolean
 function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
     if not headerKey or headerKey == "" then
         return
@@ -693,10 +700,9 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
     self.headerSelfOverrideLookup = selfOverrides
 end
 
---[[ TitanPanelReputation
-NAME: HandleFactionUpdate
-DESC: Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
-]]
+---
+---Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
+---
 ---@param factionDetails FactionDetails
 local function HandleFactionUpdate(factionDetails)
     -- Destructure props from FactionDetails
@@ -770,12 +776,11 @@ local function HandleFactionUpdate(factionDetails)
     TitanPanelReputation.CHANGED_FACTION = name
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation:FactionDetailsProvider
-DESC: Looks up all factions details, and calls 'method' with faction parameters.
-]]
----@param method function The method to call with @class `FactionDetails` parameters
-function TitanPanelReputation:FactionDetailsProvider(method)
+---
+---Looks up all factions details, and calls 'callback' with faction parameters.
+---
+---@param callback fun(factionDetails: FactionDetails) The callback to call with `FactionDetails` parameters
+function TitanPanelReputation:FactionDetailsProvider(callback)
     local count = TitanPanelReputation:BlizzAPI_GetNumFactions()
 
     -- If there are no factions, return
@@ -960,14 +965,13 @@ function TitanPanelReputation:FactionDetailsProvider(method)
 
     local orderedDetails = OrderFactionDetails(collectedDetails)
     for _, details in ipairs(orderedDetails) do
-        method(details)
+        callback(details) -- Call the callback with the faction details
     end
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation:Refresh
-DESC: Refreshes the reputation data (rebuilds the button text).
-]]
+---
+---Refreshes the reputation data (rebuilds the button text).
+---
 function TitanPanelReputation:RefreshButtonText()
     if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
         self:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
@@ -976,10 +980,9 @@ function TitanPanelReputation:RefreshButtonText()
     end
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.HandleUpdateFaction
-DESC: Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
-]]
+---
+---Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
+---
 function TitanPanelReputation:HandleUpdateFaction()
     self:FactionDetailsProvider(function(details)
         -- Check if the faction can be tracked

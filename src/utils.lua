@@ -2,17 +2,13 @@ local _, TitanPanelReputation = ...
 
 local WoW10 = select(4, GetBuildInfo()) >= 100000
 
---[[ ------------------------------ TitanPanelReputation.TABLE Filters ------------------------------ ]]
-
---[[ TitanPanelReputation
-NAME: TTitanPanelReputation:FilterTableByName
-DESC:
-Filters the `TitanPanelReputation.TABLE` by the given faction name.
-Returns the earnedValue and topValue for the given faction name.
-:DESC
-]]
+---
+---Filters the `TitanPanelReputation.TABLE` by the given faction name.
+---Returns the `earnedValue` and `topValue` for the given faction name.
+---
 ---@param name string The name of the faction to filter by
 ---@return number|nil earnedValue, number|nil topValue
+---@nodiscard
 function TitanPanelReputation:FilterTableByName(name)
     for _, info in pairs(TitanPanelReputation.TABLE) do
         if info.name == name then
@@ -22,28 +18,26 @@ function TitanPanelReputation:FilterTableByName(name)
     return nil, nil
 end
 
---[[ ------------------------------------------ Utilities ------------------------------------------- ]]
-
---[[ TitanPanelReputation
-NAME: TitanPanelReputation:TTL
-DESC: Calculates the time to next level based on the earnedValue, the topValue, and RPH (Rep/hr).
-]]
+---
+---Calculates the time to next level based on the `earnedValue`, the `topValue`, and `RPH` (Rep/hr).
+---
 ---@param earnedValue number The earned value of the faction
 ---@param topValue number The top value of the faction
 ---@param RPH number The reputation per hour
----@return number, number, number (TTL, hours, minutes)
+---@return number TTL, number hours, number minutes
+---@nodiscard
 function TitanPanelReputation:TTL(earnedValue, topValue, RPH)
     local R2G = topValue - earnedValue
     local TTL = R2G / RPH
     return TTL, floor(TTL), floor((TTL * 60) % 60)
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation:GetHumanReadableTime
-DESC: Formats the given time into a human readable format (e.g. "< 1min"/"30mins"/"1hr 30min").
-]]
+---
+---Formats the given time into a human readable format (e.g. "< 1min"/"30mins"/"1hr 30min").
+---
 ---@param time number The time to format
 ---@return string humantime The formatted time string
+---@nodiscard
 function TitanPanelReputation:GetHumanReadableTime(time)
     local humantime
     if (time < 60) then
@@ -62,19 +56,17 @@ function TitanPanelReputation:GetHumanReadableTime(time)
     return humantime
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation:GetAdjustedIDAndLabel
-DESC:
-Adjusts the standingID and label based on the given parameters. This is used to handle friendship factions and
-bonus rep gain factions without affecting the original standingID and label.
-:DESC
-]]
----@param factionID (number) The ID of the faction to get info for
----@param standingID (number) The current standingID for the given faction
----@param friendShipReputationInfo (FriendshipReputationInfo|nil) The friendship reputation info for the given faction
----@param topValue (number) The top value for the given faction
----@param returnOnNotShowFriendInfo? (boolean) Whether to return if not showing friendship info (optional, default false)
+---
+---Adjusts the standingID and label based on the given parameters. This is used to handle friendship factions and
+---bonus rep gain factions without affecting the original standingID and label.
+---
+---@param factionID number The ID of the faction to get info for
+---@param standingID number The current standingID for the given faction
+---@param friendShipReputationInfo FriendshipReputationInfo|nil The friendship reputation info for the given faction
+---@param topValue number The top value for the given faction
+---@param returnOnNotShowFriendInfo? boolean Whether to return if not showing friendship info (optional, default false)
 ---@return AdjustedIDAndLabel|nil
+---@nodiscard
 function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue,
                                                     returnOnNotShowFriendInfo)
     local adjustedID = standingID -- use local variable to avoid overwriting the global one
@@ -133,6 +125,12 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, frien
     return adjustedIDAndLabel
 end
 
+---
+---Trims the given string by removing leading and trailing whitespace.
+---
+---@param value string The string to trim
+---@return string The trimmed string
+---@nodiscard
 function TitanPanelReputation:TrimString(value)
     if type(value) ~= "string" then
         return ""

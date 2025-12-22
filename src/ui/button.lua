@@ -1,9 +1,8 @@
 local _, TitanPanelReputation = ...
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.BuildButtonText
-DESC: Builds the text to display on the TitanPanelReputation button.
-]]
+---
+---Builds the text to display on the TitanPanelReputation button.
+---
 ---@param factionDetails FactionDetails
 function TitanPanelReputation.BuildButtonText(factionDetails)
     -- Destructure props from FactionDetails

@@ -1,124 +1,119 @@
+---@diagnostic disable: assign-type-mismatch
+
 local _, TitanPanelReputation = ...
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.ID
-DESC:
-The unique ID of the addon. This is used to identify the addon in the Titan Panel API.
-Also this affects the naming convention of the `TitanPanelRightClickMenu_Prepare{TitanPanelReputation.ID}Menu`
-(menu.lua) to hook into Titan API.
-:DESC
-]]
+---
+---The unique ID of the addon. This is used to identify the addon in the Titan Panel API.
+---NOTE: This affects the naming convention of the `TitanPanelRightClickMenu_Prepare{TitanPanelReputation.ID}Menu`
+---in `menu.lua` to hook into Titan API.
+---
+---@type string
 TitanPanelReputation.ID = "Reputation"
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.VERSION
-DESC: The current version of the addon. This is used to display the version number in the Titan Panel.
-]]
+---
+---The current version of the addon. This is used to display the version number in the Titan Panel.
+---
+---@type string
 TitanPanelReputation.VERSION = TitanUtils_GetAddOnMetadata("TitanReputation", "Version")
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.TITLE
-DESC: The title of the addon. This is used to display the title in the Titan Panel.
-]]
+---
+---The title of the addon. This is used to display the title in the Titan Panel.
+---
+---@type string
 TitanPanelReputation.TITLE = TitanUtils_GetAddOnMetadata("TitanReputation", "Title")
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.ICON
-DESC:
-The icon to use for the addon. This is used to display the icon in the Titan Panel,
-aswell as in the addon list.
-:DESC
-]]
+---
+---The icon to use for the addon. This is used to display the icon in the Titan Panel,
+---as well as in the addon list.
+---
+---@type string
 TitanPanelReputation.ICON = "Interface\\AddOns\\TitanReputation\\assets\\TitanReputation"
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.INIT_TIME
-DESC:
-The time passed since TitanPanelReputation was initialized
-(set to uptime of pc in seconds, with millisecond precision).
-:DESC
-]]
+---
+---The time passed since TitanPanelReputation was initialized
+---(set to uptime of pc in seconds, with millisecond precision).
+---
+---@type number
 TitanPanelReputation.INIT_TIME = 0
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.EVENT_TIME
-DESC: The time passed since TitanPanelReputation was last updated (triggered by an event).
-]]
+---
+---The time passed since TitanPanelReputation was last updated (triggered by an event).
+---
+---@type number
 TitanPanelReputation.EVENT_TIME = GetTime()
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.SESSION_TIME_START
-DESC: The time since the session started, used to calculate session related reputation farm metrics (e.g. per hour)
-]]
+---
+---The time since the session started, used to calculate session related reputation farm metrics (e.g. per hour)
+---
+---@type number
 TitanPanelReputation.SESSION_TIME_START = GetTime()
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.TABLE
-DESC:
-The table of reputation values for each faction.
-    table = {
-        ["factionID"].name = "FactionName",
-        ["factionID"].standingID = 5,     -- 1 = Hated, 2 = Hostile, 3 = Unfriendly, 4 = Neutral, 5 = Friendly, 6 = Honored, 7 = Revered, 8 = Exalted
-        ["factionID"].earnedValue = 1000,
-        ["factionID"].topValue = 6000,
-        ...
-    }
-:DESC
-]]
+---
+---The table of reputation values for each faction.
+---```lua
+---    table = {
+---        ["factionID"].name = "FactionName",
+---        ["factionID"].standingID = 5,     -- 1 = Hated, 2 = Hostile, 3 = Unfriendly, 4 = Neutral, 5 = Friendly, 6 = Honored, 7 = Revered, 8 = Exalted
+---        ["factionID"].earnedValue = 1000,
+---        ["factionID"].topValue = 6000,
+---        ...
+---    }
+---```
+---@type table<number, { name: string, standingID: number, earnedValue: number, topValue: number }>
 TitanPanelReputation.TABLE = {}
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.RTS
-DESC:
-The table of reputation values for each faction for the current session.
-    table = {
-        ["factionName"] = 1337,
-        ...
-    }
-:DESC
-]]
+---
+---The table of reputation values for each faction for the current session.
+---```lua
+---    table = {
+---        ["factionName"] = 1337,
+---        ...
+---    }
+---```
+---
+---@type table<string, number>
 TitanPanelReputation.RTS = {}
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.BUTTON_TEXT
-DESC: The text to display on the Titan Panel button.
-]]
+---
+---The text to display on the Titan Panel button.
+---
+---@type string
 TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL")
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.TOOLTIP_TEXT
-DESC: The text to display on the Titan Panel tooltip.
-]]
+---
+---The text to display on the Titan Panel tooltip.
+---
+---@type string
 TitanPanelReputation.TOOLTIP_TEXT = ""
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.HIGHCHANGED
-DESC: Used to track the earned reputation amount for a given faction (e.g. "rep increased by 15")
-]]
+---
+---Used to track the earned reputation amount for a given faction (e.g. "rep increased by 15")
+---
+---@type number
 TitanPanelReputation.HIGHCHANGED = 0
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.CHANGED_FACTION
-DESC: The name of the faction last changed (reputation earned for).
-]]
+---
+---The name of the faction last changed (reputation earned for).
+---
+---@type string
 TitanPanelReputation.CHANGED_FACTION = "none"
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.DebugMode
-DESC: Flag that toggles extra developer tooling (e.g. ctrl+click faction testing).
-]]
+---
+---Flag that toggles extra developer tooling (e.g. ctrl+click faction testing).
+---
+---@type boolean
 TitanPanelReputation.DebugMode = false
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.ICONS
-DESC: The icons to use for achivement standings announcements.
-]]
+---
+---The icons to use for achievement standings announcements.
+---
+---@type string[]
 TitanPanelReputation.ICONS = { "03", "03", "07", "08", "06", "06", "06", "05" }
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.COLORS_DEFAULT
-DESC: The color themes `default` color palette.
-]]
+---
+---The color themes `default` color palette.
+---
+---@type table<number, { r: number, g: number, b: number }>
 TitanPanelReputation.COLORS_DEFAULT = {
     [1] = { r = 0.8, g = 0, b = 0 },            -- #33ffff
     [2] = { r = 0.8, g = 0.3, b = 0.22 },       -- #33b3c7
@@ -132,10 +127,10 @@ TitanPanelReputation.COLORS_DEFAULT = {
     [10] = { r = 0.000, g = 0.749, b = 0.953 }, -- #e63cd2
 }
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.COLORS_ARMORY
-DESC: The color themes `armory` color palette.
-]]
+---
+---The color themes `armory` color palette.
+---
+---@type table<number, { r: number, g: number, b: number }>
 TitanPanelReputation.COLORS_ARMORY = {
     [1] = { r = 0.54, g = 0.11, b = 0.07 },     -- #75e3ed
     [2] = { r = 0.65, g = 0.30, b = 0.10 },     -- #59b3e6
@@ -149,8 +144,8 @@ TitanPanelReputation.COLORS_ARMORY = {
     [10] = { r = 0.000, g = 0.749, b = 0.953 }, -- #e63cd2
 }
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.BARCOLORS
-DESC: The color theme currently in use.
-]]
+---
+---The color theme currently in use.
+---
+---@type table<number, { r: number, g: number, b: number }>
 TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_DEFAULT

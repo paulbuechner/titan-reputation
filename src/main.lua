@@ -1,9 +1,8 @@
 local ADDON_NAME, TitanPanelReputation = ...
 
---[[ TitanPanelReputation
-NAME: config
-DESC: The configuration settings for the TitanPanelReputation AddOn.
-]]
+---
+---The configuration settings for the TitanPanelReputation AddOn.
+---
 local config = {
     -- General Options --------------------------------------------------------
     AutoChange = true,                    -- Auto Show Changed
@@ -53,10 +52,9 @@ local config = {
     ColorValue = 1,                       -- 1 = Default, 2 = Armory, 3 = Basic
 }
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputationButton_OnLoad
-DESC: The `OnLoad` event handler for the TitanPanelReputation AddOn.
-]]
+---
+---The `OnLoad` event handler for the TitanPanelReputation AddOn.
+---
 ---@param self table TODO: Add explicit type
 function TitanPanelReputationButton_OnLoad(self)
     ---@type TitanPluginRegistryType
@@ -93,10 +91,9 @@ function TitanPanelReputationButton_OnLoad(self)
     TitanPanelRightClickMenu_Close()
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputationButton_OnClick
-DESC: The `OnClick` event handler for the TitanPanelReputation AddOn.
-]]
+---
+---The `OnClick` event handler for the TitanPanelReputation AddOn.
+---
 ---@param self table
 ---@param button string The button event name
 function TitanPanelReputationButton_OnClick(self, button)
@@ -108,11 +105,11 @@ function TitanPanelReputationButton_OnClick(self, button)
     end
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputationButton_OnEvent
-DESC: The `OnEvent` event handler for the TitanPanelReputation AddOn.
-]]
+---
+---The `OnEvent` event handler for the TitanPanelReputation AddOn.
+---
 ---@param event string The event name
+---@param ... any The event arguments
 function TitanPanelReputationButton_OnEvent(event, ...)
     if event == "ADDON_LOADED" and ... == ADDON_NAME then
         -- Initialize the saved variables

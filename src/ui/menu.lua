@@ -39,10 +39,9 @@ local function IsReservedMenuValue(value)
     return reservedMenuLabels[value] or false
 end
 
---[[ TitanPanelReputation
-NAME: BuildRightClickMenu
-DESC: Builds the faction headers part of the right-click menu.
-]]
+---
+---Builds the faction headers part of the right-click menu.
+---
 ---@param factionDetails FactionDetails
 local function BuildFactionHeaderMenu(factionDetails)
     -- Destructure props from FactionDetails
@@ -77,10 +76,9 @@ local function BuildFactionHeaderMenu(factionDetails)
     end
 end
 
---[[ TitanPanelReputation
-NAME: BuildFactionHeaderSubMenu
-DESC: Builds the faction headers sub menu part of the right-click menu.
-]]
+---
+---Builds the faction headers sub menu part of the right-click menu.
+---
 ---@param factionDetails FactionDetails
 local function BuildFactionHeaderSubMenu(factionDetails)
     -- Destructure props from FactionDetails
@@ -251,14 +249,12 @@ local function AddColorOption(level, label, colorValue, colors)
     })
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelRightClickMenu_PrepareReputationMenu
-DESC: Builds the faction headers sub menu part of the right-click menu.
-NOTE:
-This method is called by the TitanPanel API to build the right-click menu. Therefore the naming convention
-of this method is important and should read `TitanPanelRightClickMenu_Prepare${TitanPanelReputation.ID}Menu`
-:NOTE
-]]
+---
+---Builds the faction headers sub menu part of the right-click menu.
+---
+---NOTE: This method is called by the TitanPanel API to build the right-click menu. Therefore the naming convention
+---of this method is important and should read `TitanPanelRightClickMenu_Prepare${TitanPanelReputation.ID}Menu`
+---
 function TitanPanelRightClickMenu_PrepareReputationMenu()
     -- Ensure the Blizzard dropdown lists exist before Titan tries to add entries
     EnsureDropDownSeeded()

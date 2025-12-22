@@ -1,5 +1,9 @@
 local _, TitanPanelReputation = ...
 
+---
+---Ensures the header path is printed.
+---
+---@param headerPath string[] The header path
 local function EnsureHeaderPathPrinted(headerPath)
     TitanPanelReputation.LAST_HEADER_PATH = TitanPanelReputation.LAST_HEADER_PATH or {}
 
@@ -25,12 +29,11 @@ local function EnsureHeaderPathPrinted(headerPath)
     end
 end
 
---[[ TitanPanelReputation
-NAME: BuildFactionTooltipInfo
-DESC:
-Builds the tooltip faction details from the given `FactionDetails` and adds it to the
-tooltip text (`TitanPanelReputation.TOOLTIP_TEXT`).
-]]
+
+---
+---Builds the tooltip faction details from the given `FactionDetails` and adds it to the
+---tooltip text (`TitanPanelReputation.TOOLTIP_TEXT`).
+---
 ---@param factionDetails FactionDetails
 local function BuildFactionTooltipInfo(factionDetails)
     -- Destructure props from FactionDetails
@@ -202,10 +205,9 @@ local function BuildFactionTooltipInfo(factionDetails)
     end
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation.BuildTooltipText
-DESC: Builds the tooltip text for the TitanPanelReputation AddOn.
-]]
+---
+---Builds the tooltip text for the TitanPanelReputation AddOn.
+---
 ---@return string TitanPanelReputation.TOOLTIP_TEXT  The tooltip text
 function TitanPanelReputation:BuildTooltipText()
     TitanPanelReputation.TOOLTIP_TEXT = ""
@@ -297,10 +299,9 @@ function TitanPanelReputation:BuildTooltipText()
     return TitanPanelReputation.TOOLTIP_TEXT
 end
 
---[[ TitanPanelReputation
-NAME: TitanPanelReputation:AddTooltipText
-DESC: Adds the given text to the tooltip
-]]
+---
+---Adds the given text to the tooltip
+---
 ---@param text string The text to add to the tooltip
 function TitanPanelReputation:AddTooltipText(text)
     if (text) then
@@ -323,10 +324,10 @@ function TitanPanelReputation:AddTooltipText(text)
 end
 
 local oldScale; local isTooltipShowing = false
---[[ TitanPanelReputation
-NAME: TooltipHook
-DESC: Tooltip scaling hooked ownership check
-]]
+
+---
+---Tooltip scaling hooked ownership check
+---
 local function TooltipHook()
     if GameTooltip:GetOwner() == TitanPanelReputationButton then
         -- Cache initial tooltip scale

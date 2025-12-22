@@ -81,8 +81,12 @@ TitanPanelReputation.FACTION_MAPPING = TitanPanelReputation.FACTION_MAPPING or {
     },
 }
 
+---
+---Clones a path.
+---
+---@param path string[]
+---@return string[]
 local function ClonePath(path)
-    if not path then return nil end
     local copy = {}
     for index = 1, #path do
         copy[index] = path[index]
@@ -90,7 +94,9 @@ local function ClonePath(path)
     return copy
 end
 
+---
 ---Returns the override definition for a factionID, if one exists.
+---
 ---@param factionID number|nil
 ---@return TitanReputationFactionMapping|nil
 function TitanPanelReputation:GetFactionMapping(factionID)
@@ -98,6 +104,11 @@ function TitanPanelReputation:GetFactionMapping(factionID)
     return self.FACTION_MAPPING and self.FACTION_MAPPING[factionID] or nil
 end
 
+---
+---Derives the level flags from the level.
+---
+---@param factionDetails FactionDetails
+---@param level number
 local function DeriveLevelFlags(factionDetails, level)
     if not level then return end
     factionDetails.headerLevel = level
@@ -113,7 +124,9 @@ local function DeriveLevelFlags(factionDetails, level)
     end
 end
 
+---
 ---Applies mapping overrides (if present) to the faction details payload.
+---
 ---@param factionDetails FactionDetails
 ---@return FactionDetails
 function TitanPanelReputation:ApplyFactionMapping(factionDetails)

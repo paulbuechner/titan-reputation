@@ -37,9 +37,8 @@ end
 ---@param factionDetails FactionDetails
 local function BuildFactionTooltipInfo(factionDetails)
     -- Destructure props from FactionDetails
-    local name, parentName, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, hasBonusRepGain, headerLevel, headerPath =
+    local name, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, headerLevel, headerPath =
         factionDetails.name,
-        factionDetails.parentName,
         factionDetails.standingID,
         factionDetails.topValue,
         factionDetails.earnedValue,
@@ -49,7 +48,6 @@ local function BuildFactionTooltipInfo(factionDetails)
         factionDetails.hasRep,
         factionDetails.friendShipReputationInfo,
         factionDetails.factionID,
-        factionDetails.hasBonusRepGain,
         factionDetails.headerLevel,
         factionDetails.headerPath
 

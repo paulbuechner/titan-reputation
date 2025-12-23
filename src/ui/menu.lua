@@ -390,15 +390,9 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
                 level = 2,
                 label = TitanPanelReputation:GT("LID_DISPLAY_ON_RIGHT_SIDE"),
                 keepShownOnClick = false,
-                checked = function()
-                    return TitanGetVar(TitanPanelReputation.ID, "DisplayOnRightSide") ~= nil
-                end,
+                checked = TitanGetVar(TitanPanelReputation.ID, "DisplayOnRightSide"),
                 func = function()
-                    if TitanGetVar(TitanPanelReputation.ID, "DisplayOnRightSide") then
-                        TitanSetVar(TitanPanelReputation.ID, "DisplayOnRightSide", nil)
-                    else
-                        TitanSetVar(TitanPanelReputation.ID, "DisplayOnRightSide", 1)
-                    end
+                    TitanSetVar(TitanPanelReputation.ID, "DisplayOnRightSide", not TitanGetVar(TitanPanelReputation.ID, "DisplayOnRightSide"))
                     TitanPanelRightClickMenu_Close()
                     TitanPanel_InitPanelButtons()
                 end,

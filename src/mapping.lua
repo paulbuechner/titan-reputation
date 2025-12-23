@@ -28,99 +28,135 @@ local _, TitanPanelReputation = ...
 ---Then add/update a mapping entry to control the icon used in TitanReputation's achievement-style toasts:
 ---```lua
 ---  TitanPanelReputation.FACTION_MAPPING[FACTION_ID] = {
----    icon = "Interface/ICONS/UI_MajorFaction_Web", -- or any valid texture path
+---    icon = "Interface/Icons/UI_MajorFaction_Web", -- or any valid texture path
 ---  }
 ---```
 ---
 ---@type {[number]: TitanReputationFactionMapping}
 TitanPanelReputation.FACTION_MAPPING = TitanPanelReputation.FACTION_MAPPING or {
     -- ****************************
+    --       The War Within
+    -- ****************************
+    [2570] = { -- Arathi von Heilsturz
+        icon = "Interface/Icons/UI_MajorFaction_Flame",
+    },
+    [2658] = { -- Der Bund von K'aresh
+        icon = "Interface/Icons/UI_MajorFaction_ Karesh",
+    },
+    [2594] = { -- Der Konvent der Tiefen
+        icon = "Interface/Icons/UI_MajorFaction_Candle",
+    },
+    [2688] = { -- Die Strahlen der Flamme
+        icon = "Interface/Icons/UI_MajorFaction_ Nightfall",
+    },
+    [2590] = { -- Rat von Dornogal
+        icon = "Interface/Icons/UI_MajorFaction_Storm",
+    },
+    [2736] = { -- Vandalen der Manaschmiede
+        icon = "Interface/Icons/INV_112_Achievement_Raid_ManaforgeOmega",
+    },
+    [2640] = { -- Brann Bronzebart
+        -- icon = "Interface/Icons/UI_Delves",
+        icon = "Interface/Icons/INV_Helm_Armor_BuckledHat_B_01_Brown",
+    },
+    [2600] = { -- Die Durchtrennten Fäden
+        icon = "Interface/Icons/UI_MajorFaction_Web",
+    },
+    [2605] = { -- Der General
+        icon = "Interface/Icons/UI_Notoriety_TheGeneral",
+    },
+    [2607] = { -- Der Wesir
+        icon = "Interface/Icons/UI_Notoriety_TheVizier",
+    },
+    [2601] = { -- Die Weberin
+        icon = "Interface/Icons/UI_Notoriety_TheWeaver",
+    },
+    [2653] = { -- Die Kartelle von Lorenhall
+        icon = "Interface/Icons/UI_MajorFaction_Rocket",
+    },
+    [2685] = { -- Garbagio Treueclub
+        icon = "Interface/Icons/INV_Achievement_Zone_Undermine",
+    },
+    [2673] = { -- Bilgewasserkartell
+        icon = "Interface/Icons/INV_Chicken2_Mechanical",
+    },
+    [2677] = { -- Dampfdruckkartell
+        icon = "Interface/Icons/INV_Chicken2_Mechanical",
+    },
+    [2675] = { -- Schwarzmeer AG
+        icon = "Interface/Icons/INV_Chicken2_Mechanical",
+    },
+    [2671] = { -- Venture Company
+        icon = "Interface/Icons/INV_Chicken2_Mechanical",
+    },
+    [2669] = { -- Düsternisverschmolzene Lösungen
+        icon = "Interface/Icons/INV_Misc_Bomb_06",
+    },
+    -- ****************************
     --        Dragonflight
     -- ****************************
     [2564] = { -- Niffen von Loamm
-        icon = "Interface/ICONS/UI_MajorFaction_Niffen",
+        icon = "Interface/Icons/UI_MajorFaction_Niffen",
     },
     [2574] = { -- Traumwächter
-        icon = "Interface/ICONS/UI_MajorFaction_Denizens",
+        icon = "Interface/Icons/UI_MajorFaction_Denizens",
     },
     [2511] = { -- Tuskarr von Iskaara
-        icon = "Interface/ICONS/UI_MajorFaction_Tuskarr",
+        icon = "Interface/Icons/UI_MajorFaction_Tuskarr",
     },
     [2503] = { -- Zentauren der Maruuk
-        icon = "Interface/ICONS/UI_MajorFaction_Centaur",
+        icon = "Interface/Icons/UI_MajorFaction_Centaur",
     },
     [2507] = { -- Drachenschuppenexpedition
-        icon = "Interface/ICONS/UI_MajorFaction_Expedition",
+        icon = "Interface/Icons/UI_MajorFaction_Expedition",
     },
     [2615] = { -- Archive von Azeroth
-        icon = "Interface/ICONS/INV_Helm_Armor_BuckledHat_B_01_Brown",
+        icon = "Interface/Icons/INV_Helm_Armor_BuckledHat_B_01_Brown",
     },
     [2510] = { -- Valdrakkenabkommen
-        icon = "Interface/ICONS/UI_MajorFaction_Valdrakken",
+        icon = "Interface/Icons/UI_MajorFaction_Valdrakken",
     },
     [2517] = { -- Furorion
-        icon = "Interface/ICONS/INV_Artifact_DragonScales",
+        icon = "Interface/Icons/INV_Artifact_DragonScales",
     },
     [2544] = { -- Handwerkerkonsortium - Zweig der Dracheninseln
         icon = "Interface/Icons/INV_Misc_Statue_04",
     },
+    [2550] = { -- Kobaltkonvent
+        icon = "Interface/Icons/INV_Artifact_StolenPower",
+    },
+    [2518] = { -- Sabellian
+        icon = "Interface/Icons/INV_10_Skinning_DragonScales_Black",
+    },
+    [2553] = { -- Soridormi
+        icon = "Interface/Icons/INV_Shield_TimeWalker_B_01",
+    },
+    [2568] = { -- Glimmeroggrenner
+        icon = "Interface/Icons/INV_SnailrockMount_Pink",
+    },
+    [2526] = { -- Winterpelzfurbolgs
+        icon = "Interface/Icons/INV_10_Misc_WinterpeltFurbolg_Totem",
+    },
     -- ****************************
-    --       The War Within
+    --        Shadowlands
     -- ****************************
-    [2570] = { -- Arathi von Heilsturz
-        icon = "Interface/ICONS/UI_MajorFaction_Flame",
+    [2472] = { -- Der Archivarskodex
+        icon = "Interface/Icons/INV_Inscription_80_Scroll",
     },
-    [2658] = { -- Der Bund von K'aresh
-        icon = "Interface/ICONS/UI_MajorFaction_ Karesh",
+    [2407] = { -- Die Aufgestiegenen
+        icon = "Interface/Icons/INV_Tabard_Bastion_D_01",
     },
-    [2594] = { -- Der Konvent der Tiefen
-        icon = "Interface/ICONS/UI_MajorFaction_Candle",
+    [2439] = { -- Die Eingeschworenen
+        icon = "Interface/Icons/Spell_AnimaRevendreth_Buff",
     },
-    [2688] = { -- Die Strahlen der Flamme
-        icon = "Interface/ICONS/UI_MajorFaction_ Nightfall",
+    [2478] = { -- Die Erleuchteten
+        icon = "Interface/Icons/Achievement_Reputation_EnlightenedBrokers",
     },
-    [2590] = { -- Rat von Dornogal
-        icon = "Interface/ICONS/UI_MajorFaction_Storm",
+    [2410] = { -- Die Unvergängliche Armee
+        icon = "Interface/Icons/INV_Tabard_Maldraxxus_D_01",
     },
-    [2736] = { -- Vandalen der Manaschmiede
-        icon = "Interface/ICONS/INV_112_Achievement_Raid_ManaforgeOmega",
-    },
-    [2640] = { -- Brann Bronzebart
-        -- icon = "Interface/ICONS/UI_Delves",
-        icon = "Interface/ICONS/INV_Helm_Armor_BuckledHat_B_01_Brown",
-    },
-    [2600] = { -- Die Durchtrennten Fäden
-        icon = "Interface/ICONS/UI_MajorFaction_Web",
-    },
-    [2605] = { -- Der General
-        icon = "Interface/ICONS/UI_Notoriety_TheGeneral",
-    },
-    [2607] = { -- Der Wesir
-        icon = "Interface/ICONS/UI_Notoriety_TheVizier",
-    },
-    [2601] = { -- Die Weberin
-        icon = "Interface/ICONS/UI_Notoriety_TheWeaver",
-    },
-    [2653] = { -- Die Kartelle von Lorenhall
-        icon = "Interface/ICONS/UI_MajorFaction_Rocket",
-    },
-    [2685] = { -- Garbagio Treueclub
-        icon = "Interface/ICONS/INV_Achievement_Zone_Undermine",
-    },
-    [2673] = { -- Bilgewasserkartell
-        icon = "Interface/ICONS/INV_Chicken2_Mechanical",
-    },
-    [2677] = { -- Dampfdruckkartell
-        icon = "Interface/ICONS/INV_Chicken2_Mechanical",
-    },
-    [2675] = { -- Schwarzmeer AG
-        icon = "Interface/ICONS/INV_Chicken2_Mechanical",
-    },
-    [2671] = { -- Venture Company
-        icon = "Interface/ICONS/INV_Chicken2_Mechanical",
-    },
-    [2669] = { -- Düsternisverschmolzene Lösungen
-        icon = "Interface/ICONS/INV_Misc_Bomb_06",
+    [2465] = { -- Die Wilde Jagd
+        icon = "Interface/Icons/INV_Tabard_Ardenweald_D_01",
     },
 }
 

@@ -1,9 +1,3 @@
-> This addon is a custom fork of the original revised Titan Reputation addon. The original addon was created by 
-> Aquator and PapaSolDragon and is maintained by [lvaria](https://github.com/Ivaria). The original addon can be 
-> found [here](https://www.curseforge.com/wow/addons/titanrep).
-
-<br>
-
 <h1 align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation.png?raw=true" width="22px;" alt="TitanReputation"/> Titan [Reputation Continued]</h1>
 
 Titan Reputation is a reputation plugin for Titan Panel. It allows you to more easily monitor and track your faction
@@ -11,33 +5,37 @@ standings with any faction you may be farming reputation with.
 
 <div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_01.png?raw=true" width="100%;"/></div>
 
-<br>
-
-<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_02.png?raw=true" width="70%;"/></div>
-
 ## Features
 
 - **Titan Panel**: Displays the faction data of a given faction in a customizable button directly on Titan Panel. 
   Toggle the Blizzard Character Reputation Page. Auto-change display of most recent changed faction.
+
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_02.png?raw=true" width="100%;"/></div>
+
 - **Tooltip information**: Quickly verify standings with factions using the customizable tooltip to display the 
   factions you care about by simply mousing over the button.
 - **Session monitoring**: Toggle session data summary which displays the total gained reputation since your last 
   login/reload as well as a Reputation breakdown (per hour / per min).
-- **Faction standing announcements**: Announce your faction standing changes in a local raid warning.
-- **MikScrollingBattleText**: Mik's Scrolling Battle Text support for faction standing change announcement.
+
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_06.png?raw=true" width="100%;"/></div>
+
 - **Reputation Color Highlighting**: Color Coding based on faction standings, built in color scheme, armory color
   scheme, or a generic basic colors solution.
-- ***[Currently not supported]*** **Achievement style announcements**: Upon a faction standing change display a
+- **Achievement style announcements**: Upon a faction standing change display a
   achievements style message with the faction name and the new standing level. This makes those reputation grinds
   a bit more eventful and can be toggled on/off for those minimalists out there.
 
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_05.png?raw=true" width="100%;"/></div>
+
+- **MikScrollingBattleText**: Mik's Scrolling Battle Text support for faction standing change announcement.
+
 ### Button Customization Options:
  
-<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_03.png?raw=true" width="70%;"/></div>
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_03.png?raw=true" width="100%;"/></div>
 
 ### Tooltip Customization Options:
 
-<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_04.png?raw=true" width="70%;"/></div>
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_04.png?raw=true" width="100%;"/></div>
 
 ### Additional Feature
 
@@ -69,3 +67,7 @@ faction with this flag enabled.
 *Lastly, the majority of the work on this addon is Aquator's. He was kind enough to get the ball rolling on this 
 addon and I picked it up when he was no longer able to. I will continue to keep this addon running as long as I 
 am capable. I'd like to thank him for all his work.* - PapaSolDragon (Original Author)
+
+> This addon is a custom fork of the original revised Titan Reputation addon. The original addon was created by 
+> Aquator and PapaSolDragon and is maintained by [lvaria](https://github.com/Ivaria). The original addon can be 
+> found [here](https://www.curseforge.com/wow/addons/titanrep).

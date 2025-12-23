@@ -134,6 +134,20 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
         2456,                                                                -- Dromanin Aliothe
         2450,                                                                -- Alexandros Mograine
     })
+
+    -- ****************************
+    --      Battle for Azeroth
+    -- ****************************
+    SetIcon("INV_FACTION_83_ULDUMACCORD", { 2417 })             -- Abkommen von Uldum
+    SetIcon("INV_Faction_Championsofazeroth", { 2164 })         -- Champions von Azeroth
+    SetIcon("INV_Tabard_HordeWarEffort", { 2157 })              -- Die Eidgebundenen
+    SetIcon("INV_Faction_Unshackled", { 2373 })                 -- Die Entfesselten
+    SetIcon("INV_FACTION_83_RAJANI", { 2415 })                  -- Rajani
+    SetIcon("INV_Mechagon_JunkyardTinkeringCrafting", { 2391 }) -- Rostbolzenwiderstand
+    SetIcon("INV_Faction_TalanjisExpedition", { 2156 })         -- Talanjis Expedition
+    SetIcon("INV_Faction_TortollanSeekers", { 2163 })           -- Tortollanische Sucher
+    SetIcon("INV_Faction_Voldunai", { 2158 })                   -- Voldunai
+    SetIcon("INV_Faction_ZandalariEmpire", { 2103 })            -- Zandalariimperium
 end
 
 ---

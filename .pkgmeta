@@ -8,5 +8,6 @@ ignore:
   - README.md
   - src/types.lua
   - "*.png"
+  - resources/
 
 changelog-title: "Titan [Reputation Continued]"

@@ -148,6 +148,29 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
     SetIcon("INV_Faction_TortollanSeekers", { 2163 })           -- Tortollanische Sucher
     SetIcon("INV_Faction_Voldunai", { 2158 })                   -- Voldunai
     SetIcon("INV_Faction_ZandalariEmpire", { 2103 })            -- Zandalariimperium
+
+    -- ****************************
+    --            Legion
+    -- ****************************
+    SetIcon("Achievement_Admiral_of_the_Light", { 2165 })       -- Armee des Lichts
+    SetIcon("Spell_Shadow_DemonicCircleTeleport", { 1975 })     -- Beschwörer Margoss
+    SetIcon("Achievement_Reputation_WyrmrestTemple", { 2135 })  -- Chromie
+    SetIcon("INV_Legion_Faction_ArgussianReach", { 2170 })      -- Der Argusvorstoß
+    SetIcon("INV_Legion_Faction_HightmountainTribes", { 1828 }) -- Der Hochbergstamm
+    SetIcon("INV_Legion_Faction_Legionfall", { 2045 })          -- Die Legionsrichter
+    SetIcon("INV_Legion_Faction_NightFallen", { 1859 })         -- Die Nachtsüchtigen
+    SetIcon("INV_Legion_Faction_DreamWeavers", { 1883 })        -- Die Traumweber
+    SetIcon("INV_Legion_Faction_Warden", { 1894 })              -- Die Wächterinnen
+    SetIcon("INV_Legion_Faction_CourtofFarnodis", { 1900 })     -- Farondis' Hofstaat
+    SetIcon("Achievement_Profession_Fishing_OldManBarlowned", {
+        2097,                                                   -- Ilyssia von den Wassern
+        2098,                                                   -- Hüterin Raynae
+        2099,                                                   -- Akule Flusshorn
+        2100,                                                   -- Corbyn
+        2101,                                                   -- Sha'leth
+        2102                                                    -- Wichtlus
+    })
+    SetIcon("INV_Legion_Faction_Valarjar", { 1948 })            -- Valarjar
 end
 
 ---

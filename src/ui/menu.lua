@@ -1,5 +1,6 @@
 local _, TitanPanelReputation = ...
 
+local WoW3 = select(4, GetBuildInfo()) >= 30000
 local WoW5 = select(4, GetBuildInfo()) >= 50000
 
 local dropdownSeedFrame
@@ -472,7 +473,10 @@ function TitanPanelRightClickMenu_PrepareReputationMenu()
     TitanPanelRightClickMenu_AddTitle2(TitanPlugins[TitanPanelReputation.ID].menuText)
     -- Toggle Options
     TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_AUTO_CHANGE"), savedVar = "AutoChange" })
-    TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), savedVar = "ShowAnnounceFrame" })
+    -- Achievement-style toasts require the Achievement system (WotLK+).
+    if WoW3 then
+        TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), savedVar = "ShowAnnounceFrame" })
+    end
     if (C_AddOns.IsAddOnLoaded("MikScrollingBattleText")) then
         TitanPanelRightClickMenu_AddToggleVar2({ label = TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_MIK"), savedVar = "ShowAnnounceMik" })
     end

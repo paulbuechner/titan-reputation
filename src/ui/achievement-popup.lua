@@ -1,5 +1,6 @@
 local _, TitanPanelReputation = ...
 
+local WoW3 = select(4, GetBuildInfo()) >= 30000
 local WoW10 = select(4, GetBuildInfo()) >= 100000
 
 local TextureKitConstants = _G.TextureKitConstants
@@ -11,6 +12,14 @@ local function EnsureAchievementUI()
 end
 
 local function GetAchievementAlertSystem()
+    -- No achievements / no achievement toast system before WotLK.
+    if not WoW3 then
+        return nil
+    end
+    if not _G.AlertFrame or type(_G.AlertFrame.AddQueuedAlertFrameSubSystem) ~= "function" then
+        return nil
+    end
+
     if TitanPanelReputation.AchievementAlertSystem then
         return TitanPanelReputation.AchievementAlertSystem
     end
@@ -116,6 +125,7 @@ end
 
 function TitanPanelReputation:ShowStandingAchievement(payload)
     local system = GetAchievementAlertSystem()
+    if not system then return end
     if not payload then return end
     system:AddAlert(payload)
     PlaySound(12891)

@@ -1,5 +1,6 @@
 local _, TitanPanelReputation = ...
 
+local WoW3 = select(4, GetBuildInfo()) >= 30000
 local WoW5 = select(4, GetBuildInfo()) >= 50000
 local WoW10 = select(4, GetBuildInfo()) >= 100000
 
@@ -185,7 +186,8 @@ local function BuildStandingAlertPayload(params)
 end
 
 local function DispatchReputationAnnouncement(message, alertPayload)
-    if TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") and alertPayload then
+    -- Achievement-style toasts require the Achievement system (WotLK+).
+    if WoW3 and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") and alertPayload then
         TitanPanelReputation:ShowStandingAchievement(alertPayload)
     end
 
@@ -225,6 +227,9 @@ end
 
 function TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
     if not factionDetails or not TitanPanelReputation:IsDebugEnabled() then
+        return
+    end
+    if not WoW3 then
         return
     end
 

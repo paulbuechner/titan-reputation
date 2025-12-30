@@ -171,6 +171,25 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
         2102                                                    -- Wichtlus
     })
     SetIcon("INV_Legion_Faction_Valarjar", { 1948 })            -- Valarjar
+
+    -- ****************************
+    --     Warlords of Draenor
+    -- ****************************
+    SetIcon("INV_Tabard_A_76ArakkoaOutcast", { 1515 }) -- Ausgestoßene Arakkoa
+    SetIcon("Achievement_Zone_Tanaanjungle", { 1850 }) -- Die Säbelzahnpirscher
+    SetIcon("INV_Tabard_A_01FrostwolfClan", { 1445 })  -- Frostwolforcs
+    SetIcon("INV_Tabard_A_80LaughingSkull", { 1708 })  -- Orcs des Lachenden Schädels
+    SetIcon("Achievement_Zone_Tanaanjungle", { 1849 }) -- Orden der Erwachten
+    SetIcon("Achievement_Zone_Tanaanjungle", { 1848 }) -- Vol'jins Kopfjäger
+    SetIcon("achievement_Goblinhead", { 1711 })        -- Werterhaltungsgesellschaft des Dampfdruckkartells
+    SetIcon("INV_Tabard_A_81Exarchs", { 1731 })        -- Exarchenrat
+    SetIcon("Achievement_Zone_Tanaanjungle", { 1847 }) -- Hand des Propheten
+    SetIcon("INV_Tabard_A_ShatariDefense", { 1710 })   -- Sha'tarverteidigung
+    SetIcon("INV_Feather_01", { 1735 })                -- Kasernenleibwächter
+    -- SetIcon("...", { 1520 })                        -- Exilanten des Schattenmondklans (Can't raise standing with this faction)
+    SetIcon("INV_Tabard_A_77VoljinsSpear", { 1681 })   -- Vol'jins Speer
+    SetIcon("INV_Tabard_A_78WrynnVanguard", { 1682 })  -- Wrynns Vorhut
+    -- SetIcon("achievement_Goblinhead", { 1732 })     -- Draenorexpedition des Dampfdruckkartells (Can't raise standing with this faction)
 end
 
 ---

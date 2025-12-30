@@ -35,6 +35,7 @@ standings with any faction you may be farming reputation with.
 - **Blizzard Inactive Faction Support**: If you wish to omit a faction from the tooltip entirely. Simply visit the
   Blizzard Reputation Pane and set the faction to be "Move to Inactive". The tooltip's behavior will not process
   any faction with this flag enabled.
+
   > **Note**: When using the Blizzard Reputation Pane, you should be aware that collapsing groups in this pane
   > affects the ability of the plugin to gather data from the factions in the collapsed group.
 

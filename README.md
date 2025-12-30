@@ -1,50 +1,42 @@
 <h1 align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation.png?raw=true" width="22px;" alt="TitanReputation"/> Titan [Reputation Continued]</h1>
 
 Titan Reputation is a reputation plugin for Titan Panel. It allows you to more easily monitor and track your faction
-standings with any faction you may be farming reputation with. 
+standings with any faction you may be farming reputation with.
 
 <div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_01.png?raw=true" width="100%;"/></div>
 
 ## Features
 
-- **Titan Panel**: Displays the faction data of a given faction in a customizable button directly on Titan Panel. 
-  Toggle the Blizzard Character Reputation Page. Auto-change display of most recent changed faction.
+- **Titan Panel**: Displays the faction data of a given faction in a customizable button directly on Titan Panel.
+  Toggle the Blizzard Character Reputation Page. Auto-change display of the most recently changed faction.
 
 <div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_02.png?raw=true" width="100%;"/></div>
 
-- **Tooltip information**: Quickly verify standings with factions using the customizable tooltip to display the 
+- **Tooltip information**: Quickly verify standings with factions using the customizable tooltip to display the
   factions you care about by simply mousing over the button.
-- **Session monitoring**: Toggle session data summary which displays the total gained reputation since your last 
+- **Session monitoring**: Toggle session data summary, which displays the total gained reputation since your last
   login/reload as well as a Reputation breakdown (per hour / per min).
 
 <div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_06.png?raw=true" width="100%;"/></div>
 
-- **Reputation Color Highlighting**: Color Coding based on faction standings, built in color scheme, armory color
+- **Customization Options**: Customize the appearance of the button and tooltip to fit your needs.
+ 
+<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_07.png?raw=true" width="100%;"/></div>
+
+- **Reputation Color Highlighting**: Color Coding based on faction standings, built-in color scheme, armory color
   scheme, or a generic basic colors solution.
-- **Achievement style announcements**: Upon a faction standing change display a
-  achievements style message with the faction name and the new standing level. This makes those reputation grinds
-  a bit more eventful and can be toggled on/off for those minimalists out there.
+- **Achievement style announcements**: Upon a faction standing change, display a achievements style message with
+  the faction name and the new standing level. This makes those reputation grinds a bit more eventful and can be
+  toggled on/off for those minimalists out there.
 
 <div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_05.png?raw=true" width="100%;"/></div>
 
 - **MikScrollingBattleText**: Mik's Scrolling Battle Text support for faction standing change announcement.
-
-### Button Customization Options:
- 
-<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_03.png?raw=true" width="100%;"/></div>
-
-### Tooltip Customization Options:
-
-<div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_04.png?raw=true" width="100%;"/></div>
-
-### Additional Feature
-
-**Blizzard Inactive Faction Support**: If you wish to omit a faction from the tooltip entirely. Simply visit the 
-Blizzard Reputation Pane and set the faction to be "Move to Inactive". The tooltip's behavior will not process any 
-faction with this flag enabled.
-
-> **Note**: When using the Blizzard Reputation Pane you should be aware that collapses groups in this pane, effects
-> the ability of the plugin to gather data from the factions in the collapsed group.
+- **Blizzard Inactive Faction Support**: If you wish to omit a faction from the tooltip entirely. Simply visit the
+  Blizzard Reputation Pane and set the faction to be "Move to Inactive". The tooltip's behavior will not process
+  any faction with this flag enabled.
+  > **Note**: When using the Blizzard Reputation Pane, you should be aware that collapsing groups in this pane
+  > affects the ability of the plugin to gather data from the factions in the collapsed group.
 
 ## Contributors
 
@@ -64,8 +56,8 @@ faction with this flag enabled.
 
 ### Special Thanks
 
-*Lastly, the majority of the work on this addon is Aquator's. He was kind enough to get the ball rolling on this 
-addon and I picked it up when he was no longer able to. I will continue to keep this addon running as long as I 
+*Lastly, the majority of the work on this addon is Aquator's. He was kind enough to get the ball rolling on this
+addon, and I picked it up when he was no longer able to. I will continue to keep this addon running as long as I
 am capable. I'd like to thank him for all his work.* - PapaSolDragon (Original Author)
 
 > This addon is a custom fork of the original revised Titan Reputation addon. The original addon was created by 

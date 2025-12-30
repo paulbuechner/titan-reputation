@@ -190,6 +190,39 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
     SetIcon("INV_Tabard_A_77VoljinsSpear", { 1681 })   -- Vol'jins Speer
     SetIcon("INV_Tabard_A_78WrynnVanguard", { 1682 })  -- Wrynns Vorhut
     -- SetIcon("achievement_Goblinhead", { 1732 })     -- Draenorexpedition des Dampfdruckkartells (Can't raise standing with this faction)
+
+    -- ****************************
+    --      Mists of Pandaria
+    -- ****************************
+    SetIcon("INV_Legendary_TheBlackPrince", { 1359 })           -- Der Schwarze Prinz
+    SetIcon("Achievement_Faction_Celestials", { 1341 })         -- Die Himmlischen Erhabenen
+    SetIcon("Achievement_Faction_Klaxxi", { 1337 })             -- Die Klaxxi
+    SetIcon("Achievement_Faction_LoreWalkers", { 1345 })        -- Die Lehrensucher
+    SetIcon("Achievement_Faction_GoldenLotus", { 1269 })        -- Goldener Lotus
+    SetIcon("Achievement_General_HordeSlayer", { 1375 })        -- Herrschaftsoffensive
+    SetIcon("ability_Monk_QuiPunch", { 1492 })                  -- Kaiser Shaohao
+    SetIcon("Achievement_Faction_SerpentRiders", { 1271 })      -- Orden der Wolkenschlange
+    SetIcon("Achievement_Faction_ShadoPan", { 1270 })           -- Shado-Pan
+    SetIcon("Achievement_Faction_ShadoPan_Assault", { 1435 })   -- Shado-Pan-Vorstoß
+    SetIcon("Achievement_KirinTor_Offensive", { 1387 })         -- Kirin Tor Offensive
+    SetIcon("Achievement_Faction_SunreaverOnslaught", { 1388 }) -- Sonnenhäscheransturm
+    SetIcon("Ability_Hunter_AspectOfTheMonkey", { 1228 })       -- Wald-Ho-zen
+    SetIcon("INV_Misc_DeepJinyuCaster", { 1242 })               -- Jinyu der Perlflossen
+    SetIcon("Achievement_Faction_Tillers", {
+        1272,                                                   -- Die Ackerbauern
+        1280,                                                   -- Tina Lehmkrall
+        1275,                                                   -- Ella
+        1281,                                                   -- Gina Lehmkrall
+        1283,                                                   -- Bauer Fung
+        1273,                                                   -- Jogu der Betrunkene
+        1278,                                                   -- Sho
+        1279,                                                   -- Haohan Lehmkrall
+        1276,                                                   -- Der alte Hügelpranke
+        1277,                                                   -- Chi-Chi
+        1282                                                    -- Fischi Rohrroder
+    })
+    SetIcon("Achievement_Faction_Anglers", { 1302 })            -- Die Angler
+    SetIcon("INV_Helmet_50", { 1358 })                          -- Nat Pagle
 end
 
 ---

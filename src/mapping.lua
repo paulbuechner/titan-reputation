@@ -237,7 +237,28 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
     SetIcon("INV_Misc_Tabard_WildHammerClan", { 1174 })   -- Wildhammerklan
     SetIcon("INV_Misc_Tabard_BaradinWardens", { 1177 })   -- Wächter von Baradin
 
-
+    -- ****************************
+    --    Wrath of the Lich King
+    -- ****************************
+    SetIcon("INV_Jewelry_Talisman_08", { 1106 })                      -- Argentumkreuzzug
+    SetIcon("INV_Jewelry_Talisman_08", { 1156 })                      -- Das Äscherne Verdikt
+    SetIcon("Achievement_Reputation_WyrmrestTemple", { 1091 })        -- Der Wyrmruhpakt
+    SetIcon("Achievement_Reputation_Tuskarr", { 1073 })               -- Die Kalu'ak
+    SetIcon("INV_Tabard_SonsofHodir_B_01", { 1119 })                  -- Die Söhne Hodirs
+    SetIcon("Achievement_Reputation_KirinTor", { 1090 })              -- Kirin Tor
+    SetIcon("Achievement_Reputation_KnightsoftheEbonBlade", { 1098 }) -- Ritter der Schwarzen Klinge
+    SetIcon("Spell_Misc_HellifrePVPThrallmarFavor", { 1052 })         -- Expedition der Horde
+    SetIcon("INV_Misc_Tabard_Forsaken", { 1067 })                     -- Die Hand der Rache
+    SetIcon("INV_Elemental_Primal_Nether", { 1124 })                  -- Die Sonnenhäscher
+    SetIcon("Spell_Misc_HellifrePVPThrallmarFavor", { 1064 })         -- Die Taunka
+    SetIcon("Spell_Misc_HellifrePVPThrallmarFavor", { 1085 })         -- Kriegshymnenoffensive
+    SetIcon("INV_Misc_Head_Murloc_01", { 1105 })                      -- Die Orakel
+    SetIcon("Spell_Nature_MirrorImage", { 1104 })                     -- Stamm der Wildherzen
+    SetIcon("INV_Elemental_Primal_Mana", { 1094 })                    -- Der Silberbund
+    SetIcon("Spell_Misc_HellifrePVPHonorHoldFavor", { 1050 })         -- Expedition Valianz
+    SetIcon("Spell_Misc_HellifrePVPHonorHoldFavor", { 1037 })         -- Vorhut der Allianz
+    SetIcon("Spell_Misc_HellifrePVPHonorHoldFavor", { 1126 })         -- Die Frosterben
+    SetIcon("Spell_Misc_HellifrePVPHonorHoldFavor", { 1068 })         -- Forscherliga
 
 
     SetIcon("INV_Misc_Tabard_Gilneas", { 1134 }) -- Gilneas

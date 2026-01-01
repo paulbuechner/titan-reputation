@@ -223,6 +223,24 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
     })
     SetIcon("Achievement_Faction_Anglers", { 1302 })            -- Die Angler
     SetIcon("INV_Helmet_50", { 1358 })                          -- Nat Pagle
+
+    -- ****************************
+    --          Cataclysm
+    -- ****************************
+    SetIcon("INV_Misc_Tabard_EarthenRing", { 1135 })      -- Der Irdene Ring
+    SetIcon("INV_Misc_Tabard_DragonMawClan", { 1172 })    -- Drachenmalklan
+    SetIcon("INV_Neck_HyjalDaily_04", { 1204 })           -- Rächer des Hyjal
+    SetIcon("INV_Misc_Tabard_Tolvir", { 1173 })           -- Ramkahen
+    SetIcon("INV_Misc_Tabard_Therazane", { 1171 })        -- Therazane
+    SetIcon("INV_Misc_Tabard_GuardiansofHyjal", { 1158 }) -- Wächter des Hyjal
+    SetIcon("INV_Misc_Tabard_HellScream", { 1178 })       -- Höllschreis Hand
+    SetIcon("INV_Misc_Tabard_WildHammerClan", { 1174 })   -- Wildhammerklan
+    SetIcon("INV_Misc_Tabard_BaradinWardens", { 1177 })   -- Wächter von Baradin
+
+
+
+
+    SetIcon("INV_Misc_Tabard_Gilneas", { 1134 }) -- Gilneas
 end
 
 ---

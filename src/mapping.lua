@@ -22,6 +22,8 @@ local _, TitanPanelReputation = ...
 ---  - achievement ID
 ---  - icon (usually a fileID number in Retail)
 ---
+---Wowhead Reputation Achievement Browser: https://www.wowhead.com/de/achievements/character-achievements/reputation#
+---
 ---To translate a fileID to a path (for building `FACTION_MAPPING[*].icon`), use: `resources/ArtTextureID.lua`
 ---(search for the fileID; it contains fileID → path mappings)
 ---
@@ -260,8 +262,34 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
     SetIcon("Spell_Misc_HellifrePVPHonorHoldFavor", { 1126 })         -- Die Frosterben
     SetIcon("Spell_Misc_HellifrePVPHonorHoldFavor", { 1068 })         -- Forscherliga
 
+    -- ****************************
+    --     The Burning Crusade
+    -- ****************************
+    SetIcon("INV_Enchant_ShardPrismaticLarge", { 933 })             -- Das Konsortium
+    SetIcon("Spell_Holy_MindSooth", { 967 })                        -- Das Violette Auge
+    SetIcon("INV_Misc_Foot_Centaur", { 941 })                       -- Die Mag'har
+    SetIcon("Achievement_Reputation_AshtongueDeathsworn", { 1012 }) -- Die Todeshörigen
+    SetIcon("INV_Enchant_DustIllusion", { 990 })                    -- Die Wächter der Sande
+    SetIcon("Ability_Racial_Ultravision", { 942 })                  -- Expedition des Cenarius
+    SetIcon("SPELL_HOLY_BORROWEDTIME", { 989 })                     -- Hüter der Zeit
+    SetIcon("Ability_Mount_NetherdrakePurple", { 1015 })            -- Netherschwingen
+    SetIcon("INV_Misc_Apexis_Crystal", { 1038 })                    -- Ogri'la
+    SetIcon("INV_Mushroom_11", { 970 })                             -- Sporeggar
+    SetIcon("Achievement_Zone_HellfirePeninsula_01", { 947 })       -- Thrallmar
+    SetIcon("Achievement_Zone_IsleOfQuelDanas", { 922 })            -- Tristessa
+    SetIcon("Spell_Arcane_PortalShattrath", { 932 })                -- Die Aldor
+    SetIcon("Spell_Arcane_PortalShattrath", { 934 })                -- Die Seher
+    SetIcon("Spell_Arcane_PortalShattrath", { 935 })                -- Die Sha'tar
+    SetIcon("Ability_Hunter_Pet_NetherRay", { 1031 })               -- Himmelswache der Sha'tari
+    SetIcon("INV_Shield_48", { 1077 })                              -- Offensive der Zerschmetterten Sonne
+    SetIcon("Achievement_Zone_Terrokar", { 1011 })                  -- Unteres Viertel
+    SetIcon("Achievement_Zone_HellfirePeninsula_01", { 946 })       -- Ehrenfeste
+    SetIcon("Spell_Holy_MindSooth", { 967 })                        -- Das Violette Auge
+    SetIcon("INV_Misc_Foot_Centaur", { 978 })                       -- Kurenai
 
-    SetIcon("INV_Misc_Tabard_Gilneas", { 1134 }) -- Gilneas
+
+    SetIcon("Inv_Misc_Tournaments_Symbol_BloodElf", { 911 }) -- Silbermond
+    SetIcon("INV_Misc_Tabard_Gilneas", { 1134 })             -- Gilneas
 end
 
 ---

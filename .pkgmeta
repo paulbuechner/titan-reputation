@@ -8,6 +8,7 @@ ignore:
   - README.md
   - src/types.lua
   - "*.png"
+  - "*.afphoto"
   - resources/ArtTextureID.lua
 
 changelog-title: "Titan [Reputation Continued]"

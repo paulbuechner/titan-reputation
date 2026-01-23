@@ -242,6 +242,7 @@ function TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
         factionDetails.standingID,
         factionDetails.friendShipReputationInfo,
         factionDetails.topValue,
+        factionDetails.paragonProgressStarted,
         true
     )
     if not adjusted then
@@ -711,16 +712,17 @@ end
 ---@param factionDetails FactionDetails
 local function HandleFactionUpdate(factionDetails)
     -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID =
+    local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID, paragonProgressStarted =
         factionDetails.name,
         factionDetails.standingID,
         factionDetails.topValue,
         factionDetails.earnedValue,
         factionDetails.friendShipReputationInfo,
-        factionDetails.factionID
+        factionDetails.factionID,
+        factionDetails.paragonProgressStarted
 
     -- Get adjusted ID and label depending on the faction type
-    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue, true)
+    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, true)
     if not adjusted then return end -- Return if adjusted is nil (is friendship && 'ShowFriendsOnBar' is disabled)
 
     -- Guard: Check if factionID is present in `TitanPanelReputation.TABLE`
@@ -807,11 +809,25 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
             earnedValue = earnedValue - bottomValue
             bottomValue = 0
 
+            -- Used to determine if the player has started the paragon progress for the current faction
+            local paragonProgressStarted = false
+
             -- Fetch friendship reputation info
             local friendShipReputationInfo = nil
             if C_GossipInfo.GetFriendshipReputation(factionID) and C_GossipInfo.GetFriendshipReputation(factionID).friendshipFactionID > 0 then
                 friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
             end
+
+            -- /run DevTools_Dump(C_GossipInfo.GetFriendshipReputation(2432))
+            -- /run print(C_Reputation.IsFactionParagon(2432))
+            -- /run print(C_Reputation.IsMajorFaction(2432))
+            -- /run print(C_Reputation.GetFactionParagonInfo(2432))
+
+            -- /run DevTools_Dump(C_GossipInfo.GetFriendshipReputation(2164))
+            -- /run print(C_Reputation.IsFactionParagon(2164))
+            -- /run print(C_Reputation.IsMajorFaction(2164))
+            -- /run print(C_Reputation.GetFactionParagonInfo(2164))
+            -- /run DevTools_Dump(C_Reputation.GetFactionDataByIndex(45))
 
             --[[ --------------------------------------------------------
                     Handle Paragon, Renown and Friendship factions
@@ -819,7 +835,7 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
             if (WoW10) then
                 if (C_Reputation.IsFactionParagon(factionID)) then -- Paragon
                     -- Get faction paragon info
-                    local currentValue, threshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID)
+                    local currentValue, threshold, rewardQuestID, hasRewardPending, tooLowLevelForParagon, paragonStorageLevel = C_Reputation.GetFactionParagonInfo(factionID)
                     if currentValue then -- May be nil
                         -- Set the top value to the paragon threshold
                         topValue = threshold
@@ -839,6 +855,11 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
                         -- ... E.g. 25000 - (2 * 10000) = 5000, 38000 - (3 * 10000) = 8000, etc.
                         local adjustedValue = currentValue - (offsetLevel * threshold)
                         earnedValue = adjustedValue
+
+                        if currentValue ~= 0 then
+                            -- If the current value is not 0, the player has started the paragon progress for the current faction
+                            paragonProgressStarted = true
+                        end
                     end
                 elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
                     -- Get the renown faction data
@@ -943,6 +964,7 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
                 friendShipReputationInfo = friendShipReputationInfo,
                 factionID = factionID,
                 hasBonusRepGain = hasBonusRepGain or false,
+                paragonProgressStarted = paragonProgressStarted or false,
                 headerLevel = headerLevel,
                 headerPath = headerPath
             }

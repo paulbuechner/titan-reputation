@@ -37,7 +37,7 @@ end
 ---@param factionDetails FactionDetails
 local function BuildFactionTooltipInfo(factionDetails)
     -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, headerLevel, headerPath =
+    local name, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, paragonProgressStarted, headerLevel, headerPath =
         factionDetails.name,
         factionDetails.standingID,
         factionDetails.topValue,
@@ -48,12 +48,13 @@ local function BuildFactionTooltipInfo(factionDetails)
         factionDetails.hasRep,
         factionDetails.friendShipReputationInfo,
         factionDetails.factionID,
+        factionDetails.paragonProgressStarted,
         factionDetails.headerLevel,
         factionDetails.headerPath
 
     -- Get adjusted ID and label depending on the faction type
     local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
-        factionID, standingID, friendShipReputationInfo, topValue)
+        factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, false)
     -- Destructure props from AdjustedIDAndLabel
     local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 
@@ -153,9 +154,9 @@ local function BuildFactionTooltipInfo(factionDetails)
                 TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. indentPrefix .. preface
                 if (adjustedID == 8 or topValue == 1000 or topValue == 0) then
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
-                        TitanUtils_GetColoredText(name, TitanPanelReputation.BARCOLORS[8]) .. postface .. "\t"
+                        TitanUtils_GetColoredText(name, TitanPanelReputation.BARCOLORS[adjustedID]) .. postface .. "\t"
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
-                        TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[8])
+                        TitanUtils_GetColoredText(LABEL, TitanPanelReputation.BARCOLORS[adjustedID])
                 else
                     TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
                         TitanUtils_GetColoredText(name, TitanPanelReputation.BARCOLORS[(adjustedID)]) .. postface .. "\t"

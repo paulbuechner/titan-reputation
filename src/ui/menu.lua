@@ -83,22 +83,23 @@ end
 ---@param factionDetails FactionDetails
 local function BuildFactionHeaderSubMenu(factionDetails)
     -- Destructure props from FactionDetails
-    local name = factionDetails.name
-    local parentName = factionDetails.parentName
-    local standingID = factionDetails.standingID
-    local topValue = factionDetails.topValue
-    local isHeader = factionDetails.isHeader
-    local hasRep = factionDetails.hasRep
-    local friendShipReputationInfo = factionDetails.friendShipReputationInfo
-    local factionID = factionDetails.factionID
+    local name, parentName, standingID, topValue, isHeader, hasRep, friendShipReputationInfo, factionID, paragonProgressStarted =
+        factionDetails.name,
+        factionDetails.parentName,
+        factionDetails.standingID,
+        factionDetails.topValue,
+        factionDetails.isHeader,
+        factionDetails.hasRep,
+        factionDetails.friendShipReputationInfo,
+        factionDetails.factionID,
+        factionDetails.paragonProgressStarted
 
     local dropdownValue = TitanPanelRightClickMenu_GetDropdMenuValue()
     local currentLevel = TitanPanelRightClickMenu_GetDropdownLevel()
 
     local function GetStandingLabel()
         local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(
-            factionID, standingID, friendShipReputationInfo, topValue
-        )
+            factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted)
         if not adjusted then
             return nil, nil
         end

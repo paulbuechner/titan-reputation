@@ -21,6 +21,7 @@
 ---@field friendShipReputationInfo FriendshipReputationInfo|nil: The friendship reputation info
 ---@field factionID number: The faction ID
 ---@field hasBonusRepGain boolean: Whether the faction has bonus reputation gain
+---@field paragonProgressStarted boolean: Whether the paragon progress for the given faction has been started
 ---@field icon string|nil: The icon texture path for the faction
 
 ---@class AdjustedIDAndLabel

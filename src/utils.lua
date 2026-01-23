@@ -64,10 +64,15 @@ end
 ---@param standingID number The current standingID for the given faction
 ---@param friendShipReputationInfo FriendshipReputationInfo|nil The friendship reputation info for the given faction
 ---@param topValue number The top value for the given faction
+---@param paragonProgressStarted boolean Whether the paragon progress for the given faction has been started
 ---@param returnOnNotShowFriendInfo? boolean Whether to return if not showing friendship info (optional, default false)
 ---@return AdjustedIDAndLabel|nil
 ---@nodiscard
-function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue,
+function TitanPanelReputation:GetAdjustedIDAndLabel(factionID,
+                                                    standingID,
+                                                    friendShipReputationInfo,
+                                                    topValue,
+                                                    paragonProgressStarted,
                                                     returnOnNotShowFriendInfo)
     local adjustedID = standingID -- use local variable to avoid overwriting the global one
     local label = getglobal("FACTION_STANDING_LABEL" .. standingID)
@@ -97,12 +102,15 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, frien
     if friendShipReputationInfo then label = friendShipReputationInfo.reaction end
 
     -- Paragon - AdjustedID = 9
-    if factionID and C_Reputation.IsFactionParagon(factionID) then
-        -- If topValue is 0 or 1000, that individual faction is paragon but their paragon
-        -- rep is tracked on another faction (e.g. "Azj Kahet" Sentinals)
-        if topValue ~= 0 and topValue ~= 1000 then
+    if factionID and C_Reputation.IsFactionParagon(factionID) and paragonProgressStarted == true then
+        if topValue == 0 or topValue == 1000 then
+            -- If topValue is 0 or 1000, that individual faction is paragon but their paragon
+            -- rep is tracked on another faction (e.g. "Azj Kahet" Sentinals)
+            label = label .. " - " .. TitanPanelReputation:GT("LID_PARAGON")
+        else
             label = TitanPanelReputation:GT("LID_PARAGON")
         end
+
         adjustedID = 9
     end
 

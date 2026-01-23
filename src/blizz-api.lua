@@ -40,11 +40,24 @@ function TitanPanelReputation:BlizzAPI_GetFactionInfo(factionIndex)
     if WoW11 then
         local factionData = C_Reputation.GetFactionDataByIndex(factionIndex)
         if factionData then
-            return factionData.name, factionData.description, factionData.reaction, factionData.currentReactionThreshold,
-                factionData.nextReactionThreshold, factionData.currentStanding, factionData.atWarWith,
-                factionData.canToggleAtWar, factionData.isHeader, factionData.isCollapsed, factionData.isHeaderWithRep,
-                factionData.isWatched, factionData.isChild, factionData.factionID, factionData.hasBonusRepGain,
-                factionData.canSetInactive, factionData.isAccountWide
+            return
+                factionData.name,
+                factionData.description,
+                factionData.reaction,
+                factionData.currentReactionThreshold,
+                factionData.nextReactionThreshold,
+                factionData.currentStanding,
+                factionData.atWarWith,
+                factionData.canToggleAtWar,
+                factionData.isHeader,
+                factionData.isCollapsed,
+                factionData.isHeaderWithRep,
+                factionData.isWatched,
+                factionData.isChild,
+                factionData.factionID,
+                factionData.hasBonusRepGain,
+                factionData.canSetInactive,
+                factionData.isAccountWide
         end
     else
         return GetFactionInfo(factionIndex)

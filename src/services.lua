@@ -710,7 +710,7 @@ end
 ---Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
 ---
 ---@param factionDetails FactionDetails
-local function HandleFactionUpdate(factionDetails)
+local function HandleFactionUpdate(factionDetails, isNewDiscovered)
     -- Destructure props from FactionDetails
     local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID, paragonProgressStarted =
         factionDetails.name,
@@ -727,8 +727,8 @@ local function HandleFactionUpdate(factionDetails)
 
     -- Guard: Check if factionID is present in `TitanPanelReputation.TABLE`
     if not TitanPanelReputation.TABLE[factionID] then
-        -- If the faction has an earned amount and is not in the table yet, announce a newly discovered faction
-        if earnedValue > 0 then
+        -- When the faction is newly discovered, show announcement
+        if isNewDiscovered then
             ShowReputationAnnouncement(name, factionID, adjusted)
         end
 
@@ -1011,11 +1011,31 @@ end
 ---Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
 ---
 function TitanPanelReputation:HandleUpdateFaction()
+    -- Dry-run: collect previously unknown factions that have an earned amount
+    local newCount = 0
+    local newFactions = {}
+    -- Only perform the dry-run scan when announcement output is enabled
+    local showAnnouncements = TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") or TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")
+    if showAnnouncements then
+        self:FactionDetailsProvider(function(details)
+            if not details or not details.factionID then return end
+            -- Only count previously-unknown factions that have earned value and are Neutral (standingID == 4)
+            if not TitanPanelReputation.TABLE[details.factionID] and details.earnedValue and details.earnedValue > 0 and details.standingID == 4 then
+                newCount = newCount + 1
+                newFactions[details.factionID] = true
+            end
+        end)
+    end
+
     self:FactionDetailsProvider(function(details)
         -- Check if the faction can be tracked
         if (not details.isHeader and details.name) or (details.isHeader and details.hasRep) then
+            -- Determine if this is the newly discovered faction detected in the dry-run
+            -- May be 2 at the same time (e.g. WotLK Horde Expedition)
+            local isNew = (newFactions[details.factionID] and (newCount == 1 or newCount == 2))
+
             -- 1. Handle the faction update
-            HandleFactionUpdate(details)
+            HandleFactionUpdate(details, isNew)
 
             -- 2. Persist the faction update
             TitanPanelReputation.TABLE[details.factionID] = {

@@ -9,6 +9,10 @@ function TitanPanelReputation:LangdeDE()
         ["LID_HOUR_SHORT"] = "h",
         ["LID_HOURS_SHORT"] = "hrs",
 
+        ["LID_TITAN_TOO_OLD_WARNING_BUTTON"] = "oder neuer erforderlich",
+        ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START"] = "Bitte aktualisiere Titan Panel auf Version",
+        ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_END"] = "oder neuer, um alle Funktionen freizuschalten.",
+
         -- Labels
         ["LID_ALL_HIDDEN_LABEL"] = "Ruf: Aus",
         ["LID_NO_FACTION_LABEL"] = "Ruf: Keine Fraktion ausgewählt",

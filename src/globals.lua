@@ -20,7 +20,7 @@ TitanPanelReputation.VERSION = TitanUtils_GetAddOnMetadata("TitanReputation", "V
 ---The title of the addon. This is used to display the title in the Titan Panel.
 ---
 ---@type string
-TitanPanelReputation.TITLE = TitanUtils_GetAddOnMetadata("TitanReputation", "Title")
+TitanPanelReputation.TITLE = "|cffffffffTitan [|cffeda55fReputation Continued|r]|r"
 
 ---
 ---The icon to use for the addon. This is used to display the icon in the Titan Panel,
@@ -35,6 +35,10 @@ TitanPanelReputation.ICON = "Interface\\AddOns\\TitanReputation\\assets\\TitanRe
 ---
 ---@type number
 TitanPanelReputation.INIT_TIME = 0
+
+---Minimum required Titan Panel version (string). Update as needed.
+---@type string
+TitanPanelReputation.MIN_TITAN_VERSION = "9.0.3"
 
 ---
 ---The time passed since TitanPanelReputation was last updated (triggered by an event).

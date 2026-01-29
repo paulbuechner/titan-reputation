@@ -31,11 +31,19 @@ end
 
 
 ---
+---Build the tooltip heading (icon + title + version) as a single string.
+---
+local function BuildTooltipHeading()
+    return "|T" .. TitanPanelReputation.ICON .. ":20|t " .. TitanPanelReputation.TITLE .. " |cff00aa00" .. (TitanPanelReputation.VERSION or "") .. "|r\n"
+end
+
+
+---
 ---Builds the tooltip faction details from the given `FactionDetails` and adds it to the
 ---tooltip text (`TitanPanelReputation.TOOLTIP_TEXT`).
 ---
 ---@param factionDetails FactionDetails
-local function BuildFactionTooltipInfo(factionDetails)
+local function BuildTooltipFactionInfo(factionDetails)
     -- Destructure props from FactionDetails
     local name, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, paragonProgressStarted, headerLevel, headerPath =
         factionDetails.name,
@@ -209,13 +217,13 @@ end
 ---
 ---@return string TitanPanelReputation.TOOLTIP_TEXT  The tooltip text
 function TitanPanelReputation:BuildTooltipText()
-    TitanPanelReputation.TOOLTIP_TEXT = ""
+    TitanPanelReputation.TOOLTIP_TEXT = BuildTooltipHeading()
     TitanPanelReputation.TOTAL_EXALTED = 0
     TitanPanelReputation.TOTAL_BESTFRIENDS = 0
     TitanPanelReputation.LAST_HEADER_PATH = {}
 
     -- Add the faction details to the tooltip text
-    TitanPanelReputation:FactionDetailsProvider(BuildFactionTooltipInfo)
+    TitanPanelReputation:FactionDetailsProvider(BuildTooltipFactionInfo)
 
     -- Build the session summary
     if (TitanGetVar(TitanPanelReputation.ID, "ShowTipSessionSummaryDuration") or TitanGetVar(TitanPanelReputation.ID, "ShowTipSessionSummaryTTL")) then
@@ -296,30 +304,6 @@ function TitanPanelReputation:BuildTooltipText()
     end
 
     return TitanPanelReputation.TOOLTIP_TEXT
-end
-
----
----Adds the given text to the tooltip
----
----@param text string The text to add to the tooltip
-function TitanPanelReputation:AddTooltipText(text)
-    if (text) then
-        -- See if the string is intended for a double column
-        for text1, text2 in string.gmatch(text, "([^\t\n]*)\t?([^\t\n]*)\n") do
-            if (text2 ~= "") then
-                -- Add as double wide
-                GameTooltip:AddDoubleLine(text1, text2)
-            elseif (text1 ~= "") then
-                -- Add single column line
-                GameTooltip:AddLine(text1)
-            else
-                if not TitanGetVar(TitanPanelReputation.ID, "MinimalTip") then
-                    -- Assume a blank line
-                    GameTooltip:AddLine("\n")
-                end
-            end
-        end
-    end
 end
 
 local oldScale; local isTooltipShowing = false

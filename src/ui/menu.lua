@@ -258,6 +258,8 @@ end
 ---of this method is important and should read `TitanPanelRightClickMenu_Prepare${TitanPanelReputation.ID}Menu`
 ---
 function TitanPanelRightClickMenu_PrepareReputationMenu()
+    if TitanPanelReputation.TITAN_TOO_OLD then return end
+
     -- Ensure the Blizzard dropdown lists exist before Titan tries to add entries
     EnsureDropDownSeeded()
 

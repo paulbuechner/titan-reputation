@@ -710,7 +710,7 @@ end
 ---Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
 ---
 ---@param factionDetails FactionDetails
-local function HandleFactionUpdate(factionDetails, isNewDiscovered)
+local function HandleFactionUpdate(factionDetails)
     -- Destructure props from FactionDetails
     local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID, paragonProgressStarted =
         factionDetails.name,
@@ -721,25 +721,18 @@ local function HandleFactionUpdate(factionDetails, isNewDiscovered)
         factionDetails.factionID,
         factionDetails.paragonProgressStarted
 
-    -- Get adjusted ID and label depending on the faction type
-    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, true)
-    if not adjusted then return end -- Return if adjusted is nil (is friendship && 'ShowFriendsOnBar' is disabled)
-
     -- Guard: Check if factionID is present in `TitanPanelReputation.TABLE`
-    if not TitanPanelReputation.TABLE[factionID] then
-        -- When the faction is newly discovered, show announcement
-        if isNewDiscovered then
-            ShowReputationAnnouncement(name, factionID, adjusted)
-        end
-
-        return
-    end
+    if not TitanPanelReputation.TABLE[factionID] then return end
 
     -- Guard: Check if standingID has not increased and earnedValue has not changed
     if TitanPanelReputation.TABLE[factionID].standingID == standingID and
         TitanPanelReputation.TABLE[factionID].earnedValue == earnedValue then
         return
     end
+
+    -- Get adjusted ID and label depending on the faction type
+    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, true)
+    if not adjusted then return end -- Return if adjusted is nil (is friendship && 'ShowFriendsOnBar' is disabled)
 
     -- Calculate the earned amount
     local earnedAmount = 0
@@ -1011,31 +1004,21 @@ end
 ---Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
 ---
 function TitanPanelReputation:HandleUpdateFaction()
-    -- Dry-run: collect previously unknown factions that have an earned amount
-    local newCount = 0
+    local newFactionsCount = 0
     local newFactions = {}
-    -- Only perform the dry-run scan when announcement output is enabled
     local showAnnouncements = TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") or TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")
-    if showAnnouncements then
-        self:FactionDetailsProvider(function(details)
-            if not details or not details.factionID then return end
-            -- Only count previously-unknown factions that have earned value and are Neutral (standingID == 4)
-            if not TitanPanelReputation.TABLE[details.factionID] and details.earnedValue and details.earnedValue > 0 and details.standingID == 4 then
-                newCount = newCount + 1
-                newFactions[details.factionID] = true
-            end
-        end)
-    end
 
     self:FactionDetailsProvider(function(details)
         -- Check if the faction can be tracked
         if (not details.isHeader and details.name) or (details.isHeader and details.hasRep) then
-            -- Determine if this is the newly discovered faction detected in the dry-run
-            -- May be 2 at the same time (e.g. WotLK Horde Expedition)
-            local isNew = (newFactions[details.factionID] and (newCount == 1 or newCount == 2))
+            -- Detect newly discovered factions (for announcement later)
+            if showAnnouncements and not TitanPanelReputation.TABLE[details.factionID] and details.earnedValue and details.earnedValue > 0 and details.standingID <= 4 then
+                newFactionsCount = newFactionsCount + 1
+                newFactions[details.factionID] = details
+            end
 
             -- 1. Handle the faction update
-            HandleFactionUpdate(details, isNew)
+            HandleFactionUpdate(details)
 
             -- 2. Persist the faction update
             TitanPanelReputation.TABLE[details.factionID] = {
@@ -1047,6 +1030,29 @@ function TitanPanelReputation:HandleUpdateFaction()
         end
     end)
 
-    -- 3. Refresh the button
+    -- 3. Announce newly discovered factions (iterate over collected newFactions)
+    -- NOTE: Max 2 factions can be discovered at once, e.g. WotLK Horde Expedition
+    -- NOTE: This will also trigger if the a reputation header is uncollapsed when it was collapsed and a reload or
+    --       fresh login was performed. This could be prevented if we persist reputation data per character in
+    --       saved variables. Because this is a rare edge case, we accept the minor annoyance.
+    local isNewFaction = (newFactionsCount == 1 or newFactionsCount == 2)
+    if showAnnouncements and isNewFaction then
+        for _, details in pairs(newFactions) do
+            local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(
+                details.factionID,
+                details.standingID,
+                details.friendShipReputationInfo,
+                details.topValue,
+                details.paragonProgressStarted,
+                true
+            )
+
+            if adjusted then
+                ShowReputationAnnouncement(details.name, details.factionID, adjusted)
+            end
+        end
+    end
+
+    -- 4. Refresh the button
     self:RefreshButtonText()
 end

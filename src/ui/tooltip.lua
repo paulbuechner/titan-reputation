@@ -15,8 +15,9 @@ local function EnsureHeaderPathPrinted(headerPath)
     for level, headerName in ipairs(headerPath) do
         if TitanPanelReputation.LAST_HEADER_PATH[level] ~= headerName then
             local indent = string.rep("  ", level - 1)
-            TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
-                "\n" .. indent .. TitanUtils_GetHighlightText(headerName) .. "\n"
+            local prefix = TitanPanelReputation.TOOLTIP_TEXT == "" and "" or "\n"
+
+            TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. prefix .. indent .. TitanUtils_GetHighlightText(headerName) .. "\n"
             TitanPanelReputation.LAST_HEADER_PATH[level] = headerName
             for trim = level + 1, #TitanPanelReputation.LAST_HEADER_PATH do
                 TitanPanelReputation.LAST_HEADER_PATH[trim] = nil
@@ -179,8 +180,7 @@ local function BuildTooltipFactionInfo(factionDetails)
                     end
                     if (TitanGetVar(TitanPanelReputation.ID, "ShowTipPercent")) then
                         TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
-                            TitanUtils_GetColoredText(percent .. "%", TitanPanelReputation.BARCOLORS[(adjustedID)]) ..
-                            " "
+                            TitanUtils_GetColoredText(percent .. "%", TitanPanelReputation.BARCOLORS[(adjustedID)]) .. " "
                     end
                     if (TitanGetVar(TitanPanelReputation.ID, "ShowTipStanding")) then
                         TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
@@ -233,15 +233,13 @@ function TitanPanelReputation:BuildTooltipText()
     if (TitanGetVar(TitanPanelReputation.ID, "ShowTipSessionSummaryDuration") or TitanGetVar(TitanPanelReputation.ID, "ShowTipSessionSummaryTTL")) then
         if (next(TitanPanelReputation.RTS) ~= nil) then -- If there are any values in the RTS table
             local sessionTime = GetTime() - TitanPanelReputation.SESSION_TIME_START
-
             local humantime = TitanPanelReputation:GetHumanReadableTime(sessionTime)
 
             TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
                 "\n" ..
                 TitanUtils_GetHighlightText(TitanPanelReputation:GT("LID_SESSION_SUMMARY") .. ":") ..
                 "\t" ..
-                TitanUtils_GetNormalText(TitanPanelReputation:GT("LID_SESSION_SUMMARY_DURATION") ..
-                    ": " .. humantime)
+                TitanUtils_GetNormalText(TitanPanelReputation:GT("LID_SESSION_SUMMARY_DURATION") .. ": " .. humantime)
 
             for f, v in pairs(TitanPanelReputation.RTS) do
                 local RPH_STRING = ""
@@ -293,18 +291,15 @@ function TitanPanelReputation:BuildTooltipText()
 
     -- Build summary of total exalted and best friends
     if (TitanGetVar(TitanPanelReputation.ID, "ShowTipExaltedTotal")) then
-        TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT ..
-            "\n" ..
-            TitanUtils_GetHighlightText(TitanPanelReputation:GT(
-                "LID_SESSION_SUMMARY_TOTAL_EXALTED_FACTIONS") .. ":") ..
-            "\t" ..
+        local prefix = TitanPanelReputation.TOOLTIP_TEXT == "" and "" or "\n"
+        TitanPanelReputation.TOOLTIP_TEXT = TitanPanelReputation.TOOLTIP_TEXT .. prefix ..
+            TitanUtils_GetHighlightText(TitanPanelReputation:GT("LID_SESSION_SUMMARY_TOTAL_EXALTED_FACTIONS") .. ":") .. "\t" ..
             TitanUtils_GetGoldText(TitanPanelReputation:GT("LID_SESSION_SUMMARY_FACTIONS") .. ": ") ..
             TitanUtils_GetGreenText(TitanPanelReputation.TOTAL_EXALTED) ..
             TitanUtils_GetGoldText(" " .. TitanPanelReputation:GT("LID_SESSION_SUMMARY_FRIENDS") .. ": ") ..
             TitanUtils_GetGreenText(TitanPanelReputation.TOTAL_BESTFRIENDS) ..
             TitanUtils_GetGoldText(" " .. TitanPanelReputation:GT("LID_SESSION_SUMMARY_TOTAL") .. ": ") ..
-            TitanUtils_GetGreenText((TitanPanelReputation.TOTAL_EXALTED + TitanPanelReputation.TOTAL_BESTFRIENDS)) ..
-            "\n"
+            TitanUtils_GetGreenText((TitanPanelReputation.TOTAL_EXALTED + TitanPanelReputation.TOTAL_BESTFRIENDS)) .. "\n"
     end
 
     return TitanPanelReputation.TOOLTIP_TEXT

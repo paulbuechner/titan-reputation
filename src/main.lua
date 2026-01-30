@@ -1,5 +1,19 @@
 local ADDON_NAME, TitanPanelReputation = ...
 
+local required = TitanPanelReputation.MIN_TITAN_VERSION
+local titanVersion = TitanUtils_GetAddOnMetadata("Titan", "Version")
+
+if titanVersion and TitanPanelReputation:IsVersionLower(titanVersion, required) then
+    TitanPanelReputation.TITAN_TOO_OLD = true
+    TitanDebug("<TitanPanelReputation>" .. " "
+        .. TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START") .. " "
+        .. TitanPanelReputation.MIN_TITAN_VERSION .. " "
+        .. TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_TOOLTIP_END")
+    )
+else
+    TitanPanelReputation.TITAN_TOO_OLD = false
+end
+
 ---
 ---The configuration settings for the TitanPanelReputation AddOn.
 ---
@@ -63,21 +77,22 @@ function TitanPanelReputationButton_OnLoad(self)
         menuText = TitanPanelReputation.TITLE,
         version = TitanPanelReputation.VERSION,
         buttonTextFunction = function()
+            if TitanPanelReputation.TITAN_TOO_OLD then
+                return "Titan Panel v" .. TitanPanelReputation.MIN_TITAN_VERSION .. " "
+                    .. TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_BUTTON")
+            end
+
             TitanPanelReputation:RefreshButtonText()
             return TitanPanelReputation.BUTTON_TEXT
         end,
-        tooltipCustomFunction = function()
-            if not TitanGetVar(TitanPanelReputation.ID, "MinimalTip") then
-                local tleft = "|T" ..
-                    TitanPanelReputation.ICON .. ":20|t " .. TitanPanelReputation.TITLE
-                GameTooltip:AddDoubleLine(tleft, "",
-                    HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b,
-                    HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+        tooltipTextFunction = function()
+            if TitanPanelReputation.TITAN_TOO_OLD then
+                return TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START") .. " "
+                    .. TitanPanelReputation.MIN_TITAN_VERSION .. " "
+                    .. TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_TOOLTIP_END")
             end
-            -- Add the tooltip text
-            TitanPanelReputation:AddTooltipText(TitanPanelReputation:BuildTooltipText())
-            -- Show the tooltip
-            GameTooltip:Show()
+
+            return TitanPanelReputation:BuildTooltipText()
         end,
         category = "Information",
         icon = TitanPanelReputation.ICON,
@@ -100,9 +115,6 @@ function TitanPanelReputationButton_OnClick(self, button)
     if (button == "LeftButton") then
         ToggleCharacter("ReputationFrame")
     end
-    if (button == "RightButton") then
-        TitanPanelRightClickMenu_PrepareReputationMenu()
-    end
 end
 
 ---
@@ -122,11 +134,11 @@ function TitanPanelReputationButton_OnEvent(event, ...)
 
         -- Set color theme
         local colorValue = TitanGetVar(TitanPanelReputation.ID, "ColorValue")
-        --
         if (colorValue == 1) then TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_DEFAULT end
         if (colorValue == 2) then TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_ARMORY end
         if (colorValue == 3) then TitanPanelReputation.BARCOLORS = nil end
 
+        -- Set debug mode (restore from saved vars)
         TitanPanelReputation:SetDebugMode(TitanRep_Data.DebugMode, true)
 
         TitanDebug("<TitanPanelReputation> " .. TitanPanelReputation:GT("LID_INITIALIZED"))
@@ -136,6 +148,8 @@ function TitanPanelReputationButton_OnEvent(event, ...)
 
     if event == "UPDATE_FACTION" then
         --[[  -------------------------- MAIN ADDON LOOP START -------------------------- ]]
+
+        if TitanPanelReputation.TITAN_TOO_OLD then return end
 
         if TitanPanelReputation.INIT_TIME > 0 then
             -- Set the current tracked faction

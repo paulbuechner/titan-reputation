@@ -34,7 +34,11 @@ end
 ---Build the tooltip heading (icon + title + version) as a single string.
 ---
 local function BuildTooltipHeading()
-    return "|T" .. TitanPanelReputation.ICON .. ":20|t " .. TitanPanelReputation.TITLE .. " |cff00aa00" .. (TitanPanelReputation.VERSION or "") .. "|r\n"
+    if not TitanGetVar(TitanPanelReputation.ID, "MinimalTip") then
+        return "|T" .. TitanPanelReputation.ICON .. ":20|t " .. TitanPanelReputation.TITLE .. " |cff00aa00" .. (TitanPanelReputation.VERSION or "") .. "|r\n"
+    else
+        return ""
+    end
 end
 
 

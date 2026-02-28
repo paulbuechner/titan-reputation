@@ -815,6 +815,7 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
             -- /run print(C_Reputation.IsFactionParagon(2432))
             -- /run print(C_Reputation.IsMajorFaction(2432))
             -- /run print(C_Reputation.GetFactionParagonInfo(2432))
+            -- /run DevTools_Dump(C_MajorFactions.GetMajorFactionData(2710))
 
             -- /run DevTools_Dump(C_GossipInfo.GetFriendshipReputation(2164))
             -- /run print(C_Reputation.IsFactionParagon(2164))
@@ -823,38 +824,12 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
             -- /run DevTools_Dump(C_Reputation.GetFactionDataByIndex(45))
 
             --[[ --------------------------------------------------------
-                    Handle Paragon, Renown and Friendship factions
+                    Handle Renown, Paragon and Friendship factions
                 -----------------------------------------------------------]]
             if (WoW10) then
-                if (C_Reputation.IsFactionParagon(factionID)) then -- Paragon
-                    -- Get faction paragon info
-                    local currentValue, threshold, rewardQuestID, hasRewardPending, tooLowLevelForParagon, paragonStorageLevel = C_Reputation.GetFactionParagonInfo(factionID)
-                    if currentValue then -- May be nil
-                        -- Set the top value to the paragon threshold
-                        topValue = threshold
-
-                        -- Calculate the offset level to account for the reputation offset caused by the paragon system
-                        -- ... The typical paragon threshold is 10000, so we can use that to calculate the offset level
-                        -- ... by dividing the current rep value by the thresholds and rounding down to the nearest whole
-                        -- ... number. E.g. 20000 / 10000 = 2, 30000 / 10000 = 3, etc. If there's a reward pending, we
-                        -- ... subtract 1 from the offset level.
-                        local offsetLevel = math.floor(currentValue / threshold)
-                        if hasRewardPending then
-                            offsetLevel = offsetLevel - 1
-                        end
-
-                        -- Now adjust the actual paragon reputation value by subtracting the offset level times the threshold
-                        -- from the current value. This will give us the actual reputation value for the paragon faction.
-                        -- ... E.g. 25000 - (2 * 10000) = 5000, 38000 - (3 * 10000) = 8000, etc.
-                        local adjustedValue = currentValue - (offsetLevel * threshold)
-                        earnedValue = adjustedValue
-
-                        if currentValue ~= 0 then
-                            -- If the current value is not 0, the player has started the paragon progress for the current faction
-                            paragonProgressStarted = true
-                        end
-                    end
-                elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
+                -- NOTE: Prioritize checking for Major Faction (Renown) first since some factions (e.g. Midnight Silvermoon Court ID: 2710)
+                -- NOTE: can be both Renown and Paragon, and blizzard then provides the info only with Major Faction API.
+                if (C_Reputation.IsMajorFaction(factionID)) then -- Renown
                     -- Get the renown faction data
                     local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
 
@@ -869,6 +844,34 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
                             -- Otherwise, set the earned value to the renown reputation earned by the major faction
                             earnedValue = majorFactionData.renownReputationEarned
                         end
+                    end
+                end
+            elseif (C_Reputation.IsFactionParagon(factionID)) then -- Paragon
+                -- Get faction paragon info
+                local currentValue, threshold, rewardQuestID, hasRewardPending, tooLowLevelForParagon, paragonStorageLevel = C_Reputation.GetFactionParagonInfo(factionID)
+                if currentValue then -- May be nil
+                    -- Set the top value to the paragon threshold
+                    topValue = threshold
+
+                    -- Calculate the offset level to account for the reputation offset caused by the paragon system
+                    -- ... The typical paragon threshold is 10000, so we can use that to calculate the offset level
+                    -- ... by dividing the current rep value by the thresholds and rounding down to the nearest whole
+                    -- ... number. E.g. 20000 / 10000 = 2, 30000 / 10000 = 3, etc. If there's a reward pending, we
+                    -- ... subtract 1 from the offset level.
+                    local offsetLevel = math.floor(currentValue / threshold)
+                    if hasRewardPending then
+                        offsetLevel = offsetLevel - 1
+                    end
+
+                    -- Now adjust the actual paragon reputation value by subtracting the offset level times the threshold
+                    -- from the current value. This will give us the actual reputation value for the paragon faction.
+                    -- ... E.g. 25000 - (2 * 10000) = 5000, 38000 - (3 * 10000) = 8000, etc.
+                    local adjustedValue = currentValue - (offsetLevel * threshold)
+                    earnedValue = adjustedValue
+
+                    if currentValue ~= 0 then
+                        -- If the current value is not 0, the player has started the paragon progress for the current faction
+                        paragonProgressStarted = true
                     end
                 end
             end

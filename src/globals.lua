@@ -38,7 +38,7 @@ TitanPanelReputation.INIT_TIME = 0
 
 ---Minimum required Titan Panel version (string). Update as needed.
 ---@type string
-TitanPanelReputation.MIN_TITAN_VERSION = "9.0.3"
+TitanPanelReputation.MIN_TITAN_VERSION = "9.1.1"
 
 ---
 ---The time passed since TitanPanelReputation was last updated (triggered by an event).

@@ -145,3 +145,40 @@ function TitanPanelReputation:TrimString(value)
     end
     return value:match("^%s*(.-)%s*$") or ""
 end
+
+---
+---Parses a version string into its numeric components.
+---
+---@param version string The version string to parse
+---@return number[] parts The parsed version components
+---@nodiscard
+function TitanPanelReputation:ParseVersion(version)
+    if not version then return {} end
+    -- Strip non-numeric/dot characters (e.g. @project-version@)
+    version = tostring(version):gsub("[^0-9%.]", "")
+    local parts = {}
+    for num in string.gmatch(version, "(%d+)") do
+        parts[#parts + 1] = tonumber(num)
+    end
+    return parts
+end
+
+---
+---Compares two version strings to determine if the current version is lower than the required version.
+---
+---@param current string The current version string
+---@param required string The required version string
+---@return boolean True if the current version is lower, false otherwise
+---@nodiscard
+function TitanPanelReputation:IsVersionLower(current, required)
+    local a = self:ParseVersion(current)
+    local b = self:ParseVersion(required)
+    local n = math.max(#a, #b)
+    for i = 1, n do
+        local ai = a[i] or 0
+        local bi = b[i] or 0
+        if ai < bi then return true end
+        if ai > bi then return false end
+    end
+    return false
+end

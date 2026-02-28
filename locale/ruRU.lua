@@ -9,6 +9,10 @@ function TitanPanelReputation:LangruRU()
         ["LID_HOUR_SHORT"] = "ч",
         ["LID_HOURS_SHORT"] = "ч",
 
+        ["LID_TITAN_TOO_OLD_WARNING_BUTTON"] = "or later required",
+        ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START"] = "Please upgrade Titan Panel to version",
+        ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_END"] = "or later to unlock full functionality.",
+
         -- Labels
         ["LID_ALL_HIDDEN_LABEL"] = "Репутация: Выключено",
         ["LID_NO_FACTION_LABEL"] = "Репутация: Фракция не выбрана",

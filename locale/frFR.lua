@@ -9,6 +9,10 @@ function TitanPanelReputation:LangfrFR()
         ["LID_HOUR_SHORT"] = "h",
         ["LID_HOURS_SHORT"] = "hrs",
 
+        ["LID_TITAN_TOO_OLD_WARNING_BUTTON"] = "or later required",
+        ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START"] = "Please upgrade Titan Panel to version",
+        ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_END"] = "or later to unlock full functionality.",
+
         -- Labels
         ["LID_ALL_HIDDEN_LABEL"] = "Reputation: Off",
         ["LID_NO_FACTION_LABEL"] = "Reputation: No Faction Selected",

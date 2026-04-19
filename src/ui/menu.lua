@@ -75,6 +75,16 @@ local function CollectAllDetails()
     return list
 end
 
+-- NOTE on Blizzard_Menu refresh scope:
+-- Returning `MenuResponse.Refresh` from a setSelected callback only
+-- re-evaluates the clicked menu's level and its directly open submenu.
+-- Grandchild submenus that were already expanded retain their stale
+-- isSelected state until the user closes and re-hovers them. There is
+-- no public Blizzard_Menu API to force a deep refresh across arbitrary
+-- submenu depth, so cross-hierarchy cascades (e.g. toggling a top-level
+-- faction header while a nested sub-header's submenu is visible) may
+-- show stale checkboxes at depth >= 2 until re-hovered.
+
 local AddFactionRow
 local AddHeaderRow
 local AttachChildrenByParentName

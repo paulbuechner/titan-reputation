@@ -75,6 +75,9 @@ function TitanPanelReputationButton_OnLoad(self)
     self.registry = {
         id = TitanPanelReputation.ID,
         menuText = TitanPanelReputation.TITLE,
+        menuContextFunction = function(owner, rootDescription)
+            TitanPanelReputation:BuildContextMenu(owner, rootDescription)
+        end,
         version = TitanPanelReputation.VERSION,
         buttonTextFunction = function()
             if TitanPanelReputation.TITAN_TOO_OLD then

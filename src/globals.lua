@@ -4,8 +4,6 @@ local _, TitanPanelReputation = ...
 
 ---
 ---The unique ID of the addon. This is used to identify the addon in the Titan Panel API.
----NOTE: This affects the naming convention of the `TitanPanelRightClickMenu_Prepare{TitanPanelReputation.ID}Menu`
----in `menu.lua` to hook into Titan API.
 ---
 ---@type string
 TitanPanelReputation.ID = "Reputation"

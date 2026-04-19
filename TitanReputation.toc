@@ -34,7 +34,6 @@ src/utils.lua
 src/mapping.lua
 src/commandline.lua
 
-src/ui/components.lua
 src/ui/achievement-popup.lua
 src/ui/tooltip.lua
 src/ui/button.lua

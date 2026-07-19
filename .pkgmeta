@@ -10,5 +10,7 @@ ignore:
   - "*.png"
   - "*.afphoto"
   - resources/ArtTextureID.lua
+  - libs/MSBT
+  - libs/Titan
 
 changelog-title: "Titan [Reputation Continued]"

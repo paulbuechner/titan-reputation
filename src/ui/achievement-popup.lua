@@ -110,6 +110,13 @@ local function GetAchievementAlertSystem()
         frame.Icon.Texture:SetTexture(payload.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
         frame:EnableMouse(true)
         frame.id = payload.factionID;
+
+        -- AddOnSkins restyle (achievement-popup-skin.lua); must run after the
+        -- Blizzard art re-applied above.
+        if TitanPanelReputation.SkinAchievementAlert then
+            TitanPanelReputation.SkinAchievementAlert(frame)
+        end
+
         return true;
     end
 

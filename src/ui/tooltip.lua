@@ -267,30 +267,66 @@ function TitanPanelReputation:BuildTooltipText()
     return TitanPanelReputation.TOOLTIP_TEXT
 end
 
+-- Titan shows plugin tooltips on its own TitanPanelTooltip frame; older Titan
+-- versions used GameTooltip directly.
+local TitanTooltip = _G.TitanPanelTooltip or GameTooltip
+
 local oldScale; local isTooltipShowing = false
 
 ---
 ---Tooltip scaling hooked ownership check
 ---
 local function TooltipHook()
-    if GameTooltip:GetOwner() == TitanPanelReputationButton then
+    if TitanTooltip:GetOwner() == TitanPanelReputationButton then
         -- Cache initial tooltip scale
         if not isTooltipShowing then
             isTooltipShowing = true
-            oldScale = GameTooltip:GetScale()
+            oldScale = TitanTooltip:GetScale()
         end
         -- Set the scale
         local toolTipScale = TitanGetVar(TitanPanelReputation.ID, "ToolTipScale")
         if toolTipScale ~= nil then
-            GameTooltip:SetScale(toolTipScale)
+            TitanTooltip:SetScale(toolTipScale)
         end
     elseif isTooltipShowing then -- apply the initial scale for other tooltips
         isTooltipShowing = false
         if oldScale then
-            GameTooltip:SetScale(oldScale)
+            TitanTooltip:SetScale(oldScale)
             oldScale = nil
         end
     end
 end
 --
-hooksecurefunc(GameTooltip, "Show", TooltipHook)
+hooksecurefunc(TitanTooltip, "Show", TooltipHook)
+
+---
+---ElvUI only styles its fixed tooltip list eagerly; everything else (including
+---TitanPanelTooltip) is caught by its SharedTooltip_SetBackdropStyle hook, which
+---Blizzard first triggers when a tooltip HIDES. Without this eager pass the first
+---hover after a login/reload shows the default Blizzard style.
+---
+local function StyleTitanTooltipForElvUI()
+    if TitanTooltip == GameTooltip then return end -- already in ElvUI's own list
+
+    local E = unpack(_G.ElvUI)
+    local skins = E and E.private and E.private.skins
+    if not (skins and skins.blizzard and skins.blizzard.enable and skins.blizzard.tooltip) then
+        return -- follow ElvUI: its tooltip skin is disabled
+    end
+
+    local TT = E:GetModule("Tooltip", true)
+    if TT and TT.SetStyle then
+        TT:SetStyle(TitanTooltip)
+    end
+end
+
+if _G.ElvUI then
+    -- E.private is populated during ElvUI's PLAYER_LOGIN initialization, so the
+    -- settings check has to wait for PLAYER_ENTERING_WORLD.
+    local watcher = CreateFrame("Frame")
+    watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+    watcher:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        StyleTitanTooltipForElvUI()
+    end)
+end

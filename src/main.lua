@@ -154,6 +154,9 @@ function TitanPanelReputationButton_OnEvent(event, ...)
 
         if TitanPanelReputation.TITAN_TOO_OLD then return end
 
+        -- Faction data changed: the next FactionDetailsProvider call must rescan
+        TitanPanelReputation:InvalidateFactionDetailsCache()
+
         if TitanPanelReputation.INIT_TIME > 0 then
             -- Set the current tracked faction
             if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
@@ -171,8 +174,9 @@ function TitanPanelReputationButton_OnEvent(event, ...)
 
         --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]
 
-        -- Call TitanPanel API to render updates
-        TitanPanelButton_UpdateTooltip()
+        -- Call TitanPanel API to render updates (UpdateTooltip requires the button
+        -- frame and no-ops otherwise; it only re-renders while the tooltip is shown)
+        TitanPanelButton_UpdateTooltip(TitanPanelReputationButton)
         TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
 
         return

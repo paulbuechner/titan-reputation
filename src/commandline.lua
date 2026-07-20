@@ -94,6 +94,12 @@ local function FindAchievementByTitle(query)
 end
 
 function TitanPanelReputation:HandleAchievementInfoCommand(argument)
+    -- Achievements (and their lookup APIs) don't exist on Classic Era clients
+    if not (_G.GetAchievementInfo and _G.GetCategoryList and _G.GetCategoryNumAchievements) then
+        TitanPanelReputation:PrintMessage("Achievement search APIs are not available in this client.")
+        return
+    end
+
     local raw = NormalizeQuery(argument)
     if raw == "" then
         TitanPanelReputation:PrintMessage("Usage: /titanrep achievement-info <achievementID|achievement title>")
@@ -117,10 +123,6 @@ function TitanPanelReputation:HandleAchievementInfoCommand(argument)
         for _, m in ipairs(err) do
             TitanPanelReputation:PrintMessage(string.format('  - "%s" (ID %d) icon=%s', m.name, m.id, tostring(m.icon)))
         end
-        return
-    end
-    if err == "api" then
-        TitanPanelReputation:PrintMessage("Achievement search APIs are not available in this client.")
         return
     end
     if not id then

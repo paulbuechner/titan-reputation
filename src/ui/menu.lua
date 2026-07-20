@@ -21,7 +21,7 @@ local function GetStandingLabel(factionDetails)
 
     local adjustedID, label = adjusted.adjustedID, adjusted.label
     if TitanGetVar(TitanPanelReputation.ID, "ShortTipStanding") then
-        label = strsub(label, 1, adjustedID == 10 and 2 or 1)
+        label = string.utf8sub(label, 1, adjustedID == 10 and 2 or 1)
     end
     return adjustedID, label
 end
@@ -56,7 +56,7 @@ local function HandleFactionModifiers(factionDetails, allowDebugToast, allowWatc
     end
     if allowWatchFaction and IsShiftKeyDown() then
         TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", factionDetails.name)
-        TitanPanelReputation:RefreshButtonText()
+        -- UpdateButton invokes buttonTextFunction, which rebuilds the button text
         TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
         return true
     end
@@ -114,7 +114,7 @@ AddHeaderRow = function(owner, allDetails, details)
     -- and/or descendants, attaching children turns it into a submenu parent.
     local hdr = Titan_Menu.AddSelectorGeneric(owner, details.name,
         function()
-            return TitanPanelReputation:IsBranchVisibleByKey(headerKey)
+            return TitanPanelReputation:IsBranchVisible(headerKey)
         end,
         function()
             if HandleFactionModifiers(details, hasRep, hasRep) then return end

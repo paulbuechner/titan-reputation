@@ -75,7 +75,7 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID,
                                                     paragonProgressStarted,
                                                     returnOnNotShowFriendInfo)
     local adjustedID = standingID -- use local variable to avoid overwriting the global one
-    local label = getglobal("FACTION_STANDING_LABEL" .. standingID)
+    local label = _G["FACTION_STANDING_LABEL" .. standingID]
     local factionType = "Faction Standing"
 
     if not WoW10 then

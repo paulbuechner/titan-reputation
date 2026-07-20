@@ -64,6 +64,8 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
     --       The War Within
     -- ****************************
     SetIcon("UI_MajorFaction_Flame", { 2570 })                   -- Arathi von Heilsturz
+    -- NOTE: The embedded space in "UI_MajorFaction_ Karesh" / "UI_MajorFaction_ Nightfall"
+    -- NOTE: is part of the actual texture file name - do not "fix" it.
     SetIcon("UI_MajorFaction_ Karesh", { 2658 })                 -- Der Bund von K'aresh
     SetIcon("UI_MajorFaction_Candle", { 2594 })                  -- Der Konvent der Tiefen
     SetIcon("UI_MajorFaction_ Nightfall", { 2688 })              -- Die Strahlen der Flamme
@@ -284,7 +286,6 @@ if TitanPanelReputation.FACTION_MAPPING == nil then
     SetIcon("INV_Shield_48", { 1077 })                              -- Offensive der Zerschmetterten Sonne
     SetIcon("Achievement_Zone_Terrokar", { 1011 })                  -- Unteres Viertel
     SetIcon("Achievement_Zone_HellfirePeninsula_01", { 946 })       -- Ehrenfeste
-    SetIcon("Spell_Holy_MindSooth", { 967 })                        -- Das Violette Auge
     SetIcon("INV_Misc_Foot_Centaur", { 978 })                       -- Kurenai
 
 

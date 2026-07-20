@@ -4,7 +4,7 @@ local WoW3 = select(4, GetBuildInfo()) >= 30000
 local WoW5 = select(4, GetBuildInfo()) >= 50000
 local WoW10 = select(4, GetBuildInfo()) >= 100000
 
-local function BuildHiddenLookup(savedList)
+local function BuildKeyLookup(savedList)
     local lookup = {}
     if type(savedList) == "table" then
         for _, nodeKey in ipairs(savedList) do
@@ -16,34 +16,13 @@ local function BuildHiddenLookup(savedList)
     return lookup
 end
 
-local function WriteHiddenLookupToSavedVar(lookup)
+local function WriteLookupToSavedVar(lookup, varName)
     local serialized = {}
     for name in pairs(lookup) do
         serialized[#serialized + 1] = name
     end
     table.sort(serialized)
-    TitanSetVar(TitanPanelReputation.ID, "FactionHeaders", serialized)
-end
-
-local function BuildOverrideLookup(savedList)
-    local lookup = {}
-    if type(savedList) == "table" then
-        for _, nodeKey in ipairs(savedList) do
-            if type(nodeKey) == "string" and nodeKey ~= "" then
-                lookup[nodeKey] = true
-            end
-        end
-    end
-    return lookup
-end
-
-local function WriteOverrideLookupToSavedVar(lookup)
-    local serialized = {}
-    for name in pairs(lookup) do
-        serialized[#serialized + 1] = name
-    end
-    table.sort(serialized)
-    TitanSetVar(TitanPanelReputation.ID, "FactionShowOverrides", serialized)
+    TitanSetVar(TitanPanelReputation.ID, varName, serialized)
 end
 
 local function JoinHeaderPath(headerPath, uptoIndex)
@@ -206,19 +185,12 @@ end
 ---@param adjusted AdjustedIDAndLabel
 local function ShowReputationAnnouncement(name, factionID, adjusted)
     local msg
-    local dsc = "You have obtained "
-    local tag = " "
-
     if (TitanPanelReputation.BARCOLORS) then
         msg = TitanUtils_GetColoredText(name .. " - " .. adjusted.label, TitanPanelReputation.BARCOLORS[(adjusted.adjustedID)])
-        dsc = dsc .. TitanUtils_GetColoredText(adjusted.label, TitanPanelReputation.BARCOLORS[(adjusted.adjustedID)])
     else
         msg = TitanUtils_GetGoldText(name .. " - " .. adjusted.label)
-        dsc = dsc .. TitanUtils_GetGoldText(adjusted.label)
     end
-
-    dsc = dsc .. " standing with " .. name .. "."
-    msg = tag .. msg .. tag
+    msg = " " .. msg .. " "
 
     local alertPayload = BuildStandingAlertPayload({ name = name, label = adjusted.label, adjustedID = adjusted.adjustedID, factionID = factionID })
 
@@ -384,7 +356,7 @@ end
 function TitanPanelReputation:GetHiddenFactionLookup()
     if not self.hiddenFactionLookup then
         local saved = TitanGetVar(TitanPanelReputation.ID, "FactionHeaders") or {}
-        self.hiddenFactionLookup = BuildHiddenLookup(saved)
+        self.hiddenFactionLookup = BuildKeyLookup(saved)
     end
     return self.hiddenFactionLookup
 end
@@ -392,7 +364,7 @@ end
 function TitanPanelReputation:GetShownFactionOverrideLookup()
     if not self.shownFactionOverrideLookup then
         local saved = TitanGetVar(TitanPanelReputation.ID, "FactionShowOverrides") or {}
-        self.shownFactionOverrideLookup = BuildOverrideLookup(saved)
+        self.shownFactionOverrideLookup = BuildKeyLookup(saved)
     end
     return self.shownFactionOverrideLookup
 end
@@ -470,13 +442,6 @@ function TitanPanelReputation:IsBranchVisible(rootKey)
     return visible
 end
 
-function TitanPanelReputation:IsBranchVisibleByKey(rootKey)
-    if not rootKey or rootKey == "" then
-        return false
-    end
-    return self:IsBranchVisible(rootKey)
-end
-
 function TitanPanelReputation:ClearShownOverridesForBranch(rootName)
     if not rootName or rootName == "" then
         return
@@ -488,7 +453,7 @@ function TitanPanelReputation:ClearShownOverridesForBranch(rootName)
     for _, key in ipairs(CollectBranchKeys(rootName)) do
         overrides[key] = nil
     end
-    WriteOverrideLookupToSavedVar(overrides)
+    WriteLookupToSavedVar(overrides, "FactionShowOverrides")
 end
 
 function TitanPanelReputation:SetFactionHiddenState(factionDetails, hidden)
@@ -527,8 +492,8 @@ function TitanPanelReputation:SetFactionHiddenState(factionDetails, hidden)
         end
     end
 
-    WriteHiddenLookupToSavedVar(lookup)
-    WriteOverrideLookupToSavedVar(overrides)
+    WriteLookupToSavedVar(lookup, "FactionHeaders")
+    WriteLookupToSavedVar(overrides, "FactionShowOverrides")
     self.hiddenFactionLookup = lookup
     self.shownFactionOverrideLookup = overrides
 end
@@ -697,8 +662,8 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
         selfOverrides[headerKey] = nil
     end
 
-    WriteHiddenLookupToSavedVar(lookup)
-    WriteOverrideLookupToSavedVar(overrides)
+    WriteLookupToSavedVar(lookup, "FactionHeaders")
+    WriteLookupToSavedVar(overrides, "FactionShowOverrides")
     TitanSetVar(TitanPanelReputation.ID, "HeaderSelfOverrides", selfOverrides)
 
     self.hiddenFactionLookup = lookup
@@ -757,6 +722,21 @@ local function GetParagonInfo(factionID)
 end
 
 ---
+---Width of each classic reaction bracket (Hated .. Exalted). Stable game constants,
+---used to count skipped brackets when a standing jumps more than one level at once.
+---
+local STANDING_BRACKET_WIDTH = {
+    [1] = 36000, -- Hated
+    [2] = 3000,  -- Hostile
+    [3] = 3000,  -- Unfriendly
+    [4] = 3000,  -- Neutral
+    [5] = 6000,  -- Friendly
+    [6] = 12000, -- Honored
+    [7] = 21000, -- Revered
+    [8] = 1000,  -- Exalted
+}
+
+---
 ---Retrieve the faction name where reputation changed to populate the `TitanPanelReputation.RTS` table.
 ---
 ---@param factionDetails FactionDetails
@@ -772,11 +752,11 @@ local function HandleFactionUpdate(factionDetails)
         factionDetails.paragonProgressStarted
 
     -- Guard: Check if factionID is present in `TitanPanelReputation.TABLE`
-    if not TitanPanelReputation.TABLE[factionID] then return end
+    local previous = TitanPanelReputation.TABLE[factionID]
+    if not previous then return end
 
     -- Guard: Check if standingID has not increased and earnedValue has not changed
-    if TitanPanelReputation.TABLE[factionID].standingID == standingID and
-        TitanPanelReputation.TABLE[factionID].earnedValue == earnedValue then
+    if previous.standingID == standingID and previous.earnedValue == earnedValue then
         return
     end
 
@@ -784,25 +764,38 @@ local function HandleFactionUpdate(factionDetails)
     local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, true)
     if not adjusted then return end -- Return if adjusted is nil (is friendship && 'ShowFriendsOnBar' is disabled)
 
+    -- Standing jumps of more than one level must also count the skipped brackets. Their
+    -- widths only apply to the classic reaction ladder; renown/paragon/friendship report
+    -- synthetic standings with different bracket sizes, so the sum is skipped for those.
+    local isClassicLadder = adjusted.factionType == "Faction Standing" and adjusted.adjustedID <= 8
+
     -- Calculate the earned amount
     local earnedAmount = 0
-    if (TitanPanelReputation.TABLE[factionID].standingID < standingID) then
-        -- Standing increased
-        earnedAmount = TitanPanelReputation.TABLE[factionID].topValue - TitanPanelReputation.TABLE[factionID].earnedValue
-        earnedAmount = earnedValue + earnedAmount
+    if (previous.standingID < standingID) then
+        -- Standing increased: rest of the old bracket + skipped brackets + progress in the new one
+        earnedAmount = (previous.topValue - previous.earnedValue) + earnedValue
+        if isClassicLadder then
+            for id = previous.standingID + 1, standingID - 1 do
+                earnedAmount = earnedAmount + (STANDING_BRACKET_WIDTH[id] or 0)
+            end
+        end
 
         ShowReputationAnnouncement(name, factionID, adjusted)
-    elseif (TitanPanelReputation.TABLE[factionID].standingID > standingID) then
-        -- Standing decreased
-        earnedAmount = earnedValue - topValue
-        earnedAmount = earnedAmount - TitanPanelReputation.TABLE[factionID].earnedValue
+    elseif (previous.standingID > standingID) then
+        -- Standing decreased: progress lost in the old bracket + skipped brackets + distance below the new cap
+        earnedAmount = (earnedValue - topValue) - previous.earnedValue
+        if isClassicLadder then
+            for id = standingID + 1, previous.standingID - 1 do
+                earnedAmount = earnedAmount - (STANDING_BRACKET_WIDTH[id] or 0)
+            end
+        end
 
         ShowReputationAnnouncement(name, factionID, adjusted)
-    elseif (TitanPanelReputation.TABLE[factionID].standingID == standingID) then
+    elseif (previous.standingID == standingID) then
         -- Standing remained the same
-        if (TitanPanelReputation.TABLE[factionID].earnedValue < earnedValue) then
+        if (previous.earnedValue < earnedValue) then
             -- Earned value increased
-            earnedAmount = earnedValue - TitanPanelReputation.TABLE[factionID].earnedValue
+            earnedAmount = earnedValue - previous.earnedValue
         else
             -- Earned value remained the same
             earnedAmount = earnedValue
@@ -827,22 +820,21 @@ local function HandleFactionUpdate(factionDetails)
 end
 
 ---
----Looks up all factions details, and calls 'callback' with faction parameters.
+---Rebuilds the ordered faction details list by scanning the Blizzard reputation API.
 ---
----@param callback fun(factionDetails: FactionDetails) The callback to call with `FactionDetails` parameters
-function TitanPanelReputation:FactionDetailsProvider(callback)
+---@return FactionDetails[]
+---@nodiscard
+local function BuildFactionDetailsList()
     local count = TitanPanelReputation:BlizzAPI_GetNumFactions()
 
     -- If there are no factions, return
-    if not count then return end
+    if not count then return {} end
 
-    local done = false
-    local index = 1
     local rootHeader = ""
     local nestedHeader = ""
     local collectedDetails = {}
 
-    while (not done) do
+    for index = 1, count do
         local name, description, standingID, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader,
         isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus =
             TitanPanelReputation:BlizzAPI_GetFactionInfo(index)
@@ -856,25 +848,10 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
             local paragonProgressStarted = false
 
             -- Fetch friendship reputation info
-            local friendShipReputationInfo = nil
-            if C_GossipInfo.GetFriendshipReputation(factionID) and C_GossipInfo.GetFriendshipReputation(factionID).friendshipFactionID > 0 then
-                friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
+            local friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
+            if not (friendShipReputationInfo and friendShipReputationInfo.friendshipFactionID > 0) then
+                friendShipReputationInfo = nil
             end
-
-            -- /run DevTools_Dump(C_GossipInfo.GetFriendshipReputation(2432))
-            -- /run print(C_Reputation.IsFactionParagon(2432))
-            -- /run print(C_Reputation.IsMajorFaction(2432))
-            -- /run print(C_Reputation.GetFactionParagonInfo(2432))
-            -- /run DevTools_Dump(C_MajorFactions.GetMajorFactionData(2710))
-            -- /run DevTools_Dump(C_MajorFactions.GetMajorFactionData(2570))
-            -- /run print(C_Reputation.GetFactionParagonInfo(2570))
-            -- /run print(C_Reputation.GetFactionParagonInfo(2673))
-
-            -- /run DevTools_Dump(C_GossipInfo.GetFriendshipReputation(2164))
-            -- /run print(C_Reputation.IsFactionParagon(2164))
-            -- /run print(C_Reputation.IsMajorFaction(2164))
-            -- /run print(C_Reputation.GetFactionParagonInfo(2164))
-            -- /run DevTools_Dump(C_Reputation.GetFactionDataByIndex(45))
 
             --[[ --------------------------------------------------------
                     Handle Renown, Paragon and Friendship factions
@@ -935,7 +912,6 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
                     end
                     tinsert(headerPath, name)
                 else
-                    wipe(headerPath)
                     tinsert(headerPath, name)
                 end
             else
@@ -1011,15 +987,34 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
             -- Collect the faction details for ordering after we finish scanning
             tinsert(collectedDetails, factionDetails)
         end
-
-        index = index + 1
-
-        if (index > count) then done = true; end -- If we're done, set done to true
     end
 
-    local orderedDetails = OrderFactionDetails(collectedDetails)
-    for _, details in ipairs(orderedDetails) do
-        callback(details) -- Call the callback with the faction details
+    return OrderFactionDetails(collectedDetails)
+end
+
+---
+---Ordered faction list shared by every consumer (button, tooltip, menu). Scanning the
+---Blizzard API is expensive, so the list is rebuilt lazily after `UPDATE_FACTION`
+---invalidates it (see main.lua) instead of on every call.
+---
+---@type FactionDetails[]|nil
+local factionDetailsCache = nil
+
+function TitanPanelReputation:InvalidateFactionDetailsCache()
+    factionDetailsCache = nil
+end
+
+---
+---Looks up all factions details, and calls 'callback' with faction parameters.
+---
+---@param callback fun(factionDetails: FactionDetails) The callback to call with `FactionDetails` parameters
+function TitanPanelReputation:FactionDetailsProvider(callback)
+    if not factionDetailsCache then
+        factionDetailsCache = BuildFactionDetailsList()
+    end
+
+    for _, details in ipairs(factionDetailsCache) do
+        callback(details)
     end
 end
 
@@ -1086,7 +1081,7 @@ function TitanPanelReputation:HandleUpdateFaction()
             end
         end
     end
-
-    -- 4. Refresh the button
-    self:RefreshButtonText()
+    -- NOTE: No explicit RefreshButtonText here: main.lua follows up with
+    -- TitanPanelButton_UpdateButton, which invokes buttonTextFunction and
+    -- rebuilds the button text from the freshly cached faction list.
 end

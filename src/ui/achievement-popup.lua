@@ -61,8 +61,6 @@ local function GetAchievementAlertSystem()
             frame.Shield:SetPoint("TOPRIGHT", -8, -15);
             shieldPoints:SetPoint("CENTER", 2, -2);
             shieldPoints:SetVertexColor(1, 1, 1);
-            unlocked:SetPoint("TOP", 7, -23);
-            unlocked:SetText(ACHIEVEMENT_UNLOCKED);
             frame.GuildName:Hide();
             frame.GuildBorder:Hide();
             frame.GuildBanner:Hide();

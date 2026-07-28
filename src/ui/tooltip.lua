@@ -300,33 +300,33 @@ end
 hooksecurefunc(TitanTooltip, "Show", TooltipHook)
 
 ---
----ElvUI only styles its fixed tooltip list eagerly; everything else (including
----TitanPanelTooltip) is caught by its SharedTooltip_SetBackdropStyle hook, which
----Blizzard first triggers when a tooltip HIDES. Without this eager pass the first
----hover after a login/reload shows the default Blizzard style.
+---Skinning addons (ElvUI, EllesmereUI, ...) restyle a fixed list of tooltips once
+---at login and catch every other tooltip - TitanPanelTooltip included - by hooking
+---`SharedTooltip_SetBackdropStyle`. Blizzard only calls that for our tooltip when it
+---HIDES, so the first hover after a login/reload still showed the default Blizzard
+---look and only later hovers were skinned.
 ---
-local function StyleTitanTooltipForElvUI()
-    if TitanTooltip == GameTooltip then return end -- already in ElvUI's own list
+---Asking for the restyle ourselves fixes that for every such addon at once, instead
+---of calling into any one addon's internals. It also respects the user's settings for
+---free: each addon installs its hook only when its tooltip skin is enabled. With no
+---skinning addon present this just re-applies the default style the tooltip already
+---has.
+---
+local function RefreshTooltipBackdropStyle()
+    if TitanTooltip == GameTooltip then return end -- already in the addons' own lists
 
-    local E = unpack(_G.ElvUI)
-    local skins = E and E.private and E.private.skins
-    if not (skins and skins.blizzard and skins.blizzard.enable and skins.blizzard.tooltip) then
-        return -- follow ElvUI: its tooltip skin is disabled
-    end
-
-    local TT = E:GetModule("Tooltip", true)
-    if TT and TT.SetStyle then
-        TT:SetStyle(TitanTooltip)
+    -- Absent on Classic Era. A nil style means "default" (Blizzard's own dropdown
+    -- libraries call it that way).
+    local SetBackdropStyle = _G.SharedTooltip_SetBackdropStyle
+    if SetBackdropStyle then
+        SetBackdropStyle(TitanTooltip, _G.GAME_TOOLTIP_BACKDROP_STYLE_DEFAULT)
     end
 end
 
-if _G.ElvUI then
-    -- E.private is populated during ElvUI's PLAYER_LOGIN initialization, so the
-    -- settings check has to wait for PLAYER_ENTERING_WORLD.
-    local watcher = CreateFrame("Frame")
-    watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
-    watcher:SetScript("OnEvent", function(self)
-        self:UnregisterAllEvents()
-        StyleTitanTooltipForElvUI()
-    end)
-end
+-- Skinning addons install their hooks during PLAYER_LOGIN, so ask afterwards.
+local styleWatcher = CreateFrame("Frame")
+styleWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+styleWatcher:SetScript("OnEvent", function(self)
+    self:UnregisterAllEvents()
+    RefreshTooltipBackdropStyle()
+end)

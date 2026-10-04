@@ -1,4 +1,15 @@
 local _, TitanPanelReputation = ...
+
+---
+---Prints a message to chat through Titan's plugin API. Stays quiet while Titan's
+---"Silent Load" option is on, like Titan's own load messages.
+---
+---@param message string The message to print
+function TitanPanelReputation:Log(message)
+    if TitanAllGetVar("Silenced") then return end
+    TitanPluginDebug("TitanPanelReputation", message)
+end
+
 local ltab = {}
 
 function TitanPanelReputation:GetLangTab()
@@ -14,7 +25,7 @@ function TitanPanelReputation:GT(str)
         return result
     elseif not tContains(missingTab, str) then
         tinsert(missingTab, str)
-        TitanDebug("<TitanPanelReputation> Missing translation for: " .. str)
+        TitanPanelReputation:Log("Missing translation for: " .. str)
 
         return str
     end
@@ -30,30 +41,30 @@ function TitanPanelReputation:UpdateLanguage()
     elseif GetLocale() == "enUS" then
         TitanPanelReputation:LangenUS()
     elseif GetLocale() == "esES" then
-        TitanDebug(
-            "<TitanPanelReputation> Spanish locale not supported. You can help translating by visiting: " ..
+        TitanPanelReputation:Log(
+            "Spanish locale not supported. You can help translating by visiting: " ..
             "https://github.com/paulbuechner/titan-reputation/blob/main/locale/esEs.lua")
         TitanPanelReputation:LangesES()
     elseif GetLocale() == "frFR" then
-        TitanDebug(
-            "<TitanPanelReputation> France locale not supported. You can help translating by visiting: " ..
+        TitanPanelReputation:Log(
+            "France locale not supported. You can help translating by visiting: " ..
             "https://github.com/paulbuechner/titan-reputation/blob/main/locale/frFR.lua")
         TitanPanelReputation:LangfrFR()
     elseif GetLocale() == "itIT" then
-        TitanDebug(
-            "<TitanPanelReputation> Italian locale not supported. You can help translating by visiting: " ..
+        TitanPanelReputation:Log(
+            "Italian locale not supported. You can help translating by visiting: " ..
             "https://github.com/paulbuechner/titan-reputation/blob/main/locale/itIT.lua")
         TitanPanelReputation:LangitIT()
     elseif GetLocale() == "ptBR" then
-        TitanDebug(
-            "<TitanPanelReputation> Brazilian Portuguese locale not supported. You can help translating by visiting: " ..
+        TitanPanelReputation:Log(
+            "Brazilian Portuguese locale not supported. You can help translating by visiting: " ..
             "https://github.com/paulbuechner/titan-reputation/blob/main/locale/ptBR.lua")
         TitanPanelReputation:LangptBR()
     elseif GetLocale() == "ruRU" then
         TitanPanelReputation:LangruRU()
     elseif GetLocale() == "zhCN" then
-        TitanDebug(
-            "<TitanPanelReputation> Chinese locale not supported. You can help translating by visiting: " ..
+        TitanPanelReputation:Log(
+            "Chinese locale not supported. You can help translating by visiting: " ..
             "https://github.com/paulbuechner/titan-reputation/blob/main/locale/zhCN.lua")
         TitanPanelReputation:LangzhCN()
     end

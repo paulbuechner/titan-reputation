@@ -1035,18 +1035,6 @@ TitanUtils_GetOffscreen = function(frame) end
 -- Plugin registration routines
 --
 --[[ Titan
-NAME: TitanUtils_GetAddOnMetadata
-DESC: Attempt to get meta data from the addon
-VAR:
-- name - string of addon name
-- field - string of addon field to get
-OUT:  None
-NOTE:
-- As of May 2023 (10.1) the routine moved and no longer dies silently so it is wrapped here...
---]]
-TitanUtils_GetAddOnMetadata = function(name, field) end
-
---[[ Titan
 NAME: TitanUtils_PluginToRegister
 DESC: Place the plugin to be registered later by Titan
 VAR:
@@ -1260,6 +1248,17 @@ OUT:
 - string - message to chat window
 --]]
 TitanDebug = function(debug_message, debug_type) end
+
+--[[ API
+NAME: TitanPluginDebug
+DESC: Output a plugin debug message to the user in a consistent format.
+VAR:
+- id - plugin id, shown as the <id> prefix
+- debug_message - string to output
+OUT:
+- string - message to chat window
+--]]
+TitanPluginDebug = function(id, debug_message) end
 
 TitanDumpPluginList = function() end
 

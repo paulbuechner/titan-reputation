@@ -1,6 +1,6 @@
 ---@diagnostic disable: assign-type-mismatch
 
-local _, TitanPanelReputation = ...
+local ADDON_NAME, TitanPanelReputation = ...
 
 ---
 ---The unique ID of the addon. This is used to identify the addon in the Titan Panel API.
@@ -12,7 +12,7 @@ TitanPanelReputation.ID = "Reputation"
 ---The current version of the addon. This is used to display the version number in the Titan Panel.
 ---
 ---@type string
-TitanPanelReputation.VERSION = TitanUtils_GetAddOnMetadata("TitanReputation", "Version")
+TitanPanelReputation.VERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, "Version")
 
 ---
 ---The title of the addon. This is used to display the title in the Titan Panel.

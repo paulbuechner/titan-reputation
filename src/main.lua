@@ -1,12 +1,11 @@
 local ADDON_NAME, TitanPanelReputation = ...
 
 local required = TitanPanelReputation.MIN_TITAN_VERSION
-local titanVersion = TitanUtils_GetAddOnMetadata("Titan", "Version")
+local titanVersion = C_AddOns.GetAddOnMetadata("Titan", "Version")
 
 if titanVersion and TitanPanelReputation:IsVersionLower(titanVersion, required) then
     TitanPanelReputation.TITAN_TOO_OLD = true
-    TitanDebug("<TitanPanelReputation>" .. " "
-        .. TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START") .. " "
+    TitanPanelReputation:Log(TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START") .. " "
         .. TitanPanelReputation.MIN_TITAN_VERSION .. " "
         .. TitanPanelReputation:GT("LID_TITAN_TOO_OLD_WARNING_TOOLTIP_END")
     )
@@ -105,8 +104,6 @@ function TitanPanelReputationButton_OnLoad(self)
 
     self:RegisterEvent("UPDATE_FACTION")
     self:RegisterEvent("ADDON_LOADED")
-
-    TitanPanelRightClickMenu_Close()
 end
 
 ---
@@ -144,7 +141,7 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         -- Set debug mode (restore from saved vars)
         TitanPanelReputation:SetDebugMode(TitanRep_Data.DebugMode, true)
 
-        TitanDebug("<TitanPanelReputation> " .. TitanPanelReputation:GT("LID_INITIALIZED"))
+        TitanPanelReputation:Log(TitanPanelReputation:GT("LID_INITIALIZED"))
 
         return
     end

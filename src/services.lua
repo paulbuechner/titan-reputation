@@ -1122,12 +1122,39 @@ local function IsRevealedByExpand(details)
 end
 
 ---
+---Whether the entry has reputation to track (factions and headers with their own reputation).
+---
+---@param details FactionDetails
+---@return boolean
+local function IsTrackable(details)
+    return (not details.isHeader and details.name ~= nil) or (details.isHeader and details.hasRep)
+end
+
+---
+---Records the entry's current values after reacting to their change since the last update.
+---
+---@param details FactionDetails
+local function TrackFaction(details)
+    -- 1. Handle the faction update
+    HandleFactionUpdate(details)
+
+    -- 2. Persist the faction update
+    TitanPanelReputation.TABLE[details.factionID] = {
+        name = details.name,
+        standingID = details.standingID,
+        earnedValue = details.earnedValue,
+        topValue = details.topValue,
+    }
+end
+
+---
 ---Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
 ---
 function TitanPanelReputation:HandleUpdateFaction()
     local newFactionsCount = 0
     local newFactions = {}
     local known = GetKnownFactions()
+    local listed = {}
     local collapsedNow = {}
     local showAnnouncements = TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") or TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")
     -- New factions are judged against the ones this character has seen before. The very first scan
@@ -1140,8 +1167,7 @@ function TitanPanelReputation:HandleUpdateFaction()
             collapsedNow[self:GetNodeKey(details)] = true
         end
 
-        -- Check if the faction can be tracked
-        if (not details.isHeader and details.name) or (details.isHeader and details.hasRep) then
+        if IsTrackable(details) then
             -- Detect newly discovered factions (for announcement later)
             if detectNewFactions and not known[details.factionID] and not IsRevealedByExpand(details)
                 and details.earnedValue and details.earnedValue > 0 and details.standingID <= 4 then
@@ -1149,20 +1175,23 @@ function TitanPanelReputation:HandleUpdateFaction()
                 newFactions[details.factionID] = details
             end
             known[details.factionID] = true
+            listed[details.factionID] = true
 
-            -- 1. Handle the faction update
-            HandleFactionUpdate(details)
-
-            -- 2. Persist the faction update
-            TitanPanelReputation.TABLE[details.factionID] = {
-                name = details.name,
-                standingID = details.standingID,
-                earnedValue = details.earnedValue,
-                topValue = details.topValue,
-            }
+            TrackFaction(details)
         end
     end)
     collapsedHeaderKeys = collapsedNow
+
+    -- Factions under collapsed headers are missing from the scan: look the known ones up by ID, so
+    -- their reputation still counts for the session summary, announcements and Auto Show Changed
+    for factionID in pairs(known) do
+        if not listed[factionID] then
+            local details = self:GetFactionDetailsByID(factionID)
+            if details and IsTrackable(details) then
+                TrackFaction(details)
+            end
+        end
+    end
 
     -- 3. Announce newly discovered factions (iterate over collected newFactions)
     -- NOTE: Max 2 factions can be discovered at once, e.g. WotLK Horde Expedition

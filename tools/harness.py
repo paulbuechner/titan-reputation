@@ -791,7 +791,20 @@ def sc_known_from_last_session(tree):
     return {"toasts after it reappears": e2.alerts(), "errors": e.errors() + e2.errors()}
 
 
+def sc_tracking_under_collapsed_header(tree):
+    e = Env(tree)
+    e.login({"WatchedFaction": "Stormwind", "AutoChange": True, "ShowAnnounceFrame": True})
+    e.edit_rows(**{"The Burning Crusade": {"isCollapsed": True}})
+    e.update(1010.0)
+    # Friendly 2000/6000 -> Honored 500/12000 while its header is collapsed
+    e.edit_rows(**{"The Aldor": {"reaction": 6, "cur": 9000, "next": 21000, "standing": 9500}})
+    e.update(1020.0)
+    return {"rts": e.ev("RTS()"), "toasts": e.alerts(), "watched": e.ev("GET('WatchedFaction')"),
+            "button": plain(e.ev("BUTTON()")), "errors": e.errors()}
+
+
 SCENARIOS = {
+    "faction under collapsed header keeps counting": sc_tracking_under_collapsed_header,
     "new-faction toast: expanding a collapsed header": sc_expand_collapsed_header,
     "new-faction toast: faction known from last session": sc_known_from_last_session,
     "watched faction under collapsed header": sc_watched_under_collapsed_header,

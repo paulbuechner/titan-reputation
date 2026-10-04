@@ -1,2 +1,4 @@
 libs/TaintLess
 libs/UTF8
+tools/.venv/
+__pycache__/

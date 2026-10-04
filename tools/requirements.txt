@@ -1,0 +1,2 @@
+# Dependencies of tools/harness.py (Lua 5.1 runtime for Python)
+lupa==2.8

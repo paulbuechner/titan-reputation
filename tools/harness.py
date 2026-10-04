@@ -7,8 +7,15 @@ a player would see. Every scenario runs twice - on a git ref (default HEAD) and 
 tree - and prints IDENTICAL or both outputs, so a refactor can be shown to keep behaviour and a
 fix to change only what it targets.
 
-    pip install lupa
-    python tools/harness.py [--base REF] [SCENARIO ...]
+Setup, once per machine (any Python 3; tools/.venv is gitignored, use bin/ instead of Scripts/
+outside Windows):
+
+    python -m venv tools/.venv
+    tools/.venv/Scripts/python -m pip install -r tools/requirements.txt
+
+Run from the repository root:
+
+    tools/.venv/Scripts/python tools/harness.py [--base REF] [SCENARIO ...]
 
 Exits with 1 when the working tree raised Lua errors in any scenario. Files missing from REF
 (the gitignored packager externals such as libs/UTF8) are loaded from the working tree.

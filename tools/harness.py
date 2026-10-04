@@ -471,6 +471,13 @@ class Env:
             r.update(changes_by_name.get(r["name"], {}))
         self.set_data(self.rows, self.extras)
 
+    def gain(self, name, amount):
+        """Change a faction's reputation by `amount` (negative for a loss) within its standing."""
+        for r in self.rows:
+            if r["name"] == name:
+                r["standing"] += amount
+        self.set_data(self.rows, self.extras)
+
     def run(self, code):
         return self.lua.execute(code)
 
@@ -719,7 +726,18 @@ def sc_visibility_after_reload(tree):
             "errors": e.errors() + e2.errors()}
 
 
+def sc_event_burst(tree):
+    e = Env(tree)
+    e.login({"WatchedFaction": "The Aldor"})
+    e.gain("The Aldor", 250)
+    scans_before = e.ev("SCANS")
+    e.burst(1010.0, 3)
+    return {"scans for 3 events": e.ev("SCANS") - scans_before, "rts": e.ev("RTS()"),
+            "button": plain(e.ev("BUTTON()")), "errors": e.errors()}
+
+
 SCENARIOS = {
+    "UPDATE_FACTION burst": sc_event_burst,
     "menu visibility after reload": sc_visibility_after_reload,
     "standing up/down announcements": sc_standing_changes,
     "color option click": sc_color_menu_click,

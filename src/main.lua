@@ -120,6 +120,51 @@ function TitanPanelReputationButton_OnClick(self, button)
 end
 
 ---
+---Delay (seconds) between the first `UPDATE_FACTION` of a burst and its processing.
+---
+local UPDATE_FACTION_DELAY = 0.1
+
+---
+---Whether processing of the current `UPDATE_FACTION` burst is already scheduled.
+---
+local updateScheduled = false
+
+---
+---Processes the faction changes of one `UPDATE_FACTION` burst.
+---
+local function ProcessFactionUpdate()
+    updateScheduled = false
+
+    --[[  -------------------------- MAIN ADDON LOOP START -------------------------- ]]
+
+    -- Faction data changed: the next FactionDetailsProvider call must rescan
+    TitanPanelReputation:InvalidateFactionDetailsCache()
+
+    if TitanPanelReputation.INIT_TIME > 0 then
+        -- UPDATE_FACTION fires in bursts; events within .15s count as one reputation change
+        if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
+            TitanPanelReputation.HIGHCHANGED = 0
+            TitanPanelReputation.CHANGED_FACTION = "none"
+            TitanPanelReputation.EVENT_TIME = GetTime()
+        end
+
+        TitanPanelReputation:HandleUpdateFaction()
+
+        -- If AutoChange is enabled, show the faction with the biggest change of this burst
+        if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
+            TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
+        end
+    end
+
+    --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]
+
+    -- Call TitanPanel API to render updates (UpdateTooltip requires the button
+    -- frame and no-ops otherwise; it only re-renders while the tooltip is shown)
+    TitanPanelButton_UpdateTooltip(TitanPanelReputationButton)
+    TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
+end
+
+---
 ---The `OnEvent` event handler for the TitanPanelReputation AddOn.
 ---
 ---@param event string The event name
@@ -143,35 +188,14 @@ function TitanPanelReputationButton_OnEvent(event, ...)
     end
 
     if event == "UPDATE_FACTION" then
-        --[[  -------------------------- MAIN ADDON LOOP START -------------------------- ]]
-
         if TitanPanelReputation.TITAN_TOO_OLD then return end
 
-        -- Faction data changed: the next FactionDetailsProvider call must rescan
-        TitanPanelReputation:InvalidateFactionDetailsCache()
-
-        if TitanPanelReputation.INIT_TIME > 0 then
-            -- UPDATE_FACTION fires in bursts; events within .15s count as one reputation change
-            if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
-                TitanPanelReputation.HIGHCHANGED = 0
-                TitanPanelReputation.CHANGED_FACTION = "none"
-                TitanPanelReputation.EVENT_TIME = GetTime()
-            end
-
-            TitanPanelReputation:HandleUpdateFaction()
-
-            -- If AutoChange is enabled, show the faction with the biggest change of this burst
-            if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
-                TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
-            end
+        -- The client fires UPDATE_FACTION several times per reputation change: process each burst
+        -- once, shortly after its first event, instead of rescanning every faction per event
+        if not updateScheduled then
+            updateScheduled = true
+            C_Timer.After(UPDATE_FACTION_DELAY, ProcessFactionUpdate)
         end
-
-        --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]
-
-        -- Call TitanPanel API to render updates (UpdateTooltip requires the button
-        -- frame and no-ops otherwise; it only re-renders while the tooltip is shown)
-        TitanPanelButton_UpdateTooltip(TitanPanelReputationButton)
-        TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
 
         return
     end

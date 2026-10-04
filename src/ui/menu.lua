@@ -186,23 +186,24 @@ end
 local function BuildTooltipOptions(parent)
     local id = TitanPanelReputation.ID
 
-    local scale = TitanGetVar(id, "ToolTipScale") * 100
+    -- Step in whole percent: repeated 0.1 float steps drift (0.7000000000000001, ...) and could
+    -- slip one step below the 40% minimum.
+    local function GetScalePercent()
+        return math.floor(TitanGetVar(id, "ToolTipScale") * 100 + 0.5)
+    end
+    local function StepScale(deltaPercent)
+        local percent = GetScalePercent() + deltaPercent
+        if percent < 40 or percent > 120 then return end
+        TitanSetVar(id, "ToolTipScale", percent / 100)
+        TitanPanelButton_UpdateButton(id)
+    end
+
     local scale_parent = Titan_Menu.AddButton(parent,
-        TitanPanelReputation:GT("LID_TOOLTIP_SCALE") .. " (" .. scale .. "%)")
+        TitanPanelReputation:GT("LID_TOOLTIP_SCALE") .. " (" .. GetScalePercent() .. "%)")
     Titan_Menu.AddCommand(scale_parent, id, TitanPanelReputation:GT("LID_SCALE_INCREASE"),
-        function()
-            local curr = TitanGetVar(id, "ToolTipScale")
-            if curr >= 1.2 then return end
-            TitanSetVar(id, "ToolTipScale", curr + 0.1)
-            TitanPanelButton_UpdateButton(id)
-        end)
+        function() StepScale(10) end)
     Titan_Menu.AddCommand(scale_parent, id, TitanPanelReputation:GT("LID_SCALE_DECREASE"),
-        function()
-            local curr = TitanGetVar(id, "ToolTipScale")
-            if curr <= 0.4 then return end
-            TitanSetVar(id, "ToolTipScale", curr - 0.1)
-            TitanPanelButton_UpdateButton(id)
-        end)
+        function() StepScale(-10) end)
 
     Titan_Menu.AddSelector(parent, id, TitanPanelReputation:GT("LID_SHOW_MINIMAL"), "MinimalTip")
 

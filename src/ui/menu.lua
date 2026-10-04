@@ -282,12 +282,12 @@ function TitanPanelReputation:BuildContextMenu(_owner, rootDescription)
 
     Titan_Menu.AddDivider(root)
 
-    -- Top-level faction headers with descendant submenus
+    -- Top-level faction headers with descendant submenus (collapsed ones too: the scan puts their
+    -- remembered rows back in)
     local allDetails = CollectAllDetails()
     for _, details in ipairs(allDetails) do
         if (not details.isInactive)
             and details.isHeader
-            and (not details.isCollapsed)
             and (details.headerLevel or 0) == 0 then
             AddHeaderRow(root, allDetails, details)
         end

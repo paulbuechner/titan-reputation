@@ -800,17 +800,57 @@ local function HandleFactionUpdate(factionDetails)
 end
 
 ---
----Builds the details of one faction from the values the client reports for it: normalizes the bar
----and applies paragon, renown and friendship progress. The hierarchy fields describe an entry at
----the top of the list; the list scan replaces them with the row's actual place.
+---This character's saved data (SavedVariablesPerCharacter).
 ---
+---@return table
+local function GetCharacterData()
+    if type(TitanRep_CharData) ~= "table" then
+        TitanRep_CharData = {}
+    end
+    return TitanRep_CharData
+end
+
+---
+---Collects the values of one reputation row (as `BlizzAPI_GetFactionInfo` returns them) that the
+---addon uses; nil for rows without a faction ID.
+---
+---@return table|nil row
+---@nodiscard
+local function ReadRow(name, _, standingID, bottomValue, topValue, earnedValue, _, _, isHeader,
+                       isCollapsed, hasRep, _, isChild, factionID, hasBonusRepGain)
+    if not factionID then
+        return nil
+    end
+    return {
+        name = name,
+        standingID = standingID,
+        bottomValue = bottomValue,
+        topValue = topValue,
+        earnedValue = earnedValue,
+        isHeader = isHeader,
+        isCollapsed = isCollapsed,
+        hasRep = hasRep,
+        isChild = isChild,
+        factionID = factionID,
+        hasBonusRepGain = hasBonusRepGain,
+        isInactive = false,
+    }
+end
+
+---
+---Builds the details of one faction from its row (see `ReadRow`): normalizes the bar and applies
+---paragon, renown and friendship progress. The hierarchy fields describe an entry at the top of
+---the list; the list scan replaces them with the row's actual place.
+---
+---@param row table
 ---@return FactionDetails
 ---@nodiscard
-local function CreateFactionDetails(name, standingID, bottomValue, topValue, earnedValue, isHeader,
-                                    isCollapsed, hasRep, isChild, factionID, hasBonusRepGain, isInactive)
+local function CreateFactionDetails(row)
+    local factionID = row.factionID
+
     -- Normalize values
-    topValue = topValue - bottomValue
-    earnedValue = earnedValue - bottomValue
+    local topValue = row.topValue - row.bottomValue
+    local earnedValue = row.earnedValue - row.bottomValue
 
     -- Used to determine if the player has started the paragon progress for the current faction
     local paragonProgressStarted = false
@@ -876,20 +916,20 @@ local function CreateFactionDetails(name, standingID, bottomValue, topValue, ear
     -- NOTE: but should always return valid values so defaults won't be used.
     local factionDetails = ---@type FactionDetails
     {
-        name = name or "",
+        name = row.name or "",
         parentName = "",
-        standingID = standingID or -69,
+        standingID = row.standingID or -69,
         topValue = topValue,
         earnedValue = earnedValue,
         percent = percent,
-        isHeader = isHeader or false,
-        isCollapsed = isCollapsed or false,
-        isInactive = isInactive or false,
-        hasRep = hasRep or false,
-        isChild = isChild or false,
+        isHeader = row.isHeader or false,
+        isCollapsed = row.isCollapsed or false,
+        isInactive = row.isInactive or false,
+        hasRep = row.hasRep or false,
+        isChild = row.isChild or false,
         friendShipReputationInfo = friendShipReputationInfo,
         factionID = factionID,
-        hasBonusRepGain = hasBonusRepGain or false,
+        hasBonusRepGain = row.hasBonusRepGain or false,
         paragonProgressStarted = paragonProgressStarted or false,
         headerLevel = 0,
         headerPath = {}
@@ -898,96 +938,181 @@ local function CreateFactionDetails(name, standingID, bottomValue, topValue, ear
 end
 
 ---
+---The rows of each header as last seen expanded, per character: header factionID -> faction IDs of
+---its direct rows in list order. The client does not list the rows of a collapsed header, so the
+---scan puts these back in (read by ID): the tooltip and menu do not depend on the collapse state.
+---
+---@return table<number, number[]>
+local function GetKnownChildren()
+    local data = GetCharacterData()
+    data.KnownChildren = data.KnownChildren or {}
+    return data.KnownChildren
+end
+
+---
+---Reads the rows the client lists: all of them except the rows of collapsed headers.
+---
+---@return table[]
+local function ReadListedRows()
+    local rows = {}
+    for index = 1, TitanPanelReputation:BlizzAPI_GetNumFactions() or 0 do
+        local row = ReadRow(TitanPanelReputation:BlizzAPI_GetFactionInfo(index))
+        if row then
+            row.isInactive = TitanPanelReputation:BlizzAPI_IsFactionInactive(index)
+            rows[#rows + 1] = row
+        end
+    end
+    return rows
+end
+
+---
+---Puts the remembered rows of collapsed headers back in after their header, and remembers the rows
+---of the expanded ones (see `GetKnownChildren`). Inactive factions are not remembered: they are only
+---listed under the "Inactive" header, which the tooltip and menu skip anyway.
+---
+---@param listedRows table[]
+---@return table[]
+local function AddRowsOfCollapsedHeaders(listedRows)
+    local knownChildren = GetKnownChildren()
+    local listed = {}
+    for _, row in ipairs(listedRows) do
+        listed[row.factionID] = true
+    end
+
+    local rows, added, seenChildren = {}, {}, {}
+
+    local function AddRemembered(headerID)
+        for _, factionID in ipairs(knownChildren[headerID] or {}) do
+            if not listed[factionID] and not added[factionID] then
+                local row = ReadRow(TitanPanelReputation:BlizzAPI_GetFactionInfoByID(factionID))
+                if row then
+                    added[factionID] = true
+                    rows[#rows + 1] = row
+                    if row.isHeader then
+                        AddRemembered(factionID)
+                    end
+                end
+            end
+        end
+    end
+
+    local rootRow, nestedRow = nil, nil
+    for _, row in ipairs(listedRows) do
+        -- The header the row is listed under (same nesting rules as BuildFactionDetailsList)
+        local parent = nil
+        if row.isHeader and not row.isChild then
+            rootRow, nestedRow = row, nil
+        elseif row.isHeader then
+            parent, nestedRow = rootRow, row
+        else
+            parent = (row.isChild and nestedRow) or rootRow
+            if not row.isChild then
+                nestedRow = nil
+            end
+        end
+        local siblings = parent and seenChildren[parent.factionID]
+        if siblings and not row.isInactive then
+            siblings[#siblings + 1] = row.factionID
+        end
+
+        added[row.factionID] = true
+        rows[#rows + 1] = row
+        if row.isHeader then
+            if row.isCollapsed then
+                AddRemembered(row.factionID)
+            else
+                seenChildren[row.factionID] = {}
+            end
+        end
+    end
+
+    -- What the client lists under an expanded header is the current layout
+    for headerID, children in pairs(seenChildren) do
+        knownChildren[headerID] = children
+    end
+    return rows
+end
+
+---
 ---Rebuilds the ordered faction details list by scanning the Blizzard reputation API.
 ---
 ---@return FactionDetails[]
 ---@nodiscard
 local function BuildFactionDetailsList()
-    local count = TitanPanelReputation:BlizzAPI_GetNumFactions()
-
-    -- If there are no factions, return
-    if not count then return {} end
-
     local rootHeader = ""
     local nestedHeader = ""
     local collectedDetails = {}
 
-    for index = 1, count do
-        local name, _, standingID, bottomValue, topValue, earnedValue, _, _, isHeader,
-        isCollapsed, hasRep, _, isChild, factionID, hasBonusRepGain =
-            TitanPanelReputation:BlizzAPI_GetFactionInfo(index)
-        if factionID then
-            local factionDetails = CreateFactionDetails(name, standingID, bottomValue, topValue, earnedValue,
-                isHeader, isCollapsed, hasRep, isChild, factionID, hasBonusRepGain,
-                TitanPanelReputation:BlizzAPI_IsFactionInactive(index))
+    for _, row in ipairs(AddRowsOfCollapsedHeaders(ReadListedRows())) do
+        local name, isHeader, isChild = row.name, row.isHeader, row.isChild
+        local factionDetails = CreateFactionDetails(row)
 
-            local headerPath = {}
-            if isHeader then
-                if isChild then
-                    if rootHeader ~= "" then
-                        tinsert(headerPath, rootHeader)
-                    end
-                    tinsert(headerPath, name)
-                else
-                    tinsert(headerPath, name)
+        local headerPath = {}
+        if isHeader then
+            if isChild then
+                if rootHeader ~= "" then
+                    tinsert(headerPath, rootHeader)
                 end
+                tinsert(headerPath, name)
             else
-                local shouldAttachToNested = (nestedHeader ~= "" and isChild)
-                if shouldAttachToNested then
-                    if rootHeader ~= "" then
-                        tinsert(headerPath, rootHeader)
-                    end
-                    tinsert(headerPath, nestedHeader)
-                else
-                    if rootHeader ~= "" then
-                        tinsert(headerPath, rootHeader)
-                    end
+                tinsert(headerPath, name)
+            end
+        else
+            local shouldAttachToNested = (nestedHeader ~= "" and isChild)
+            if shouldAttachToNested then
+                if rootHeader ~= "" then
+                    tinsert(headerPath, rootHeader)
+                end
+                tinsert(headerPath, nestedHeader)
+            else
+                if rootHeader ~= "" then
+                    tinsert(headerPath, rootHeader)
                 end
             end
+        end
 
-            local headerLevel
-            if isHeader then
-                headerLevel = math.max(#headerPath - 1, 0)
-            else
-                headerLevel = #headerPath
+        local headerLevel
+        if isHeader then
+            headerLevel = math.max(#headerPath - 1, 0)
+        else
+            headerLevel = #headerPath
+        end
+
+        local resolvedParentName = ""
+        if isHeader then
+            if #headerPath > 1 then
+                resolvedParentName = headerPath[#headerPath - 1]
             end
-
-            local resolvedParentName = ""
-            if isHeader then
-                if #headerPath > 1 then
-                    resolvedParentName = headerPath[#headerPath - 1]
-                end
-            else
-                if #headerPath > 0 then
-                    resolvedParentName = headerPath[#headerPath]
-                end
+        else
+            if #headerPath > 0 then
+                resolvedParentName = headerPath[#headerPath]
             end
+        end
 
-            factionDetails.parentName = resolvedParentName
-            factionDetails.headerLevel = headerLevel
-            factionDetails.headerPath = headerPath
+        factionDetails.parentName = resolvedParentName
+        factionDetails.headerLevel = headerLevel
+        factionDetails.headerPath = headerPath
 
-            -- Apply optional faction mapping overrides before consumers use the data
-            factionDetails = TitanPanelReputation:ApplyFactionMapping(factionDetails)
+        -- Apply optional faction mapping overrides before consumers use the data
+        factionDetails = TitanPanelReputation:ApplyFactionMapping(factionDetails)
 
-            -- The visibility checks look these up per entry and per menu row, so build them once
-            factionDetails.nodeKey = BuildNodeKey(factionDetails)
-            factionDetails.ancestorKeys = BuildAncestorKeys(factionDetails)
-            factionDetails.rootKey = DetermineRootHeaderKey(factionDetails)
+        -- The visibility checks look these up per entry and per menu row, so build them once
+        factionDetails.nodeKey = BuildNodeKey(factionDetails)
+        factionDetails.ancestorKeys = BuildAncestorKeys(factionDetails)
+        factionDetails.rootKey = DetermineRootHeaderKey(factionDetails)
 
-            if isHeader then
-                if isChild then
-                    nestedHeader = name or ""
-                else
-                    rootHeader = name or ""
-                    nestedHeader = ""
-                end
-            elseif not isChild then
+        if isHeader then
+            if isChild then
+                nestedHeader = name or ""
+            else
+                rootHeader = name or ""
                 nestedHeader = ""
             end
-            -- Collect the faction details for ordering after we finish scanning
-            tinsert(collectedDetails, factionDetails)
+        elseif not isChild then
+            nestedHeader = ""
         end
+        -- Collect the faction details for ordering after we finish scanning
+        tinsert(collectedDetails, factionDetails)
     end
 
     return OrderFactionDetails(collectedDetails)
@@ -1027,13 +1152,11 @@ end
 ---@return FactionDetails|nil
 ---@nodiscard
 function TitanPanelReputation:GetFactionDetailsByID(factionID)
-    local name, _, standingID, bottomValue, topValue, earnedValue, _, _, isHeader,
-    isCollapsed, hasRep, _, isChild, id, hasBonusRepGain = self:BlizzAPI_GetFactionInfoByID(factionID)
-    if not id then
+    local row = ReadRow(self:BlizzAPI_GetFactionInfoByID(factionID))
+    if not row then
         return nil
     end
-    return self:ApplyFactionMapping(CreateFactionDetails(name, standingID, bottomValue, topValue, earnedValue,
-        isHeader, isCollapsed, hasRep, isChild, id, hasBonusRepGain, false))
+    return self:ApplyFactionMapping(CreateFactionDetails(row))
 end
 
 ---
@@ -1101,8 +1224,9 @@ local collapsedHeaderKeys = {}
 ---
 ---@return table<number, boolean>
 local function GetKnownFactions()
-    TitanRep_CharData.KnownFactions = TitanRep_CharData.KnownFactions or {}
-    return TitanRep_CharData.KnownFactions
+    local data = GetCharacterData()
+    data.KnownFactions = data.KnownFactions or {}
+    return data.KnownFactions
 end
 
 ---

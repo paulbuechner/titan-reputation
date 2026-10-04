@@ -803,7 +803,28 @@ def sc_tracking_under_collapsed_header(tree):
             "button": plain(e.ev("BUTTON()")), "errors": e.errors()}
 
 
+def sc_collapsed_section_listed(tree):
+    def classic_lines(text):
+        names = ("Classic", "Stormwind", "Steamwheedle", "Booty Bay", "Gadgetzan", "Bloodsail")
+        return [line.strip() for line in plain(text).splitlines() if any(n in line for n in names)]
+
+    e = Env(tree)
+    e.login({"WatchedFaction": "Stormwind"})  # logged out with every header expanded
+    e2 = e.relog()
+    e2.login()
+    e2.edit_rows(**{"Classic": {"isCollapsed": True}})
+    e2.update(1010.0)
+    collapsed = classic_lines(e2.ev("TOOLTIP()"))
+    e3 = e2.relog()  # the header stays collapsed at the next login
+    e3.login()
+    return {"tooltip after collapsing": collapsed,
+            "tooltip at next login": classic_lines(e3.ev("TOOLTIP()")),
+            "menu at next login": classic_lines(e3.ev("MENU_DUMP(MENU())")),
+            "errors": e.errors() + e2.errors() + e3.errors()}
+
+
 SCENARIOS = {
+    "collapsed section stays listed": sc_collapsed_section_listed,
     "faction under collapsed header keeps counting": sc_tracking_under_collapsed_header,
     "new-faction toast: expanding a collapsed header": sc_expand_collapsed_header,
     "new-faction toast: faction known from last session": sc_known_from_last_session,

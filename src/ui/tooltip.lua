@@ -88,7 +88,7 @@ end
 ---@param factionDetails FactionDetails
 local function BuildTooltipFactionInfo(factionDetails)
     -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, factionID, paragonProgressStarted, headerLevel, headerPath =
+    local name, standingID, topValue, earnedValue, percent, isHeader, isInactive, hasRep, friendShipReputationInfo, headerLevel, headerPath =
         factionDetails.name,
         factionDetails.standingID,
         factionDetails.topValue,
@@ -98,14 +98,11 @@ local function BuildTooltipFactionInfo(factionDetails)
         factionDetails.isInactive,
         factionDetails.hasRep,
         factionDetails.friendShipReputationInfo,
-        factionDetails.factionID,
-        factionDetails.paragonProgressStarted,
         factionDetails.headerLevel,
         factionDetails.headerPath
 
     -- Get adjusted ID and label depending on the faction type
-    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
-        factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, false)
+    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, false)
     -- Destructure props from AdjustedIDAndLabel
     local adjustedID, LABEL = adjustedIDAndLabel.adjustedID, adjustedIDAndLabel.label
 

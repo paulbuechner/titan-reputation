@@ -57,23 +57,21 @@ function TitanPanelReputation:GetHumanReadableTime(time)
 end
 
 ---
----Adjusts the standingID and label based on the given parameters. This is used to handle friendship factions and
----bonus rep gain factions without affecting the original standingID and label.
+---Adjusts the standingID and label of the given faction for friendship, paragon and renown
+---factions without affecting the original standingID and label.
 ---
----@param factionID number The ID of the faction to get info for
----@param standingID number The current standingID for the given faction
----@param friendShipReputationInfo FriendshipReputationInfo|nil The friendship reputation info for the given faction
----@param topValue number The top value for the given faction
----@param paragonProgressStarted boolean Whether the paragon progress for the given faction has been started
----@param returnOnNotShowFriendInfo? boolean Whether to return if not showing friendship info (optional, default false)
+---@param factionDetails FactionDetails The faction to get the standing for
+---@param returnOnNotShowFriendInfo? boolean Whether to return nil for friendships while 'ShowFriendsOnBar' is disabled (optional, default false)
 ---@return AdjustedIDAndLabel|nil
 ---@nodiscard
-function TitanPanelReputation:GetAdjustedIDAndLabel(factionID,
-                                                    standingID,
-                                                    friendShipReputationInfo,
-                                                    topValue,
-                                                    paragonProgressStarted,
-                                                    returnOnNotShowFriendInfo)
+function TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, returnOnNotShowFriendInfo)
+    local factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted =
+        factionDetails.factionID,
+        factionDetails.standingID,
+        factionDetails.friendShipReputationInfo,
+        factionDetails.topValue,
+        factionDetails.paragonProgressStarted
+
     local adjustedID = standingID -- use local variable to avoid overwriting the global one
     local label = _G["FACTION_STANDING_LABEL" .. standingID]
     local factionType = "Faction Standing"

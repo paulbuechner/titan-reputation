@@ -210,14 +210,7 @@ function TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
         return
     end
 
-    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(
-        factionDetails.factionID,
-        factionDetails.standingID,
-        factionDetails.friendShipReputationInfo,
-        factionDetails.topValue,
-        factionDetails.paragonProgressStarted,
-        true
-    )
+    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, true)
     if not adjusted then
         return
     end
@@ -743,14 +736,12 @@ local STANDING_BRACKET_WIDTH = {
 ---@param factionDetails FactionDetails
 local function HandleFactionUpdate(factionDetails)
     -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, friendShipReputationInfo, factionID, paragonProgressStarted =
+    local name, standingID, topValue, earnedValue, factionID =
         factionDetails.name,
         factionDetails.standingID,
         factionDetails.topValue,
         factionDetails.earnedValue,
-        factionDetails.friendShipReputationInfo,
-        factionDetails.factionID,
-        factionDetails.paragonProgressStarted
+        factionDetails.factionID
 
     -- Guard: Check if factionID is present in `TitanPanelReputation.TABLE`
     local previous = TitanPanelReputation.TABLE[factionID]
@@ -762,7 +753,7 @@ local function HandleFactionUpdate(factionDetails)
     end
 
     -- Get adjusted ID and label depending on the faction type
-    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, true)
+    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, true)
     if not adjusted then return end -- Return if adjusted is nil (is friendship && 'ShowFriendsOnBar' is disabled)
 
     -- Standing jumps of more than one level must also count the skipped brackets. Their
@@ -1071,14 +1062,7 @@ function TitanPanelReputation:HandleUpdateFaction()
     local isNewFaction = (newFactionsCount == 1 or newFactionsCount == 2)
     if detectNewFactions and isNewFaction then
         for _, details in pairs(newFactions) do
-            local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(
-                details.factionID,
-                details.standingID,
-                details.friendShipReputationInfo,
-                details.topValue,
-                details.paragonProgressStarted,
-                true
-            )
+            local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(details, true)
 
             if adjusted then
                 ShowReputationAnnouncement(details.name, details.factionID, adjusted)

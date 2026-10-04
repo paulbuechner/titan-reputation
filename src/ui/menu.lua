@@ -10,13 +10,7 @@ local WoW5 = select(4, GetBuildInfo()) >= 50000
 ---@return number|nil adjustedID
 ---@return string|nil label
 local function GetStandingLabel(factionDetails)
-    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(
-        factionDetails.factionID,
-        factionDetails.standingID,
-        factionDetails.friendShipReputationInfo,
-        factionDetails.topValue,
-        factionDetails.paragonProgressStarted
-    )
+    local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails)
     if not adjusted then return nil, nil end
 
     local adjustedID, label = adjusted.adjustedID, adjusted.label

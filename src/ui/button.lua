@@ -20,15 +20,12 @@ end
 ---@param factionDetails FactionDetails
 function TitanPanelReputation.BuildButtonText(factionDetails)
     -- Destructure props from FactionDetails
-    local name, standingID, topValue, earnedValue, percent, friendShipReputationInfo, factionID, paragonProgressStarted =
+    local name, topValue, earnedValue, percent, friendShipReputationInfo =
         factionDetails.name,
-        factionDetails.standingID,
         factionDetails.topValue,
         factionDetails.earnedValue,
         factionDetails.percent,
-        factionDetails.friendShipReputationInfo,
-        factionDetails.factionID,
-        factionDetails.paragonProgressStarted
+        factionDetails.friendShipReputationInfo
 
     -- Return if the faction is not currently being watched (displayed on the Titan Panel button)
     if TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") ~= name then
@@ -36,8 +33,7 @@ function TitanPanelReputation.BuildButtonText(factionDetails)
     end
 
     -- Get adjusted ID and label depending on the faction type
-    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(
-        factionID, standingID, friendShipReputationInfo, topValue, paragonProgressStarted, true)
+    local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, true)
 
     -- Return if adjustedIDAndLabel is nil (is friendship && 'ShowFriendsOnBar' is disabled)
     if not adjustedIDAndLabel then return end

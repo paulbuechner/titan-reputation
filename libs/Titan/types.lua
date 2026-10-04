@@ -46,107 +46,9 @@ TitanPlugins = {}; -- Used by plugins
 
 -- Titan.lua ------------------------------------------------------------------------------------------
 
-TitanPanel_OkToReload = function() end
-
---[[ Titan
-NAME: TitanPanel_ResetToDefault
-DESC: Give the user a 'are you sure'. If the user accepts then reset current toon back to default Titan settings.
-VAR:  None
-OUT:  None
-NOTE:
-- Even if the user was using global profiles they will not when this is done.
-:NOTE
---]]
-TitanPanel_ResetToDefault = function() end
-
---[[ Titan
-NAME: TitanPanel_SaveCustomProfile
-DESC: The user wants to save a custom Titan profile. Show the user the dialog boxes to make it happen.
-VAR:  None
-OUT:  None
-NOTE:
-- The profile is written to the Titan saved variables. A reload of the UI is needed to ensure the profile is written to disk for the user to load later.
-:NOTE
---]]
-TitanPanel_SaveCustomProfile = function() end
-
---[[ Titan
-NAME: TitanSetPanelFont
-DESC: Set or change the font and font size of text on the Titan bar. This affects ALL plugins.
-VAR: fontname - The text name of the font to use. Defaults to Titan default if none given.
-VAR: fontsize - The size of the font to use. Defaults to Titan default if none given.
-OUT: None
-NOTE:
-- Each registered plugin will have its font updated. Then all plugins will be refreshed to show the new font.
-:NOTE
---]]
-TitanSetPanelFont = function(fontname, fontsize) end
-
---[[ Titan
-NAME: TitanPanel_PlayerEnteringWorld
-DESC: Do all the setup needed when a user logs in / reload UI / enter or leave an instance.
-VAR:  None
-OUT:  None
-NOTE:
-- This is called after the 'player entering world' event is fired by Blizz.
-- This is also used when a LDB plugin is created after Titan runs the 'player entering world' code.
-:NOTE
---]]
-TitanPanel_PlayerEnteringWorld = function(reload) end
-
---[[ Titan
-NAME: TitanPanelBarButton_OnClick
-DESC: Handle the button clicks on any Titan bar.
-VAR: self - expected to be a Titan bar
-VAR: button - which mouse button was clicked
-OUT:  None
-NOTE:
-- This only reacts to the right or left mouse click without modifiers.
-- Used in the set script for the Titan display and hider frames
-:NOTE
---]]
-TitanPanelBarButton_OnClick = function(self, button) end
-
-TitanPanel_SetBarTexture = function(frame) end
-
 --------------------------------------------------------------
 --
 -- auto hide event handlers
---[[ Titan
-NAME: TitanPanelBarButton_OnLeave
-DESC: On leaving the display check if we have to hide the Titan bar. A timer is used - when it expires the bar is hid.
-VAR: self - expected to be a Titan bar
-OUT: None
---]]
-TitanPanelBarButton_OnLeave = function(self) end
-
---[[ Titan
-NAME: TitanPanelBarButton_OnEnter
-DESC: No code - this is a place holder for the XML template.
-VAR: self - expected to be a Titan bar
-OUT: None
---]]
-TitanPanelBarButton_OnEnter = function(self) end
-
---[[ Titan
-NAME: TitanPanelBarButtonHider_OnLeave
-DESC: No code - this is a place holder for the XML template.
-VAR: self - expected to be a Titan bar
-OUT: None
---]]
-TitanPanelBarButtonHider_OnLeave = function(self) end
-
---[[ Titan
-NAME: TitanPanelBarButtonHider_OnEnter
-DESC: On entering the hider check if we need to show the display bar.
-VAR: self - expected to be a Titan hider bar
-OUT: None
-NOTE:
-- No action is taken if the user is on combat.
-:NOTE
---]]
-TitanPanelBarButtonHider_OnEnter = function(self) end
-
 --------------------------------------------------------------
 --
 -- Titan Frames for CLASSIC versions
@@ -156,108 +58,12 @@ TitanPanelBarButtonHider_OnEnter = function(self) end
 -- Routines to handle adjusting some UI frames
 --
 --[[ Titan
-NAME: TitanPanelBarButton_ToggleAlign
-DESC: Align the buttons per the user's new choice.
-VAR: align - left or center
-OUT: None
---]]
-TitanPanelBarButton_ToggleAlign = function(align) end
-
---[[ Titan
 NAME: TitanPanelBarButton_ToggleAutoHide
 DESC: Toggle the auto hide of the given Titan bar per the user's new choice.
 VAR: frame - expected to be a Titan bar
 OUT:  None
 --]]
 TitanPanelBarButton_ToggleAutoHide = function(frame) end
-
---[[ Titan
-NAME: TitanPanelBarButton_ToggleScreenAdjust
-DESC: Toggle whether Titan adjusts 'top' frames around Titan bars per the user's new choice.
-VAR:  None
-NOTE:
-- Another addon can tell Titan to NOT adjust some or all frames.
-:NOTE
---]]
-TitanPanelBarButton_ToggleScreenAdjust = function() end
-
---[[ Titan
-NAME: TitanPanelBarButton_ToggleAuxScreenAdjust
-DESC: Toggle whether Titan adjusts 'bottom' frames around Titan bars per the user's new choice.
-VAR:  None
-OUT:  None
-NOTE:
-- Another addon can tell Titan to NOT adjust some or all frames.
-:NOTE
---]]
-TitanPanelBarButton_ToggleAuxScreenAdjust = function() end
-
---[[ Titan
-NAME: TitanPanelBarButton_ForceLDBLaunchersRight
-DESC: Force all plugins created from LDB addons, visible or not, to be on the right side of the Titan bar. Any visible plugin will be forced to the right side on the same bar it is currently on.
-VAR:  None
-OUT:  None
---]]
-TitanPanelBarButton_ForceLDBLaunchersRight = function() end
-
---[[ Titan
-NAME: TitanPanelBarButton_DisplayBarsWanted
-DESC: Show all the Titan bars the user has selected.
-VAR:  None
-OUT:  None
---]]
-TitanPanelBarButton_DisplayBarsWanted = function(reason) end
-
---[[ Titan
-NAME: TitanPanelBarButton_HideAllBars
-DESC: This routine will hide all the Titan bars (and hiders) regardless of what the user has selected.
-VAR:  None
-OUT:  None
-NOTE:
-- For example when the pet battle is active. We cannot figure out how to move the pet battle frame so we are punting and hiding Titan...
-- We only need to hide the bars (and hiders) - not adjust frames
-:NOTE
---]]
-TitanPanelBarButton_HideAllBars = function() end
-
---[[ Titan
-NAME: TitanPanelBarButton_Show
-DESC: Show / hide the given Titan bar based on the user selection.
-VAR: frame - expected to be a Titan bar name (string)
-OUT:  None
-NOTE:
-- Hide moves rather than just 'not shown'. Otherwise the buttons will stay visible defeating the purpose of hide.
-:NOTE
---]]
-TitanPanelBarButton_Show = function(frame) end
-
---[[ Titan
-NAME: TitanPanelBarButton_Hide
-DESC: Hide the given Titan bar based on the user selection.
-VAR: frame - expected to be a Titan bar name (string)
-OUT:  None
-NOTE:
-- Hide moves rather than just 'not shown'. Otherwise the buttons will stay visible defeating the purpose of hide.
-- Also moves the hider bar if auto hide is not selected.
-:NOTE
---]]
-TitanPanelBarButton_Hide = function(frame) end
-
---[[ Titan
-NAME: TitanPanel_InitPanelButtons
-DESC: Show all user selected plugins on the Titan bar(s) then justify per the user selection.
-VAR:  None
-OUT:  None
---]]
-TitanPanel_InitPanelButtons = function() end
-
---[[ Titan
-NAME: TitanPanel_ReOrder
-DESC: Reorder all the shown all user selected plugins on the Titan bar(s). Typically used after a button has been removed / hidden.
-VAR: index - the index of the plugin removed so the list can be updated
-OUT:  None
---]]
-TitanPanel_ReOrder = function(index) end
 
 --[[ Titan
 NAME: TitanPanel_RemoveButton
@@ -270,57 +76,6 @@ NOTE:
 --]]
 TitanPanel_RemoveButton = function(id) end
 
---[[ Titan
-NAME: TitanPanel_GetButtonNumber
-DESC: Get the index of the given plugin from the Titan plugin displayed list.
-VAR: id - the plugin name (string)
-OUT: index of the plugin in the Titan plugin list or the end of the list. The routine returns +1 if not found so it is 'safe' to update / add to the Location
---]]
-TitanPanel_GetButtonNumber = function(id) end
-
---[[ Titan
-NAME: TitanPanel_RefreshPanelButtons
-DESC: Update / refresh each plugin from the Titan plugin list. Used when a Titan option is changed that effects all plugins.
-VAR:  None
-OUT:  None
---]]
-TitanPanel_RefreshPanelButtons = function() end
-
---[[ Titan
-NAME: TitanPanelButton_Justify
-DESC: Justify the plugins on each Titan bar. Used when the user changes the 'center' option on a Titan bar.
-VAR:  None
-OUT:  None
---]]
-TitanPanelButton_Justify = function() end
-
---[[ Titan
-NAME: TitanPanelRightClickMenu_PrepareBarMenu
-DESC: This is the controller of the Titan (right click) menu.
-VAR: self - expected to be the Titan bar that was right clicked
-OUT: None
-NOTE:
-- Frame name used is <Titan bar name>RightClickMenu
-:NOTE
---]]
-TitanPanelRightClickMenu_PrepareBarMenu = function(self) end
-
---[[ Titan
-NAME: TitanPanel_IsPluginShown
-DESC: Determine if the given plugin is shown on a Titan bar. The Titan bar could be not shown or on auto hide and the plugin will still be 'shown'.
-VAR: id - plugin name (string)
-OUT: int - index of the plugin or nil
---]]
-TitanPanel_IsPluginShown = function(id) end
-
---[[ Titan
-NAME: TitanPanel_GetPluginSide
-DESC: Determine if the given plugin is or would be on right or left of a Titan bar. This returns right or left regardless of whether the plugin is 'shown'.
-VAR: id - plugin name (string)
-OUT: string - "Right" or "Left"
---]]
-TitanPanel_GetPluginSide = function(id) end
-
 --[[
 print("OnMoveStart"
 .." "..tostring(self:GetName())..""
@@ -332,28 +87,10 @@ print("OnMoveStart"
 )
 --]]
 
---[[ Titan
-NAME: TitanPanel_InitPanelBarButton
-DESC: Set the scale, texture (graphic), and transparancy of all the Titan bars based on the user selection.
-VAR:  None
-OUT:  None
---]]
-TitanPanel_InitPanelBarButton = function() end
-
 --
 --==========================
 -- Routines to handle creation of Titan bars
 --
---[[ Titan
-NAME: TitanPanelButton_CreateBar(frame_str)
-DESC: Create a Titan bar that can show plugins.
-VAR: frame_str - name of the frame
-NOTE:
-- This assumes ...
-:NOTE
---]]
-TitanPanelButton_CreateBar = function(frame_str) end
-
 
 
 
@@ -380,21 +117,6 @@ TitanUtils_SetMinimapAdjust = function(bool) -- Used by addons
     -- This routine allows an addon to turn on or off
     -- the Titan minimap adjust.
 end
-
---[[ API
-NAME: TitanUtils_AddonAdjust
-DESC: Tell Titan to adjust (or not) a frame.
-VAR: frame - is the name (string) of the frame
-VAR: bool  - true if the addon will adjust the frame or false if Titan will adjust
-OUT:  None
-Note:
-- Titan will NOT store the adjust value across a log out / exit.
-- This is a generic way for an addon to tell Titan to not adjust a frame. The addon will take responsibility for adjusting that frame. This is useful for UI style addons so the user can run Titan and a modifed UI.
-- The list of frames Titan adjusts is specified in TitanMovableData within TitanMovable.lua.
-- If the frame name is not in TitanMovableData then Titan does not adjust that frame.
-:NOTE
---]]
-TitanUtils_AddonAdjust = function(frame, bool) end -- Used by addons
 
 
 --[[ ==================================================
@@ -468,25 +190,6 @@ OUT: string - plugin id or nil
 TitanUtils_GetButtonID = function(name) end
 
 --[[ API
-NAME: TitanUtils_GetParentButtonID
-DESC: Return the plugin id of the parent of the given name, if it exists.
-VAR: name - is the id of the plugin
-OUT: string - plugin id or nil
---]]
-TitanUtils_GetParentButtonID = function(name) end
-
---[[ API
-NAME: TitanUtils_GetButtonIDFromMenu
-DESC: Return the plugin id of whatever the mouse is over. Used in the right click menu on load.
-VAR: self - is the id of the frame
-OUT: string - plugin id or nil
-NOTE:
-- The plugin id returned could be the Titan bar or a plugin or nil.
-:NOTE
---]]
-TitanUtils_GetButtonIDFromMenu = function(self) end
-
---[[ API
 NAME: TitanUtils_GetPlugin
 DESC: Return the plugin itself (table and all).
 VAR: id - is the id of the plugin
@@ -502,33 +205,6 @@ OUT: string - internal bar name or nil
 OUT: string - locale bar name or nil
 --]]
 TitanUtils_GetWhichBar = function(id) end
-
---[[ API
-NAME: TitanUtils_PickBar
-DESC: Return the first bar that is shown.
-VAR:  None
-OUT: string - bar name or nil
---]]
-TitanUtils_PickBar = function()
-    -- Pick the 'first' bar shown per the Titan defined order.
-    -- This is used for defaulting where plugins are put
-    -- if using the Titan options screen.
-end
-
---[[ API
-NAME: TitanUtils_ToRight
-DESC: See if the plugin is to be on the right.
-   These are the methods to place a plugin on the right:
-   1) DisplayOnRightSide saved variable logic (preferred)
-   2) Place a plugin in TITAN_PANEL_NONMOVABLE_PLUGINS (NOT preferred)
-:DESC
-VAR:  None
-OUT: bool - true or nil. true if the plugin is to be placed on the right side of a bar.
-NOTE:
-- Using the Titan template TitanPanelIconTemplate used to enforce right side only but was removed during DragonFlight to give users more flexibility.
-:NOTE
---]]
-TitanUtils_ToRight = function(id) end
 
 --------------------------------------------------------------
 --
@@ -907,24 +583,6 @@ OUT:  None
 TitanPanelRightClickMenu_ToggleVar = function(value) end
 
 --[[ API
-NAME: TitanPanelRightClickMenu_AllVarNil
-DESC: Check if all the variables in the table are nil/false.
-VAR: id - id of the plugin
-VAR: toggleTable - table of saved var to be checked
-OUT: bool - true (1) or nil
---]]
-TitanPanelRightClickMenu_AllVarNil = function(id, toggleTable) end
-
---[[ API
-NAME: TitanPanelRightClickMenu_AddToggleColoredText
-DESC: This will toggle the "ShowColoredText" Titan variable then update the button
-VAR: id - id of the plugin
-VAR: level - level to put the line
-OUT:  None
---]]
-TitanPanelRightClickMenu_ToggleColoredText = function(value) end
-
---[[ API
 NAME: TitanPanelRightClickMenu_SetCustomBackdrop
 DESC: This will set the backdrop of the given button. This is used for custom created controls such as Clock offset or Volume sliders to give a consistent look.
 VAR: frame - the control frame of the plugin
@@ -956,19 +614,6 @@ OUT:  None.
 TitanUtils_AddButtonOnBar = function(bar, id) end
 
 --[[ Titan
-NAME: TitanUtils_GetFirstButtonOnBar
-DESC: Find the first button that is on the given bar and is on the given side.
-VAR: bar - The Titan bar to search
-VAR: side - right or left
-OUT: int - index of the first button or nil if none found
-NOTE:
--- buttons on Left are placed L to R; buttons on Right are placed R to L. Next and prev depend on which side we need to check.
--- buttons on Right are placed R to L
-:NOTE
---]]
-TitanUtils_GetFirstButtonOnBar = function(bar, side) end
-
---[[ Titan
 NAME: TitanUtils_ShiftButtonOnBarLeft
 DESC: Find the button that is on the bar and is on the side and left of the given button
 VAR:
@@ -990,114 +635,10 @@ TitanUtils_ShiftButtonOnBarRight = function(name) end
 --
 -- Control Frame check & manipulation routines
 --
---[[ Titan Plugins
-NAME: TitanUtils_CheckFrameCounting
-DESC: Check the frame - expected to be a control / menu frame. Close if timer has expired. Used in plugin OnUpdate
-VAR:
-- frame - control / menu frame
-- elapsed - portion of second since last OnUpdate
-OUT:  None
---]]
-TitanUtils_CheckFrameCounting = function(frame, elapsed) end
-
---[[ Titan Plugins
-NAME: TitanUtils_StartFrameCounting
-DESC: Set the max time the control frame could be open once cursor has left frame. Used in plugin OnLeave
-VAR:
-- frame - control / menu frame
-- frameShowTime - max time
-OUT:  None
---]]
-TitanUtils_StartFrameCounting = function(frame, frameShowTime) end
-
---[[ Titan Plugins
-NAME: TitanUtils_StopFrameCounting
-DESC: Remove timer flag once cursor has entered frame. Used in plugin OnEnter
-VAR:
-- frame - control / menu frame
-OUT:  None
---]]
-TitanUtils_StopFrameCounting = function(frame) end
-
---[[ Titan Plugins AND Titan
-NAME: TitanUtils_CloseAllControlFrames
-DESC: Remove all timer flags on plugin control frames. Used for plugin Shift+Left and within Titan
-VAR:  None
-OUT:  None
---]]
-TitanUtils_CloseAllControlFrames = function() end
-
-TitanUtils_IsAnyControlFrameVisible = function() end
-
---[[ Titan Plugins AND Titan
-NAME: TitanUtils_GetOffscreen
-DESC: Check where the control frame should be on screen; return x and y
-VAR:  None
-OUT: float - x where frame should be
-OUT: float - y where frame should be
---]]
-TitanUtils_GetOffscreen = function(frame) end
-
 --------------------------------------------------------------
 --
 -- Plugin registration routines
 --
---[[ Titan
-NAME: TitanUtils_PluginToRegister
-DESC: Place the plugin to be registered later by Titan
-VAR:
-- self - frame of the plugin (must be a Titan template)
-- isChildButton - true if the frame is a child of a Titan frame
-OUT:  None
-NOTE:
-- .registry is part of 'self' (the Titan plugin frame) which works great for Titan specific plugins.
-  Titan plugins create the registry as part of the frame _OnLoad.
-  But this does not work for LDB buttons. The frame is created THEN the registry is added to the frame.
-- Any read of the registry must assume it may not exist. Also assume the registry could be updated after this routine.
-- This is called when a Titan plugin frame is created. Normally these are held until the player 'enters world' then the plugin is registered.
-  Sometimes plugin frames are created after this process. Right now only LDB plugins are handled. If someone where to start creating Titan frames after the registration process were complete then it would fail to be registered...
--!For LDB plugins the 'registry' is attached to the frame AFTER the frame is created...
-- The fields put into "Attempted" are defaulted here in preperation of being registered.
---]]
-TitanUtils_PluginToRegister = function(self, isChildButton) end
-
---[[ Titan
-NAME: TitanUtils_PluginFail
-DESC: Place the plugin to be registered later by Titan
-VAR:
-- plugin - frame of the plugin (must be a Titan template)
-OUT:  None
-NOTE:
-- This is called when a plugin is unsupported. Cuurently this is used if a LDB data object is not supported. See SupportedDOTypes in LDBToTitan.lua for more detail.
-  It is intended mainly for developers. It is a place to put relevant info for debug and so users can supply troubleshooting info.
-  The key is set the status to 'fail' so there is no further attempt to register the plugin.
-- The results will show in "Attempted" so the developer has a shot at figuring out what was wrong.
-- plugin is expected to hold as much relevant info as possible...
---]]
-TitanUtils_PluginFail = function(plugin) end
-
---[[ Titan
-NAME: TitanUtils_RegisterPlugin
-DESC: Attempt to register a plugin that has requested to be registered
-VAR:
-- plugin - frame of the plugin (must be a Titan template)
-OUT:  None
-NOTE:
-- Lets be extremely paranoid here because registering plugins that do not play nice can cause real headaches...
---]]
-TitanUtils_RegisterPlugin = function(plugin) end
-
---[[ Titan
-NAME: TitanUtils_RegisterPluginList
-DESC: Attempt to register the list of plugins that have requested to be registered
-VAR:  None
-OUT:  None
-NOTE:
-- Tell the user when this starts and ends only on the first time.
-  This could be called if a plugin requests to be registered after the first loop through.
---]]
-TitanUtils_RegisterPluginList = function() end
-
 --[[ API
 NAME: TitanUtils_IsPluginRegistered
 DESC: See if the given plugin was registered successfully.
@@ -1110,14 +651,6 @@ TitanUtils_IsPluginRegistered = function(id) end
 
 --------------------------------------------------------------
 -- Right click menu routines for Titan Panel bars
-
---[[ Titan
-NAME: TitanUtils_CloseRightClickMenu
-DESC: Close the right click menu of any plugin if it was open. Only one can be open at a time.
-VAR:  None
-OUT:  None
---]]
-TitanUtils_CloseRightClickMenu = function() end
 
 --[[ Titan
 NAME: TitanPanelRightClickMenu_Toggle
@@ -1149,75 +682,6 @@ OUT:  None
 TitanPanelRightClickMenu_Close = function() end
 
 --------------------------------------------------------------
--- Titan utility routines
-
---[[ Titan
-NAME: TitanUtils_ParseName
-DESC: Parse the player name and return the parts.
-VAR:
-- name - the name to break up
-OUT:
-- string player name only
-- string realm name only
---]]
-TitanUtils_ParseName = function(name) end
-
---[[ Titan
-NAME: TitanUtils_CreateName
-DESC: Given the player name and server and return the Titan name.
-VAR:
-- player - 1st part
-- realm - 2nd part. Could be realm or 'custom'
-OUT:
-- string - Titan name
---]]
-TitanUtils_CreateName = function(player, realm) end
-
---[[ Titan
-NAME: TitanUtils_GetPlayer
-DESC: Create the player name (toon being played) and return the parts.
-VAR:  None
-OUT:
-- string Titan player name or nil
-- string player name only
-- string realm name only
---]]
-TitanUtils_GetPlayer = function() end
-
---[[ Titan
-NAME: TitanUtils_GetGlobalProfile
-DESC: Return the global profile setting and the global profile name, if any.
-VAR:  None
-OUT:
-- bool Global profile value
-- string Global profile name or default
-- string player name only or blank
-- string realm name only or blank
---]]
-TitanUtils_GetGlobalProfile = function() end
-
---[[ Titan
-NAME: TitanUtils_SetGlobalProfile
-DESC: Return the global profile setting and the global profile name, if any.
-VAR:
-- bool Global profile value
-- string Global profile name or default
-OUT:  None
---]]
-TitanUtils_SetGlobalProfile = function(glob, toon) end
-
---[[ Titan
-NAME: TitanUtils_ScreenSize
-DESC: Return the screen size after scaling
-VAR:
-- output - boolean if true dump a lot of UI size info to chat
-OUT:
-- number - scaled X / width
-- number - scaled Y / height
---]]
-TitanUtils_ScreenSize = function(output) end
-
---------------------------------------------------------------
 -- Various debug routines
 --[[
 local function Debug_array(message)
@@ -1226,15 +690,6 @@ local idx = TitanDebugArray.index
 	TitanDebugArray.lines[TitanDebugArray.index] = (date("%m/%d/%y %H:%M:%S".." : ")..message)
 end
 --]]
---[[ Titan
-NAME: TitanPanel_GetVersion
-DESC: Get the Titan version into a string.
-VAR:  None
-OUT:
-- string containing the version
---]]
-TitanPanel_GetVersion = function() end
-
 --[[ Titan
 NAME: TitanPrint
 DESC: Output a message to the user in a consistent format.
@@ -1393,22 +848,6 @@ If these events are overridden then the default routine needs to be included!
 :DESC
 --]]
 
---[[ Titan
-NAME: TitanPanel_SetScale
-DESC: Set the scale of each plugin and each Titan bar.
-VAR:  None
-OUT:  None
---]]
-TitanPanel_SetScale = function() end
-
---[[ Titan
-NAME: TitanPanelButton_IsIcon
-DESC: Is the given Titan plugin of type icon?
-VAR: id - string name of the plugin
-OUT: boolean
---]]
-TitanPanelButton_IsIcon = function(id) end
-
 --[[ API
 NAME: TitanOptionSlider_TooltipText
 DESC: Set the color of the tooltip text to normal (white) with the value in green.
@@ -1447,14 +886,6 @@ NOTE:
 :NOTE
 --]]
 TitanPanelPluginHandle_OnUpdate = function(table, oldarg) end -- Used by plugins
-
---[[ API
-NAME: TitanPanelDetectPluginMethod
-DESC: Poorly named routine that sets the OnDragStart & OnDragStop scripts of a Titan plugin.
-VAR: id - the string name of the plugin
-VAR: isChildButton - boolean
---]]
-TitanPanelDetectPluginMethod = function(id, isChildButton) end
 
 --[[ API
 NAME: TitanPanelButton_OnShow
@@ -1525,35 +956,6 @@ VAR: iconB - if given, this is the Blue (RBG) setting of the icon
 --]]
 TitanPanelButton_SetButtonIcon = function(id, iconCoords, iconR, iconG, iconB) end
 
---[[ Titan
-NAME: TitanPanelButton_GetType
-DESC: Get the type of the given Titan plugin.
-VAR: id - string name of the plugin
-OUT: type - The type of the plugin (text, icon, combo (default))
-NOTE:
-- This assumes that the developer is playing nice and is using the Titan templates as is...
-:NOTE
---]]
-TitanPanelButton_GetType = function(id) end
-
---[[ Titan
-NAME: TitanPanelButton_ApplyBarPos
-DESC: Apply saved Bar position to the Bar frame.
-VAR: frame_str - string name of the Bar frame
-OUT: None
-NOTE:
-- Bit of a sledge hammer; used when loading a profile over the current so the Bars are properly placed.
-:NOTE
---]]
-TitanPanelButton_ApplyBarPos = function(frame_str) end
-
---[[ Titan
-NAME: TitanOptionsSliderTemplate_OnLoad
-DESC: Loads the Backdrop for TitanOptionsSliderTemplate with new 9.0 API
-VAR: self - The frame
---]]
-TitanOptionsSliderTemplate_OnLoad = function(self) end
-
 
 
 
@@ -1592,62 +994,6 @@ TitanAdjustSettings =			TitanSettings.Players[toon].Adjust		: List of frames Tit
 - The index is the string name of the Titan Bar to coordinate staic and user selected bar data
 :DESC
 --]]
-
---[[ Titan
-NAME: TitanVariables_SyncSinglePluginSettings
-DESC: Routine to sync one plugin - current loaded (lua file) to its plugin saved vars (last save to disk).
-VAR:  id : plugin name
-OUT:  None
---]]
-TitanVariables_SyncSinglePluginSettings = function(id) end
-
---[[ Titan
-NAME: TitanVariables_SyncPluginSettings
-DESC: Routine to sync plugin datas - current loaded (lua file) to any plugin saved vars (last save to disk).
-VAR:  None
-OUT:  None
---]]
-TitanVariables_SyncPluginSettings = function() end
-
---[[ Titan
-NAME: TitanVariables_InitTitanSettings
-DESC: Ensure TitanSettings (one of the saved vars in the toc) exists and set the Titan version.
-VAR:  None
-OUT:  None
-NOTE:
-- Called when Titan is loaded (ADDON_LOADED event)
-:NOTE
---]]
-TitanVariables_InitTitanSettings = function() end
-
---[[ Titan
-NAME: TitanVariables_SetBarPos
-DESC: Update local and saved vars to new bar position per user
-VAR:  self - frame to save position
-OUT:  None
-NOTE:
-- Called when Titan is loaded (ADDON_LOADED event)
-- Called when user moves or changes width of bar
-- :GetPoint(1) results in incorrect values based on point used
-:NOTE
---]]
-TitanVariables_SetBarPos = function(self, reset, x_off, y_off, w_off) end
-
---[[ Titan
-NAME: TitanVariables_GetBarPos
-DESC: Retrieve saved vars of bar position
-VAR:  frame_str - frame name to retrieve positions from
-OUT:  X, Y, Width
---]]
-TitanVariables_GetBarPos = function(frame_str) end
-
---[[ Titan
-NAME: TitanVariables_GetFrameName
-DESC: Build the frame name from the bar name
-VAR:  bar_str - frame name to retrieve positions from
-OUT:  frame string
---]]
-TitanVariables_GetFrameName = function(bar_str) end
 
 --[[ API
 NAME: TitanGetVar
@@ -1783,18 +1129,6 @@ VAR: value - strata name (string)
 OUT: None
 --]]
 TitanVariables_SetPanelStrata = function(value) end
-
---[[ Titan
-NAME: TitanVariables_UseSettings
-DESC: Set the Titan variables and plugin variables to the passed in profile.
-VAR: profile - profile to use for this toon : <name>@<server>
-OUT: None
-NOTE:
-- Called from the Titan right click menu
-- profile is compared as 'lower' so the case of profile does not matter
-:NOTE
---]]
-TitanVariables_UseSettings = function(profile, action) end
 
 -- decrecated routines
 --[[

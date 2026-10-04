@@ -167,9 +167,15 @@ end
 function TitanPanelButton_UpdateTooltip() end
 function TitanPanelButton_OnLoad() end
 function TitanPanelButton_OnClick() end
-local function Node(kind, label) return { kind = kind, label = label, children = {} } end
+local function Node(kind, label)
+  local n = { kind = kind, label = label, children = {} }
+  function n:SetEnabled(enabled) self.enabled = enabled end
+  function n:SetTitleAndTextTooltip(title, text) self.tooltip = tostring(title) .. ": " .. tostring(text) end
+  return n
+end
 local function Add(owner, n) owner.children[#owner.children + 1] = n; return n end
 Titan_Menu = {}
+function Titan_Menu.SetAtribEnabled(owner, enabled) owner:SetEnabled(enabled) end
 function Titan_Menu.AddDivider(o) return Add(o, Node("divider")) end
 function Titan_Menu.AddButton(o, label) return Add(o, Node("button", label)) end
 function Titan_Menu.AddSelector(o, id, label, opt)
@@ -251,7 +257,7 @@ local function FactionData(f)
   return { name = f.name, description = "", reaction = f.reaction, currentReactionThreshold = f.cur,
     nextReactionThreshold = f.next, currentStanding = f.standing, atWarWith = false, canToggleAtWar = false,
     isHeader = f.isHeader or false, isCollapsed = f.isCollapsed or false, isHeaderWithRep = f.hasRep or false,
-    isWatched = false, isChild = f.isChild or false, factionID = f.id, hasBonusRepGain = false,
+    isWatched = f.id == XP_BAR, isChild = f.isChild or false, factionID = f.id, hasBonusRepGain = false,
     canSetInactive = true, isAccountWide = false }
 end
 local function FactionInfo(f)
@@ -270,7 +276,12 @@ C_Reputation = {
     return p.current, p.threshold, 0, p.pending, p.tooLow
   end,
   IsMajorFaction = function(id) return MAJOR[id] ~= nil end,
+  -- "Show as Experience Bar": XP_BAR holds the picked faction ID (nil for none)
+  GetWatchedFactionData = function() return XP_BAR and FactionData(ById(XP_BAR)) or nil end,
+  SetWatchedFactionByID = function(id) XP_BAR = id ~= 0 and id or nil end,
+  SetWatchedFactionByIndex = function(i) local f = Visible()[i]; XP_BAR = f and f.id or nil end,
 }
+SHOW_FACTION_ON_MAINSCREEN = "Show as Experience Bar"
 C_MajorFactions = {
   GetMajorFactionData = function(id)
     local m = MAJOR[id]; if not m then return nil end
@@ -288,12 +299,15 @@ function GetNumFactions() SCANS = SCANS + 1; return #Visible() end
 function GetFactionInfo(i) return FactionInfo(Visible()[i]) end
 function GetFactionInfoByID(id) return FactionInfo(ById(id)) end
 function IsFactionInactive(i) local f = Visible()[i]; return f ~= nil and f.inactive or false end
+function SetWatchedFactionIndex(i) local f = Visible()[i]; XP_BAR = f and f.id or nil end
 -- Each client only has its own API: retail removed the globals in 11.0, Classic lacks the newer ones
 if MODE == "retail" then
   GetNumFactions, GetFactionInfo, GetFactionInfoByID, IsFactionInactive = nil, nil, nil, nil
+  SetWatchedFactionIndex = nil
 else
   C_Reputation.GetNumFactions, C_Reputation.GetFactionDataByIndex = nil, nil
   C_Reputation.GetFactionDataByID, C_Reputation.IsFactionActive = nil, nil
+  C_Reputation.SetWatchedFactionByID, C_Reputation.SetWatchedFactionByIndex = nil, nil
   C_MajorFactions = nil
 end
 
@@ -328,6 +342,8 @@ function MENU_DUMP(node, depth, out)
   for _, n in ipairs(node.children) do
     local sel = ""
     if n.isSelected then local ok, v = pcall(n.isSelected); sel = ok and (v and " [x]" or " [ ]") or " [ERR]" end
+    if n.enabled == false then sel = sel .. " (disabled)" end
+    if n.tooltip then sel = sel .. " | tooltip " .. n.tooltip end
     out[#out + 1] = string.rep("  ", depth) .. n.kind .. ": " .. tostring(n.label) .. sel
     MENU_DUMP(n, depth + 1, out)
   end
@@ -868,6 +884,36 @@ def sc_collapsed_subheader_grouping(tree):
     return {"expanded": expanded, "sub-header collapsed": tbc_lines(e.ev("TOOLTIP()")), "errors": e.errors()}
 
 
+def sc_experience_bar(tree):
+    def auto_change(e):
+        return next(line.strip() for line in plain(e.ev("MENU_DUMP(MENU())")).splitlines() if "Auto Show" in line)
+
+    e = Env(tree)
+    e.run("XP_BAR = 21")  # Booty Bay shown as experience bar, the button shows none yet
+    e.login({"AutoChange": True})
+    out = {"login": plain(e.ev("BUTTON()")), "menu": auto_change(e)}
+    e.run('SHIFT = true; CLICK({"The Burning Crusade", "Shattrath City", "The Aldor - Friendly"}); SHIFT = false')
+    e.update(1010.0)
+    out["shift-click Aldor"] = plain(e.ev("BUTTON()"))
+    e.run("NOW = 1015; C_Reputation.SetWatchedFactionByID(369); FLUSH_TIMERS()")  # fires no UPDATE_FACTION
+    out["Gadgetzan picked as bar"] = plain(e.ev("BUTTON()"))
+    e.gain("The Aldor", 250)
+    e.update(1020.0)
+    out["Aldor gains"] = plain(e.ev("BUTTON()"))
+    e.run("NOW = 1025; C_Reputation.SetWatchedFactionByID(0); FLUSH_TIMERS()")
+    e.gain("The Aldor", 250)
+    e.update(1030.0)
+    out["bar unchecked, Aldor gains"] = plain(e.ev("BUTTON()"))
+    out["menu without bar"] = auto_change(e)
+
+    era = Env(tree, mode="era", rows=[r for r in retail_rows() if r["id"] in (9003, 72, 169, 21, 369, 87)], extras={})
+    era.login({"WatchedFaction": "Stormwind"})
+    era.run("NOW = 1010; SetWatchedFactionIndex(5); FLUSH_TIMERS()")  # row 5: Gadgetzan
+    out["Classic Era: Gadgetzan picked as bar"] = plain(era.ev("BUTTON()"))
+    out["errors"] = e.errors() + era.errors()
+    return out
+
+
 def sc_time_formatting(tree):
     e = Env(tree)
     e.login({"WatchedFaction": "Stormwind"})
@@ -878,6 +924,7 @@ def sc_time_formatting(tree):
 
 
 SCENARIOS = {
+    "follow the experience bar faction": sc_experience_bar,
     "time formatting": sc_time_formatting,
     "collapsed sub-header keeps its group": sc_collapsed_subheader_grouping,
     "collapsed header never seen expanded": sc_collapsed_unknown_notice,

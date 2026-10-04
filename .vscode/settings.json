@@ -34,6 +34,7 @@
     "UIDROPDOWNMENU_OPEN_MENU",
     "UIDropDownMenu_Refresh",
     "ACHIEVEMENT_UNLOCKED",
+    "SHOW_FACTION_ON_MAINSCREEN",
     "GetNumFactions",
     "GetFactionInfo",
     "GetFactionInfoByID",

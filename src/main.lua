@@ -151,8 +151,10 @@ local function ProcessFactionUpdate()
 
         TitanPanelReputation:HandleUpdateFaction()
 
-        -- If AutoChange is enabled, show the faction with the biggest change of this burst
-        if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
+        -- A faction picked as experience bar takes precedence; otherwise, if AutoChange is enabled,
+        -- show the faction with the biggest change of this burst
+        if not TitanPanelReputation:FollowExperienceBar()
+            and TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
             TitanPanelReputation:SetWatchedFaction(TitanPanelReputation.CHANGED_FACTION,
                 TitanPanelReputation.CHANGED_FACTION_ID)
         end
@@ -203,5 +205,19 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         end
 
         return
+    end
+end
+
+-- Picking "Show as Experience Bar" changes no reputation, and the reputation panel refreshes the
+-- bar itself instead of relying on an event: handle each pick like an UPDATE_FACTION
+for _, api in ipairs({
+    { C_Reputation, "SetWatchedFactionByIndex" }, -- retail
+    { C_Reputation, "SetWatchedFactionByID" },    -- retail
+    { _G,           "SetWatchedFactionIndex" },   -- Classic
+}) do
+    if api[1] and api[1][api[2]] then
+        hooksecurefunc(api[1], api[2], function()
+            TitanPanelReputationButton_OnEvent("UPDATE_FACTION")
+        end)
     end
 end

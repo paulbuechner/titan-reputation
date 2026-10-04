@@ -23,6 +23,7 @@ function TitanPanelReputation:LangdeDE()
         ["LID_SHOW_VALUE"] = "Rufwert anzeigen",
         ["LID_SHOW_PERCENT"] = "Prozent anzeigen",
         ["LID_AUTO_CHANGE"] = "Fraktion automatisch wechseln",
+        ["LID_AUTO_CHANGE_EXPERIENCE_BAR"] = "Aus, solange eine Fraktion als Erfahrungsbalken angezeigt wird. Zum Wiedereinschalten im Ruffenster „%s“ abwählen.",
         ["LID_FRIENDSHIP_RANK_SETTINGS"] = "Freundschaftsrang-Einstellungen",
         ["LID_SHOW_FRIENDSHIPS"] = "Freundschaften anzeigen",
         ["LID_HIDE_MAX_FRIENDSHIPS"] = "Maximale Freundschaften ausblenden",

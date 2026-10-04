@@ -32,6 +32,9 @@ standings with any faction you may be farming reputation with.
 <div align="center"><img src="https://github.com/paulbuechner/titan-reputation/blob/main/assets/TitanReputation_Screenshot_05.png?raw=true" width="100%;"/></div>
 
 - **MikScrollingBattleText**: Mik's Scrolling Battle Text support for faction standing change announcement.
+- **Blizzard Experience Bar Support**: The button follows the faction set to "Show as Experience Bar" in the Blizzard
+  Reputation Pane and switches whenever you pick another one there. While a faction is shown as experience bar,
+  "Auto Show Changed" is paused.
 - **Blizzard Inactive Faction Support**: If you wish to omit a faction from the tooltip entirely. Simply visit the
   Blizzard Reputation Pane and set the faction to be "Move to Inactive". The tooltip's behavior will not process
   any faction with this flag enabled.

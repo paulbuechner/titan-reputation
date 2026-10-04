@@ -272,7 +272,14 @@ function TitanPanelReputation:BuildContextMenu(_owner, rootDescription)
     local id = TitanPanelReputation.ID
     local root = rootDescription
 
-    Titan_Menu.AddSelector(root, id, TitanPanelReputation:GT("LID_AUTO_CHANGE"), "AutoChange")
+    local autoChange = Titan_Menu.AddSelector(root, id, TitanPanelReputation:GT("LID_AUTO_CHANGE"), "AutoChange")
+    if TitanPanelReputation:BlizzAPI_GetExperienceBarFactionID() then
+        -- The button follows the experience bar faction instead (see FollowExperienceBar)
+        Titan_Menu.SetAtribEnabled(autoChange, false)
+        autoChange:SetTitleAndTextTooltip(TitanPanelReputation:GT("LID_AUTO_CHANGE"),
+            format(TitanPanelReputation:GT("LID_AUTO_CHANGE_EXPERIENCE_BAR"),
+                SHOW_FACTION_ON_MAINSCREEN or "Show as Experience Bar"))
+    end
     if WoW3 then
         Titan_Menu.AddSelector(root, id, TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), "ShowAnnounceFrame")
     end

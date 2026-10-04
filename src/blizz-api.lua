@@ -86,3 +86,17 @@ function TitanPanelReputation:BlizzAPI_GetFactionInfoByID(factionID)
         return GetFactionInfoByID(factionID)
     end
 end
+
+---
+---Returns the faction picked as "Show as Experience Bar" in the reputation panel, if any.
+---
+---[Documentation](https://warcraft.wiki.gg/wiki/API_C_Reputation.GetWatchedFactionData)
+---@return number|nil factionID
+---@nodiscard
+function TitanPanelReputation:BlizzAPI_GetExperienceBarFactionID()
+    local factionData = C_Reputation.GetWatchedFactionData and C_Reputation.GetWatchedFactionData()
+    if factionData and factionData.factionID and factionData.factionID > 0 then
+        return factionData.factionID
+    end
+    return nil
+end

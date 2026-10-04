@@ -23,6 +23,7 @@ function TitanPanelReputation:LangruRU()
         ["LID_SHOW_VALUE"] = "Показывать значение репутации",
         ["LID_SHOW_PERCENT"] = "Показывать процент",
         ["LID_AUTO_CHANGE"] = "Автоматическое отображение изменений",
+        ["LID_AUTO_CHANGE_EXPERIENCE_BAR"] = "Off while a faction is shown as experience bar. To use it again, uncheck \"%s\" in the reputation panel.",
         ["LID_FRIENDSHIP_RANK_SETTINGS"] = "Настройки рангов дружбы",
         ["LID_SHOW_FRIENDSHIPS"] = "Показывать дружеские отношения",
         ["LID_HIDE_MAX_FRIENDSHIPS"] = "Hide Max Friendships",

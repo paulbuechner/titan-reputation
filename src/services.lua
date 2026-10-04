@@ -1182,6 +1182,41 @@ function TitanPanelReputation:SetWatchedFaction(name, factionID)
 end
 
 ---
+---The experience bar faction seen by the previous update; false before the first one.
+---
+---@type number|nil|false
+local lastExperienceBarFactionID = false
+
+---
+---Shows the faction picked as "Show as Experience Bar" on the button whenever another one is
+---picked there (and at login while the button shows none). In between, Shift-click in the menu
+---still picks a faction; Auto Show Changed stays off as long as a faction is picked there.
+---
+---@return boolean following Whether a faction is shown as experience bar
+function TitanPanelReputation:FollowExperienceBar()
+    -- Plugin settings are only there once Titan has loaded its profile
+    local watchedName = TitanGetVar(TitanPanelReputation.ID, "WatchedFaction")
+    if watchedName == nil then
+        return false
+    end
+
+    local factionID = self:BlizzAPI_GetExperienceBarFactionID()
+    local picked = lastExperienceBarFactionID ~= false and factionID ~= lastExperienceBarFactionID
+    lastExperienceBarFactionID = factionID
+    if not factionID then
+        return false
+    end
+
+    if picked or watchedName == "none" then
+        local details = self:GetFactionDetailsByID(factionID)
+        if details then
+            self:SetWatchedFaction(details.name, factionID)
+        end
+    end
+    return true
+end
+
+---
 ---Returns the faction shown on the button: found by its saved ID (by name for selections saved
 ---before the ID was), and looked up directly while its header is collapsed.
 ---

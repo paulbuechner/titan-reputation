@@ -23,6 +23,7 @@ function TitanPanelReputation:LangfrFR()
         ["LID_SHOW_VALUE"] = "Show Reputation Value",
         ["LID_SHOW_PERCENT"] = "Show Percent",
         ["LID_AUTO_CHANGE"] = "Auto Show Changed",
+        ["LID_AUTO_CHANGE_EXPERIENCE_BAR"] = "Off while a faction is shown as experience bar. To use it again, uncheck \"%s\" in the reputation panel.",
         ["LID_FRIENDSHIP_RANK_SETTINGS"] = "Friendship Rank Settings",
         ["LID_SHOW_FRIENDSHIPS"] = "Show Friendships",
         ["LID_HIDE_MAX_FRIENDSHIPS"] = "Hide Max Friendships",

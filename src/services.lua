@@ -793,19 +793,19 @@ local function HandleFactionUpdate(factionDetails)
         ShowReputationAnnouncement(name, factionID, adjusted)
     elseif (previous.standingID == standingID) then
         -- Standing remained the same
-        if (previous.earnedValue < earnedValue) then
-            -- Earned value increased
+        if (previous.earnedValue < earnedValue) or isClassicLadder then
+            -- Progress within the bracket; negative when reputation was lost
             earnedAmount = earnedValue - previous.earnedValue
         else
-            -- Earned value remained the same
-            earnedAmount = earnedValue
+            -- Renown, paragon and friendship progress restarts on a level-up (or once a paragon
+            -- reward is collected) while the standing stays: rest of the old level + new progress
+            earnedAmount = (previous.topValue - previous.earnedValue) + earnedValue
         end
     end
 
-    if TitanPanelReputation.RTS[name] then
-        TitanPanelReputation.RTS[name] = TitanPanelReputation.RTS[name] + earnedAmount
-    else
-        TitanPanelReputation.RTS[name] = earnedAmount
+    -- Nothing earned (e.g. a paragon reward was collected): keep it out of the session summary
+    if earnedAmount ~= 0 then
+        TitanPanelReputation.RTS[name] = (TitanPanelReputation.RTS[name] or 0) + earnedAmount
     end
 
     -- Check if the earned amount is a new high or low

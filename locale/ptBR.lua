@@ -24,12 +24,6 @@ function TitanPanelReputation:LangptBR()
         ["LID_FRIENDSHIP_RANK_SETTINGS"] = "Friendship Rank Settings",
         ["LID_SHOW_FRIENDSHIPS"] = "Show Friendships",
         ["LID_HIDE_MAX_FRIENDSHIPS"] = "Hide Max Friendships",
-        ["LID_SHOW_BESTFRIEND"] = "Show Best Friend",
-        ["LID_SHOW_GOODFRIEND"] = "Show Good Friend",
-        ["LID_SHOW_FRIEND"] = "Show Friend",
-        ["LID_SHOW_BUDDY"] = "Show Buddy",
-        ["LID_SHOW_ACQUAINTANCE"] = "Show Acquaintance",
-        ["LID_SHOW_STRANGER"] = "Show Stranger",
         ["LID_REPUTATION_STANDING_SETTINGS"] = "Reputation Standing Settings",
         ["LID_SHOW_EXALTED"] = "Show Exalted",
         ["LID_SHOW_REVERED"] = "Show Revered",
@@ -48,7 +42,6 @@ function TitanPanelReputation:LangptBR()
         ["LID_BUTTON_OPTIONS"] = "Button Options",
         ["LID_TOOLTIP_OPTIONS"] = "Tooltip Options",
         ["LID_COLOR_OPTIONS"] = "Color Options",
-        ["LID_CLOSE_MENU"] = "Close",
 
 
         -- Session Summary
@@ -56,19 +49,15 @@ function TitanPanelReputation:LangptBR()
         ["LID_SHOW_SUMMARY_DURATION"] = "Show Duration",
         ["LID_SHOW_SUMMARY_TTL"] = "Show Time to Level",
 
-        ["LID_TIP_SESSION_SUMMARY_SETTINGS"] = "Tooltip Session Summary Settings",
         ["LID_TIP_SHOW_SUMMARY_DURATION"] = "Show Duration",
         ["LID_TIP_SHOW_SUMMARY_TTL"] = "Show Time to Level",
 
-        ["LID_SHOW_ANNOUNCE"] = "Announce Standing Changes",
         ["LID_SHOW_ANNOUNCE_FRAME"] = "Standing Change Achievements",
         ["LID_SHOW_ANNOUNCE_MIK"] = " - Use MikSBT for Announcement",
         ["LID_TOOLTIP_SCALE"] = "Tooltip Scale",
-        ["LID_TOOLTIP_WARNING"] = "CAUTION: This effects ALL tooltips",
         ["LID_SHOW_MINIMAL"] = "Use MinimalTip Tooltip Display",
         ["LID_SCALE_INCREASE"] = "+ Increase Tooltip Scale",
         ["LID_SCALE_DECREASE"] = "- Decrease Tooltip Scale",
-        ["LID_DISPLAY_ON_RIGHT_SIDE"] = "Align Plugin to Right-Side",
         ["LID_SHOW_FRIENDS_ON_BAR"] = "Show Friendships",
         ["LID_PARAGON"] = "Paragon",
         ["LID_SESSION_SUMMARY"] = "Session Summary",

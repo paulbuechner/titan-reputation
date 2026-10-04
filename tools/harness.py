@@ -736,7 +736,22 @@ def sc_event_burst(tree):
             "button": plain(e.ev("BUTTON()")), "errors": e.errors()}
 
 
+def sc_same_named_subheaders(tree):
+    rows = [row("Classic", 9003, header=True),
+            row("Alliance", 9101, 4, header=True, child=True),
+            row("Stormwind", 72, 8, 999, child=True),
+            row("Ironforge", 47, 7, 5000, child=True),
+            row("Battle for Azeroth", 9008, header=True),
+            row("Alliance", 9102, 4, header=True, child=True),
+            row("7th Legion", 2159, 6, 2000, child=True)]
+    e = Env(tree, rows=rows, extras={})
+    e.login({"WatchedFaction": "Stormwind"})
+    return {"menu": plain(e.ev("MENU_DUMP(MENU())")), "tooltip": plain(e.ev("TOOLTIP()")),
+            "errors": e.errors()}
+
+
 SCENARIOS = {
+    "menu: equally named sub-headers": sc_same_named_subheaders,
     "UPDATE_FACTION burst": sc_event_burst,
     "menu visibility after reload": sc_visibility_after_reload,
     "standing up/down announcements": sc_standing_changes,

@@ -308,7 +308,7 @@ local function OrderFactionDetails(detailsList)
     end
 
     for _, details in ipairs(detailsList) do
-        local bucket = EnsureBucket(DetermineRootHeaderKey(details))
+        local bucket = EnsureBucket(details.rootKey)
         local level = details.headerLevel
 
         if level == 0 and details.isHeader then
@@ -953,6 +953,7 @@ local function BuildFactionDetailsList()
             -- The visibility checks look these up per entry and per menu row, so build them once
             factionDetails.nodeKey = BuildNodeKey(factionDetails)
             factionDetails.ancestorKeys = BuildAncestorKeys(factionDetails)
+            factionDetails.rootKey = DetermineRootHeaderKey(factionDetails)
 
             if isHeader then
                 if isChild then

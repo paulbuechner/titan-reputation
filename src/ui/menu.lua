@@ -79,7 +79,7 @@ end
 
 local AddFactionRow
 local AddHeaderRow
-local AttachChildrenByParentName
+local AttachChildren
 
 AddFactionRow = function(owner, details)
     local text = BuildDisplayText(details)
@@ -134,12 +134,15 @@ AddHeaderRow = function(owner, allDetails, details)
         end
     end
 
-    AttachChildrenByParentName(hdr, allDetails, details.name)
+    AttachChildren(hdr, allDetails, details)
 end
 
-AttachChildrenByParentName = function(owner, allDetails, parentName)
+-- Children are the entries naming `parent` as their parent header within the same top-level
+-- header, the grouping the tooltip uses as well; the name alone would also pull in the children
+-- of an equally named sub-header in another expansion.
+AttachChildren = function(owner, allDetails, parent)
     for _, details in ipairs(allDetails) do
-        if (not details.isInactive) and details.parentName == parentName then
+        if (not details.isInactive) and details.parentName == parent.name and details.rootKey == parent.rootKey then
             if details.isHeader then
                 AddHeaderRow(owner, allDetails, details)
             else

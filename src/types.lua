@@ -15,6 +15,7 @@
 ---@field headerPath string[]: Ordered list of header labels leading to this entry (empty table for root entries)
 ---@field nodeKey? string: Key identifying this entry in the visibility saved variables (headerPath + name, "/"-joined); set once mapping overrides are applied
 ---@field ancestorKeys? string[]: Node keys of the headers above this entry, outermost first; set together with `nodeKey`
+---@field rootKey? string: Top-level header the entry is grouped under (its own name for top-level headers); set together with `nodeKey`
 ---@field isHeader boolean: Whether the faction is a header
 ---@field isCollapsed boolean: Whether the faction is collapsed
 ---@field isInactive boolean: Whether the faction is inactive

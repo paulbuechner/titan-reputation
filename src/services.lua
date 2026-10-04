@@ -36,10 +36,13 @@ local function JoinHeaderPath(headerPath, uptoIndex)
     return out
 end
 
-function TitanPanelReputation:GetNodeKey(factionDetails)
-    if not factionDetails then
-        return ""
-    end
+---
+---Builds the key that identifies a faction or header in the visibility saved variables: its
+---header path joined with "/", ending in its own name (e.g. "Dragonflight/Sabellian").
+---
+---@param factionDetails FactionDetails
+---@return string
+local function BuildNodeKey(factionDetails)
     local hp = factionDetails.headerPath or {}
     if factionDetails.isHeader then
         if #hp == 0 then
@@ -57,36 +60,54 @@ function TitanPanelReputation:GetNodeKey(factionDetails)
     return factionDetails.name or ""
 end
 
-local function GetAncestorKeyAndNamePairs(factionDetails)
-    local pairsList = {}
-    if not factionDetails or not factionDetails.headerPath then
-        return pairsList
-    end
+---
+---Builds the node keys of all headers above a faction or header, outermost first.
+---
+---@param factionDetails FactionDetails
+---@return string[]
+local function BuildAncestorKeys(factionDetails)
+    local keys = {}
     local hp = factionDetails.headerPath
+    if not hp then
+        return keys
+    end
     local maxIndex = #hp
     -- For headers, headerPath includes the header itself; ancestors are everything before the last element
     if factionDetails.isHeader and maxIndex > 0 then
         maxIndex = maxIndex - 1
     end
     for i = 1, maxIndex do
-        pairsList[#pairsList + 1] = {
-            key = JoinHeaderPath(hp, i),
-            name = hp[i],
-        }
+        keys[i] = JoinHeaderPath(hp, i)
     end
-    return pairsList
+    return keys
+end
+
+local NO_KEYS = {}
+
+function TitanPanelReputation:GetNodeKey(factionDetails)
+    if not factionDetails then
+        return ""
+    end
+    -- Cached entries carry it precomputed (see BuildFactionDetailsList)
+    return factionDetails.nodeKey or BuildNodeKey(factionDetails)
+end
+
+local function GetAncestorKeys(factionDetails)
+    if not factionDetails then
+        return NO_KEYS
+    end
+    return factionDetails.ancestorKeys or BuildAncestorKeys(factionDetails)
 end
 
 function TitanPanelReputation:IsDescendantOfKey(rootKey, factionDetails)
     if not rootKey or rootKey == "" or not factionDetails then
         return false
     end
-    local nodeKey = self:GetNodeKey(factionDetails)
-    if nodeKey == rootKey then
+    if self:GetNodeKey(factionDetails) == rootKey then
         return true
     end
-    for _, pair in ipairs(GetAncestorKeyAndNamePairs(factionDetails)) do
-        if pair.key == rootKey then
+    for _, key in ipairs(GetAncestorKeys(factionDetails)) do
+        if key == rootKey then
             return true
         end
     end
@@ -398,8 +419,8 @@ function TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
         return true
     end
 
-    for _, pair in ipairs(GetAncestorKeyAndNamePairs(factionDetails)) do
-        if pair.key ~= "" and lookup[pair.key] then
+    for _, key in ipairs(GetAncestorKeys(factionDetails)) do
+        if key ~= "" and lookup[key] then
             return true
         end
     end
@@ -408,12 +429,12 @@ function TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
 end
 
 function TitanPanelReputation:HasHiddenAncestor(factionDetails)
-    if not factionDetails or not factionDetails.headerPath then
+    if not factionDetails then
         return false
     end
     local lookup = self:GetHiddenFactionLookup()
-    for _, pair in ipairs(GetAncestorKeyAndNamePairs(factionDetails)) do
-        if pair.key ~= "" and lookup[pair.key] then
+    for _, key in ipairs(GetAncestorKeys(factionDetails)) do
+        if key ~= "" and lookup[key] then
             return true
         end
     end
@@ -964,6 +985,10 @@ local function BuildFactionDetailsList()
             }
             -- Apply optional faction mapping overrides before consumers use the data
             factionDetails = TitanPanelReputation:ApplyFactionMapping(factionDetails)
+
+            -- The visibility checks look these up per entry and per menu row, so build them once
+            factionDetails.nodeKey = BuildNodeKey(factionDetails)
+            factionDetails.ancestorKeys = BuildAncestorKeys(factionDetails)
 
             if isHeader then
                 if isChild then

@@ -13,6 +13,8 @@
 ---@field percent string: The percentage of the current faction standing progress
 ---@field headerLevel number: The indentation level used when grouping factions
 ---@field headerPath string[]: Ordered list of header labels leading to this entry (empty table for root entries)
+---@field nodeKey? string: Key identifying this entry in the visibility saved variables (headerPath + name, "/"-joined); set once mapping overrides are applied
+---@field ancestorKeys? string[]: Node keys of the headers above this entry, outermost first; set together with `nodeKey`
 ---@field isHeader boolean: Whether the faction is a header
 ---@field isCollapsed boolean: Whether the faction is collapsed
 ---@field isInactive boolean: Whether the faction is inactive

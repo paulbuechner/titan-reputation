@@ -795,7 +795,106 @@ local function HandleFactionUpdate(factionDetails)
         (earnedAmount < 0 and highChanged <= 0 and earnedAmount < highChanged) then
         TitanPanelReputation.HIGHCHANGED = earnedAmount
         TitanPanelReputation.CHANGED_FACTION = name
+        TitanPanelReputation.CHANGED_FACTION_ID = factionID
     end
+end
+
+---
+---Builds the details of one faction from the values the client reports for it: normalizes the bar
+---and applies paragon, renown and friendship progress. The hierarchy fields describe an entry at
+---the top of the list; the list scan replaces them with the row's actual place.
+---
+---@return FactionDetails
+---@nodiscard
+local function CreateFactionDetails(name, standingID, bottomValue, topValue, earnedValue, isHeader,
+                                    isCollapsed, hasRep, isChild, factionID, hasBonusRepGain, isInactive)
+    -- Normalize values
+    topValue = topValue - bottomValue
+    earnedValue = earnedValue - bottomValue
+
+    -- Used to determine if the player has started the paragon progress for the current faction
+    local paragonProgressStarted = false
+
+    -- Fetch friendship reputation info
+    local friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
+    if not (friendShipReputationInfo and friendShipReputationInfo.friendshipFactionID > 0) then
+        friendShipReputationInfo = nil
+    end
+
+    --[[ --------------------------------------------------------
+            Handle Renown, Paragon and Friendship factions
+        -----------------------------------------------------------]]
+    if (WoW10) then
+        if (IsFactionParagon(factionID)) then -- Paragon
+            -- Get faction paragon info
+            local paragonEarnedValue, paragonTopValue, paragonProgress = GetParagonInfo(factionID)
+            if paragonEarnedValue and paragonTopValue then
+                earnedValue = paragonEarnedValue
+                topValue = paragonTopValue
+                paragonProgressStarted = paragonProgress
+            end
+        elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
+            -- Get the renown faction data
+            local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
+
+            if majorFactionData then
+                -- Set the top value to the renown level threshold of the major faction
+                topValue = majorFactionData.renownLevelThreshold
+
+                -- If the faction has maximum renown, set the earned value to the renown level threshold of the major faction
+                if C_MajorFactions.HasMaximumRenown(factionID) then
+                    earnedValue = majorFactionData.renownLevelThreshold
+                else
+                    -- Otherwise, set the earned value to the renown reputation earned by the major faction
+                    earnedValue = majorFactionData.renownReputationEarned
+                end
+            end
+        end
+    end
+
+    if (WoW5) then -- Friendship Reputation is available with MoP
+        if (friendShipReputationInfo) then
+            -- Set topValue to the difference between nextFriendThreshold and friendThreshold (reactionThreshold) if
+            -- nextFriendThreshold exists, otherwise set it to the difference between friendRep (standing) and friendThreshold
+            if friendShipReputationInfo.nextThreshold then
+                topValue = friendShipReputationInfo.nextThreshold -
+                    friendShipReputationInfo.reactionThreshold
+            else
+                topValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
+            end
+            earnedValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
+        end
+    end
+
+    -- Calculate earnedValueRatio based on the earned value and top value. If top value is less than or equal to 0, set it to 0
+    local earnedValueRatio = (topValue > 0) and (earnedValue / topValue) or 0
+
+    -- Calculate the percentage and format it to 2 decimal places (e.g. 12.33334 -> 12.33)
+    local percent = format("%.2f", earnedValueRatio * 100)
+
+    -- NOTE: Uses default initialization because `GetFactionInfo` WOW API is not strictly typed,
+    -- NOTE: but should always return valid values so defaults won't be used.
+    local factionDetails = ---@type FactionDetails
+    {
+        name = name or "",
+        parentName = "",
+        standingID = standingID or -69,
+        topValue = topValue,
+        earnedValue = earnedValue,
+        percent = percent,
+        isHeader = isHeader or false,
+        isCollapsed = isCollapsed or false,
+        isInactive = isInactive or false,
+        hasRep = hasRep or false,
+        isChild = isChild or false,
+        friendShipReputationInfo = friendShipReputationInfo,
+        factionID = factionID,
+        hasBonusRepGain = hasBonusRepGain or false,
+        paragonProgressStarted = paragonProgressStarted or false,
+        headerLevel = 0,
+        headerPath = {}
+    }
+    return factionDetails
 end
 
 ---
@@ -818,70 +917,9 @@ local function BuildFactionDetailsList()
         isCollapsed, hasRep, _, isChild, factionID, hasBonusRepGain =
             TitanPanelReputation:BlizzAPI_GetFactionInfo(index)
         if factionID then
-            -- Normalize values
-            topValue = topValue - bottomValue
-            earnedValue = earnedValue - bottomValue
-            bottomValue = 0
-
-            -- Used to determine if the player has started the paragon progress for the current faction
-            local paragonProgressStarted = false
-
-            -- Fetch friendship reputation info
-            local friendShipReputationInfo = C_GossipInfo.GetFriendshipReputation(factionID)
-            if not (friendShipReputationInfo and friendShipReputationInfo.friendshipFactionID > 0) then
-                friendShipReputationInfo = nil
-            end
-
-            --[[ --------------------------------------------------------
-                    Handle Renown, Paragon and Friendship factions
-                -----------------------------------------------------------]]
-            if (WoW10) then
-                if (IsFactionParagon(factionID)) then -- Paragon
-                    -- Get faction paragon info
-                    local paragonEarnedValue, paragonTopValue, paragonProgress = GetParagonInfo(factionID)
-                    if paragonEarnedValue and paragonTopValue then
-                        earnedValue = paragonEarnedValue
-                        topValue = paragonTopValue
-                        paragonProgressStarted = paragonProgress
-                    end
-                elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
-                    -- Get the renown faction data
-                    local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
-
-                    if majorFactionData then
-                        -- Set the top value to the renown level threshold of the major faction
-                        topValue = majorFactionData.renownLevelThreshold
-
-                        -- If the faction has maximum renown, set the earned value to the renown level threshold of the major faction
-                        if C_MajorFactions.HasMaximumRenown(factionID) then
-                            earnedValue = majorFactionData.renownLevelThreshold
-                        else
-                            -- Otherwise, set the earned value to the renown reputation earned by the major faction
-                            earnedValue = majorFactionData.renownReputationEarned
-                        end
-                    end
-                end
-            end
-
-            if (WoW5) then -- Friendship Reputation is available with MoP
-                if (friendShipReputationInfo) then
-                    -- Set topValue to the difference between nextFriendThreshold and friendThreshold (reactionThreshold) if
-                    -- nextFriendThreshold exists, otherwise set it to the difference between friendRep (standing) and friendThreshold
-                    if friendShipReputationInfo.nextThreshold then
-                        topValue = friendShipReputationInfo.nextThreshold -
-                            friendShipReputationInfo.reactionThreshold
-                    else
-                        topValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
-                    end
-                    earnedValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
-                end
-            end
-
-            -- Calculate earnedValueRatio based on the earned value and top value. If top value is less than or equal to 0, set it to 0
-            local earnedValueRatio = (topValue > 0) and (earnedValue / topValue) or 0
-
-            -- Calculate the percentage and format it to 2 decimal places (e.g. 12.33334 -> 12.33)
-            local percent = format("%.2f", earnedValueRatio * 100)
+            local factionDetails = CreateFactionDetails(name, standingID, bottomValue, topValue, earnedValue,
+                isHeader, isCollapsed, hasRep, isChild, factionID, hasBonusRepGain,
+                TitanPanelReputation:BlizzAPI_IsFactionInactive(index))
 
             local headerPath = {}
             if isHeader then
@@ -925,28 +963,10 @@ local function BuildFactionDetailsList()
                 end
             end
 
-            -- NOTE: Uses default initialization because `GetFactionInfo` WOW API is not strictly typed,
-            -- NOTE: but should always return valid values so defaults won't be used.
-            local factionDetails = ---@type FactionDetails
-            {
-                name = name or "",
-                parentName = resolvedParentName,
-                standingID = standingID or -69,
-                topValue = topValue,
-                earnedValue = earnedValue,
-                percent = percent,
-                isHeader = isHeader or false,
-                isCollapsed = isCollapsed or false,
-                isInactive = TitanPanelReputation:BlizzAPI_IsFactionInactive(index),
-                hasRep = hasRep or false,
-                isChild = isChild or false,
-                friendShipReputationInfo = friendShipReputationInfo,
-                factionID = factionID,
-                hasBonusRepGain = hasBonusRepGain or false,
-                paragonProgressStarted = paragonProgressStarted or false,
-                headerLevel = headerLevel,
-                headerPath = headerPath
-            }
+            factionDetails.parentName = resolvedParentName
+            factionDetails.headerLevel = headerLevel
+            factionDetails.headerPath = headerPath
+
             -- Apply optional faction mapping overrides before consumers use the data
             factionDetails = TitanPanelReputation:ApplyFactionMapping(factionDetails)
 
@@ -1000,12 +1020,71 @@ function TitanPanelReputation:FactionDetailsProvider(callback)
 end
 
 ---
+---Builds the details of a faction by its ID, also while its header is collapsed (the list scan only
+---sees expanded rows). Such entries have no place in the list and are not cached.
+---
+---@param factionID number
+---@return FactionDetails|nil
+---@nodiscard
+function TitanPanelReputation:GetFactionDetailsByID(factionID)
+    local name, _, standingID, bottomValue, topValue, earnedValue, _, _, isHeader,
+    isCollapsed, hasRep, _, isChild, id, hasBonusRepGain = self:BlizzAPI_GetFactionInfoByID(factionID)
+    if not id then
+        return nil
+    end
+    return self:ApplyFactionMapping(CreateFactionDetails(name, standingID, bottomValue, topValue, earnedValue,
+        isHeader, isCollapsed, hasRep, isChild, id, hasBonusRepGain, false))
+end
+
+---
+---Shows the given faction on the button. Its ID keeps finding it while its header is collapsed.
+---
+---@param name string
+---@param factionID number
+function TitanPanelReputation:SetWatchedFaction(name, factionID)
+    TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", name)
+    TitanSetVar(TitanPanelReputation.ID, "WatchedFactionID", factionID)
+end
+
+---
+---Returns the faction shown on the button: found by its saved ID (by name for selections saved
+---before the ID was), and looked up directly while its header is collapsed.
+---
+---@return FactionDetails|nil
+---@nodiscard
+function TitanPanelReputation:GetWatchedFactionDetails()
+    local name = TitanGetVar(TitanPanelReputation.ID, "WatchedFaction")
+    if not name or name == "none" then
+        return nil
+    end
+    local factionID = TitanGetVar(TitanPanelReputation.ID, "WatchedFactionID")
+    if not factionID or factionID == 0 then
+        factionID = nil
+    end
+
+    local found = nil
+    self:FactionDetailsProvider(function(details)
+        if not found and (details.factionID == factionID or (not factionID and details.name == name)) then
+            found = details
+        end
+    end)
+    if found then
+        if not factionID then
+            TitanSetVar(TitanPanelReputation.ID, "WatchedFactionID", found.factionID)
+        end
+        return found
+    end
+    return factionID and self:GetFactionDetailsByID(factionID) or nil
+end
+
+---
 ---Refreshes the reputation data (rebuilds the button text).
 ---
 function TitanPanelReputation:RefreshButtonText()
-    if not (TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none") then
-        self:FactionDetailsProvider(TitanPanelReputation.BuildButtonText)
-    else
+    local details = self:GetWatchedFactionDetails()
+    if details then
+        TitanPanelReputation.BuildButtonText(details)
+    elseif TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") == "none" then
         TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL")
     end
 end

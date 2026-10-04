@@ -29,6 +29,33 @@ function TitanPanelReputation:BlizzAPI_IsFactionInactive(index)
 end
 
 ---
+---Unpacks a retail `FactionData` table into the values the classic `GetFactionInfo` returns.
+---
+---@param factionData FactionData|nil
+local function UnpackFactionData(factionData)
+    if factionData then
+        return
+            factionData.name,
+            factionData.description,
+            factionData.reaction,
+            factionData.currentReactionThreshold,
+            factionData.nextReactionThreshold,
+            factionData.currentStanding,
+            factionData.atWarWith,
+            factionData.canToggleAtWar,
+            factionData.isHeader,
+            factionData.isCollapsed,
+            factionData.isHeaderWithRep,
+            factionData.isWatched,
+            factionData.isChild,
+            factionData.factionID,
+            factionData.hasBonusRepGain,
+            factionData.canSetInactive,
+            factionData.isAccountWide
+    end
+end
+
+---
 ---Returns info for a faction.
 ---
 ---[Documentation OLD](https://warcraft.wiki.gg/wiki/API_GetFactionInfo)
@@ -38,28 +65,24 @@ end
 ---@nodiscard
 function TitanPanelReputation:BlizzAPI_GetFactionInfo(factionIndex)
     if WoW11 then
-        local factionData = C_Reputation.GetFactionDataByIndex(factionIndex)
-        if factionData then
-            return
-                factionData.name,
-                factionData.description,
-                factionData.reaction,
-                factionData.currentReactionThreshold,
-                factionData.nextReactionThreshold,
-                factionData.currentStanding,
-                factionData.atWarWith,
-                factionData.canToggleAtWar,
-                factionData.isHeader,
-                factionData.isCollapsed,
-                factionData.isHeaderWithRep,
-                factionData.isWatched,
-                factionData.isChild,
-                factionData.factionID,
-                factionData.hasBonusRepGain,
-                factionData.canSetInactive,
-                factionData.isAccountWide
-        end
+        return UnpackFactionData(C_Reputation.GetFactionDataByIndex(factionIndex))
     else
         return GetFactionInfo(factionIndex)
+    end
+end
+
+---
+---Returns info for a faction by its ID, also while its header is collapsed. Same values as
+---`BlizzAPI_GetFactionInfo`.
+---
+---[Documentation OLD](https://warcraft.wiki.gg/wiki/API_GetFactionInfoByID)
+---[Documentation NEW](https://warcraft.wiki.gg/wiki/API_C_Reputation.GetFactionDataByID)
+---@param factionID number
+---@nodiscard
+function TitanPanelReputation:BlizzAPI_GetFactionInfoByID(factionID)
+    if WoW11 then
+        return UnpackFactionData(C_Reputation.GetFactionDataByID(factionID))
+    else
+        return GetFactionInfoByID(factionID)
     end
 end

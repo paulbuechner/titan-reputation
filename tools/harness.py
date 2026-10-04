@@ -750,7 +750,23 @@ def sc_same_named_subheaders(tree):
             "errors": e.errors()}
 
 
+def sc_watched_under_collapsed_header(tree):
+    e = Env(tree)
+    e.login({"WatchedFaction": "Booty Bay"})
+    shown = plain(e.ev("BUTTON()"))
+    e.edit_rows(**{"Classic": {"isCollapsed": True}})
+    e.update(1010.0)
+    e.gain("Booty Bay", 500)
+    e.update(1020.0)
+    after_gain = plain(e.ev("BUTTON()"))
+    e2 = e.relog()
+    e2.login()
+    return {"before collapse": shown, "collapsed, after +500": after_gain,
+            "after reload, still collapsed": plain(e2.ev("BUTTON()")), "errors": e.errors() + e2.errors()}
+
+
 SCENARIOS = {
+    "watched faction under collapsed header": sc_watched_under_collapsed_header,
     "menu: equally named sub-headers": sc_same_named_subheaders,
     "UPDATE_FACTION burst": sc_event_burst,
     "menu visibility after reload": sc_visibility_after_reload,

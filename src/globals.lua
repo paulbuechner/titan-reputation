@@ -102,6 +102,12 @@ TitanPanelReputation.HIGHCHANGED = 0
 TitanPanelReputation.CHANGED_FACTION = "none"
 
 ---
+---The factionID of `CHANGED_FACTION`.
+---
+---@type number
+TitanPanelReputation.CHANGED_FACTION_ID = 0
+
+---
 ---Flag that toggles extra developer tooling (e.g. ctrl+click faction testing).
 ---
 ---@type boolean

@@ -20,6 +20,7 @@ local config = {
     -- General Options --------------------------------------------------------
     AutoChange = true,                    -- Auto Show Changed
     WatchedFaction = "none",              --
+    WatchedFactionID = 0,                 -- ID of WatchedFaction (0 = not known yet)
     -- Announcement Settings
     ShowAnnounceFrame = true,             --
     ShowAnnounceMik = true,               --
@@ -152,7 +153,8 @@ local function ProcessFactionUpdate()
 
         -- If AutoChange is enabled, show the faction with the biggest change of this burst
         if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
-            TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
+            TitanPanelReputation:SetWatchedFaction(TitanPanelReputation.CHANGED_FACTION,
+                TitanPanelReputation.CHANGED_FACTION_ID)
         end
     end
 

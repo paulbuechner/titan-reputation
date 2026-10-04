@@ -15,7 +15,8 @@ local function ColorText(text, color)
 end
 
 ---
----Builds the text to display on the TitanPanelReputation button.
+---Builds the text to display on the TitanPanelReputation button for the watched faction (see
+---`GetWatchedFactionDetails`).
 ---
 ---@param factionDetails FactionDetails
 function TitanPanelReputation.BuildButtonText(factionDetails)
@@ -26,11 +27,6 @@ function TitanPanelReputation.BuildButtonText(factionDetails)
         factionDetails.earnedValue,
         factionDetails.percent,
         factionDetails.friendShipReputationInfo
-
-    -- Return if the faction is not currently being watched (displayed on the Titan Panel button)
-    if TitanGetVar(TitanPanelReputation.ID, "WatchedFaction") ~= name then
-        return
-    end
 
     -- Get adjusted ID and label depending on the faction type
     local adjustedIDAndLabel = TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, true)

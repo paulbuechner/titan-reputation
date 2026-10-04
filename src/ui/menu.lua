@@ -47,7 +47,7 @@ local function HandleFactionModifiers(factionDetails, allowDebugToast, allowWatc
         return true
     end
     if allowWatchFaction and IsShiftKeyDown() then
-        TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", factionDetails.name)
+        TitanPanelReputation:SetWatchedFaction(factionDetails.name, factionDetails.factionID)
         -- UpdateButton invokes buttonTextFunction, which rebuilds the button text
         TitanPanelButton_UpdateButton(TitanPanelReputation.ID)
         return true

@@ -706,7 +706,21 @@ def sc_debug_toast(tree):
     return {"toasts": e.alerts(), "errors": e.errors()}
 
 
+def sc_visibility_after_reload(tree):
+    e = Env(tree)
+    e.login({"WatchedFaction": "The Aldor"})
+    e.run('CLICK({"Classic"})')                                                   # hide the branch ...
+    e.run('CLICK({"Classic", "Steamwheedle Cartel", "Booty Bay - Friendly"})')  # ... but keep Booty Bay
+    e.run('CLICK({"The War Within", "The Severed Threads", "The Severed Threads - 5"})')  # header row only
+    before = plain(e.ev("TOOLTIP()"))
+    e2 = e.relog()
+    e2.login()
+    return {"tooltip before reload": before, "tooltip after reload": plain(e2.ev("TOOLTIP()")),
+            "errors": e.errors() + e2.errors()}
+
+
 SCENARIOS = {
+    "menu visibility after reload": sc_visibility_after_reload,
     "standing up/down announcements": sc_standing_changes,
     "color option click": sc_color_menu_click,
     "debug toast": sc_debug_toast,

@@ -24,7 +24,9 @@ local config = {
     ShowAnnounceFrame = true,             --
     ShowAnnounceMik = true,               --
     --
-    FactionHeaders = {},                  --
+    FactionHeaders = {},                  -- Menu: hidden factions and headers
+    FactionShowOverrides = {},            -- Menu: shown although a parent header is hidden
+    HeaderSelfOverrides = {},             -- Menu: kept visible while only their header row is hidden
     -- Button Options ---------------------------------------------------------
     DisplayOnRightSide = false,           -- Align Plugin to Right-Side
     ShowIcon = true,                      -- Show Icon

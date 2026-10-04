@@ -14,6 +14,7 @@ Exits with 1 when the working tree raised Lua errors in any scenario. Files miss
 (the gitignored packager externals such as libs/UTF8) are loaded from the working tree.
 """
 import argparse
+import copy
 import io
 import json
 import pathlib
@@ -188,18 +189,62 @@ function Titan_Menu.AddCommand(o, id, label, fn, ...)
   local n = Add(o, Node("command", label)); n.setSelected = function() fn(params) end; return n
 end
 
--- Reputation data (rows in Blizzard display order; values absolute like the client API)
-FACTIONS, PARAGON, MAJOR, FRIEND = {}, {}, {}, {}
+-- Timers run when the driver flushes them, at the current NOW (keeps both trees' clocks equal)
+TIMERS = {}
+C_Timer = { After = function(delay, fn) TIMERS[#TIMERS + 1] = fn end }
+function FLUSH_TIMERS()
+  while #TIMERS > 0 do
+    local fn = table.remove(TIMERS, 1)
+    local ok, err = pcall(fn)
+    if not ok then ERRORS[#ERRORS + 1] = "timer: " .. tostring(err) end
+  end
+end
+
+-- Reputation data: rows in Blizzard display order, values absolute like the client API. As in the
+-- client, rows under a collapsed header (or hidden by a list filter) are not listed by index but
+-- can still be looked up by ID. SCANS counts list scans (GetNumFactions calls).
+FACTIONS, PARAGON, MAJOR, FRIEND, SCANS = {}, {}, {}, {}, 0
+local function Visible()
+  local rows, rootCollapsed, nestedCollapsed = {}, false, false
+  for _, f in ipairs(FACTIONS) do
+    if f.hidden then
+      -- filtered out of the list
+    elseif f.isHeader and not f.isChild then
+      rows[#rows + 1] = f
+      rootCollapsed, nestedCollapsed = f.isCollapsed or false, false
+    elseif not rootCollapsed then
+      if f.isHeader then
+        rows[#rows + 1] = f
+        nestedCollapsed = f.isCollapsed or false
+      elseif f.isChild then
+        if not nestedCollapsed then rows[#rows + 1] = f end
+      else
+        nestedCollapsed = false
+        rows[#rows + 1] = f
+      end
+    end
+  end
+  return rows
+end
+local function ById(id) for _, f in ipairs(FACTIONS) do if f.id == id then return f end end end
+local function FactionData(f)
+  if not f then return nil end
+  return { name = f.name, description = "", reaction = f.reaction, currentReactionThreshold = f.cur,
+    nextReactionThreshold = f.next, currentStanding = f.standing, atWarWith = false, canToggleAtWar = false,
+    isHeader = f.isHeader or false, isCollapsed = f.isCollapsed or false, isHeaderWithRep = f.hasRep or false,
+    isWatched = false, isChild = f.isChild or false, factionID = f.id, hasBonusRepGain = false,
+    canSetInactive = true, isAccountWide = false }
+end
+local function FactionInfo(f)
+  if not f then return nil end
+  return f.name, "", f.reaction, f.cur, f.next, f.standing, false, false, f.isHeader or false,
+    f.isCollapsed or false, f.hasRep or false, false, f.isChild or false, f.id, false, true
+end
 C_Reputation = {
-  GetNumFactions = function() return #FACTIONS end,
-  GetFactionDataByIndex = function(i)
-    local f = FACTIONS[i]; if not f then return nil end
-    return { name = f.name, description = "", reaction = f.reaction, currentReactionThreshold = f.cur,
-      nextReactionThreshold = f.next, currentStanding = f.standing, atWarWith = false, canToggleAtWar = false,
-      isHeader = f.isHeader or false, isCollapsed = false, isHeaderWithRep = f.hasRep or false, isWatched = false,
-      isChild = f.isChild or false, factionID = f.id, hasBonusRepGain = false, canSetInactive = true, isAccountWide = false }
-  end,
-  IsFactionActive = function(i) return not FACTIONS[i].inactive end,
+  GetNumFactions = function() SCANS = SCANS + 1; return #Visible() end,
+  GetFactionDataByIndex = function(i) return FactionData(Visible()[i]) end,
+  GetFactionDataByID = function(id) return FactionData(ById(id)) end,
+  IsFactionActive = function(i) local f = Visible()[i]; return f ~= nil and not f.inactive end,
   IsFactionParagon = function(id) return PARAGON[id] ~= nil end,
   GetFactionParagonInfo = function(id)
     local p = PARAGON[id]; if not p then return nil end
@@ -220,24 +265,31 @@ C_GossipInfo = { GetFriendshipReputation = function(id)
   return { friendshipFactionID = id, standing = fr.standing, maxRep = 0, reaction = fr.reaction, reactionThreshold = fr.threshold,
     nextThreshold = fr.nextThreshold, text = "", texture = 0, reversedColor = false }
 end }
-function GetNumFactions() return #FACTIONS end
-function GetFactionInfo(i)
-  local f = FACTIONS[i]; if not f then return nil end
-  return f.name, "", f.reaction, f.cur, f.next, f.standing, false, false, f.isHeader or false, false,
-    f.hasRep or false, false, f.isChild or false, f.id, false, true
+function GetNumFactions() SCANS = SCANS + 1; return #Visible() end
+function GetFactionInfo(i) return FactionInfo(Visible()[i]) end
+function GetFactionInfoByID(id) return FactionInfo(ById(id)) end
+function IsFactionInactive(i) local f = Visible()[i]; return f ~= nil and f.inactive or false end
+-- Each client only has its own API: retail removed the globals in 11.0, Classic lacks the newer ones
+if MODE == "retail" then
+  GetNumFactions, GetFactionInfo, GetFactionInfoByID, IsFactionInactive = nil, nil, nil, nil
+else
+  C_Reputation.GetNumFactions, C_Reputation.GetFactionDataByIndex = nil, nil
+  C_Reputation.GetFactionDataByID, C_Reputation.IsFactionActive = nil, nil
+  C_MajorFactions = nil
 end
-function IsFactionInactive(i) return FACTIONS[i].inactive or false end
 
 -- Driver helpers
 function FIRE(event, ...)
   local ok, err = pcall(TitanPanelReputationButton_OnEvent, event, ...)
   if not ok then ERRORS[#ERRORS + 1] = event .. ": " .. tostring(err) end
 end
-function SIM_PEW(overrides)
+-- Titan's profile load at PLAYER_ENTERING_WORLD (TitanVariables_SyncRegisterSavedVariables): missing
+-- settings get the registry default, settings the registry does not declare are dropped.
+function SIM_PEW(saved)
   local reg = TitanPanelReputationButton.registry
-  local s = {}
-  for k, v in pairs(reg.savedVariables) do s[k] = v end
-  for k, v in pairs(overrides or {}) do s[k] = v end
+  local s = saved or {}
+  for k, v in pairs(reg.savedVariables) do if s[k] == nil then s[k] = v end end
+  for k in pairs(s) do if reg.savedVariables[k] == nil then s[k] = nil end end
   TitanPluginSettings = { [reg.id] = s }
   PEW_DONE = true
 end
@@ -355,8 +407,21 @@ def retail_extras():
     }
 
 
+def declared_saved_variables(tree):
+    """Globals the TOC declares as SavedVariables / SavedVariablesPerCharacter."""
+    toc = next(tree.glob("*.toc")).read_text(encoding="utf-8-sig")
+    names = []
+    for value in re.findall(r"^##\s*SavedVariables(?:PerCharacter)?:\s*(.+)$", toc, re.MULTILINE):
+        names += [n.strip() for n in value.split(",") if n.strip()]
+    return names
+
+
 class Env:
-    def __init__(self, tree, mode="retail", rows=None, extras=None, locale="enUS"):
+    """One game session: load the addon, then drive it. `saved` carries the previous session's
+    saved variables (see `relog`)."""
+
+    def __init__(self, tree, mode="retail", rows=None, extras=None, locale="enUS", saved=None):
+        self.tree, self.mode, self.locale, self.saved_state = tree, mode, locale, saved or {}
         self.lua = lupa.LuaRuntime(unpack_returned_tuples=True)
         g = self.lua.globals()
         g.MODE, g.LOCALE = mode, locale
@@ -383,6 +448,8 @@ class Env:
                          "TitanPanelButton_OnLoad(TitanPanelReputationButton)")
 
     def set_data(self, rows, extras):
+        """Replace the client's reputation data (rows may carry isCollapsed / hidden)."""
+        self.rows, self.extras = rows, extras
         g = self.lua.globals()
         g.FACTIONS = self.lua.table_from([self.lua.table_from(r) for r in rows])
         for key in ("MAJOR", "PARAGON", "FRIEND"):
@@ -391,21 +458,60 @@ class Env:
                 t[fid] = self.lua.table_from({k: v for k, v in data.items() if v is not None})
             g[key] = t
 
+    def edit_rows(self, **changes_by_name):
+        """Change rows by faction name, e.g. edit_rows(**{"Classic": {"isCollapsed": True}})."""
+        for r in self.rows:
+            r.update(changes_by_name.get(r["name"], {}))
+        self.set_data(self.rows, self.extras)
+
     def run(self, code):
         return self.lua.execute(code)
 
     def ev(self, expr):
         return self.lua.eval(expr)
 
+    def to_lua(self, value):
+        if isinstance(value, dict):
+            t = self.lua.table()
+            for k, v in value.items():
+                t[k] = self.to_lua(v)
+            return t
+        return value
+
+    def to_py(self, value):
+        if lupa.lua_type(value) == "table":
+            return {k: self.to_py(v) for k, v in value.items()}
+        return value
+
     def login(self, settings=None, scan_at=1003.0):
-        """ADDON_LOADED at t=1000, Titan PEW (plugin settings), first UPDATE_FACTION."""
+        """Saved variables load, ADDON_LOADED at t=1000, Titan's PLAYER_ENTERING_WORLD (plugin
+        settings), first UPDATE_FACTION."""
+        g = self.lua.globals()
+        for name, value in self.saved_state.get("svs", {}).items():
+            g[name] = self.to_lua(value)
         self.run("FIRE('ADDON_LOADED', 'TitanReputation')")
-        overrides = self.lua.table_from(settings or {})
-        self.lua.globals().SIM_PEW(overrides)
+        plugin_settings = dict(self.saved_state.get("settings", {}))
+        plugin_settings.update(settings or {})
+        g.SIM_PEW(self.to_lua(plugin_settings))
         self.update(scan_at)
 
     def update(self, at):
-        self.run(f"NOW = {at}; FIRE('UPDATE_FACTION')")
+        self.burst(at, 1)
+
+    def burst(self, at, events):
+        """`events` UPDATE_FACTION events at time `at`, then whatever timers they scheduled."""
+        self.run(f"NOW = {at}" + "; FIRE('UPDATE_FACTION')" * events + "; FLUSH_TIMERS()")
+
+    def saved(self):
+        """What WoW would write to disk at logout: plugin settings and declared saved variables."""
+        g = self.lua.globals()
+        svs = {name: self.to_py(g[name]) for name in declared_saved_variables(self.tree) if g[name] is not None}
+        return {"settings": self.to_py(g.TitanPluginSettings["Reputation"]), "svs": svs}
+
+    def relog(self, rows=None, extras=None):
+        """A new session of the same character, carrying over the saved variables."""
+        return Env(self.tree, self.mode, copy.deepcopy(rows if rows is not None else self.rows),
+                   copy.deepcopy(extras if extras is not None else self.extras), self.locale, saved=self.saved())
 
     def errors(self):
         return list(self.lua.globals().ERRORS.values())

@@ -16,30 +16,28 @@ function TitanPanelReputation:GetLangTab()
     return ltab
 end
 
-local missingTab = {}
+local missingKeys = {}
 
 function TitanPanelReputation:GT(str)
-    local result = TitanPanelReputation:GetLangTab()[str]
-
+    local result = ltab[str]
     if result ~= nil then
         return result
-    elseif not tContains(missingTab, str) then
-        tinsert(missingTab, str)
-        TitanPanelReputation:Log("Missing translation for: " .. str)
-
-        return str
     end
 
+    -- Report each missing key once per session
+    if not missingKeys[str] then
+        missingKeys[str] = true
+        TitanPanelReputation:Log("Missing translation for: " .. str)
+    end
     return str
 end
 
 function TitanPanelReputation:UpdateLanguage()
+    -- English first, so any key a translation lacks falls back to it
     TitanPanelReputation:LangenUS()
 
     if GetLocale() == "deDE" then
         TitanPanelReputation:LangdeDE()
-    elseif GetLocale() == "enUS" then
-        TitanPanelReputation:LangenUS()
     elseif GetLocale() == "esES" then
         TitanPanelReputation:Log(
             "Spanish locale not supported. You can help translating by visiting: " ..

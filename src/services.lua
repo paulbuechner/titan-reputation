@@ -310,9 +310,6 @@ local function OrderFactionDetails(detailsList)
     for _, details in ipairs(detailsList) do
         local bucket = EnsureBucket(DetermineRootHeaderKey(details))
         local level = details.headerLevel
-        if level == nil then
-            level = details.isHeader and 0 or (details.isChild and 2 or 1)
-        end
 
         if level == 0 and details.isHeader then
             bucket.header = details
@@ -393,14 +390,6 @@ function TitanPanelReputation:GetHeaderSelfOverrideLookup()
         self.headerSelfOverrideLookup = saved
     end
     return self.headerSelfOverrideLookup
-end
-
-function TitanPanelReputation:IsNodeExplicitlyHiddenByKey(nodeKey)
-    if not nodeKey or nodeKey == "" then
-        return false
-    end
-    local lookup = self:GetHiddenFactionLookup()
-    return lookup[nodeKey] or false
 end
 
 function TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails)
@@ -533,9 +522,9 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
     local overrides = self:GetShownFactionOverrideLookup()
     local selfOverrides = self:GetHeaderSelfOverrideLookup()
 
-    -- Helper: determine if a nodeKey has any hidden ancestor purely from the key string,
-    -- without relying on the current `FactionDetailsProvider` scan state.
-    local function KeyHasHiddenAncestor(nodeKey)
+    -- Helper: determine if a nodeKey has any hidden ancestor (other than `excludeKey`, if given)
+    -- purely from the key string, without relying on the current `FactionDetailsProvider` scan state.
+    local function KeyHasHiddenAncestor(nodeKey, excludeKey)
         if not nodeKey or nodeKey == "" then
             return false
         end
@@ -547,28 +536,6 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
                 prefix = prefix .. "/" .. segment
             end
             -- Stop before checking the key itself; ancestors are prefixes only.
-            if prefix == nodeKey then
-                break
-            end
-            if lookup[prefix] then
-                return true
-            end
-        end
-        return false
-    end
-
-    -- Helper: determine if a nodeKey has any hidden ancestor OTHER than `excludeKey`.
-    local function KeyHasOtherHiddenAncestor(nodeKey, excludeKey)
-        if not nodeKey or nodeKey == "" then
-            return false
-        end
-        local prefix = nil
-        for segment in string.gmatch(nodeKey, "([^/]+)") do
-            if not prefix then
-                prefix = segment
-            else
-                prefix = prefix .. "/" .. segment
-            end
             if prefix == nodeKey then
                 break
             end
@@ -642,7 +609,7 @@ function TitanPanelReputation:SetHeaderSelfHiddenState(headerKey, hidden)
             if self:IsDescendantOfKey(headerKey, details) then
                 -- Only persist hidden state if the node is hidden *because of this header*,
                 -- not because some other ancestor (e.g. the root header) is hidden.
-                if self:IsFactionEffectivelyHidden(details) and not KeyHasOtherHiddenAncestor(detailsKey, headerKey) then
+                if self:IsFactionEffectivelyHidden(details) and not KeyHasHiddenAncestor(detailsKey, headerKey) then
                     lookup[detailsKey] = true
                     overrides[detailsKey] = nil
                 end
@@ -847,8 +814,8 @@ local function BuildFactionDetailsList()
     local collectedDetails = {}
 
     for index = 1, count do
-        local name, description, standingID, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader,
-        isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus =
+        local name, _, standingID, bottomValue, topValue, earnedValue, _, _, isHeader,
+        isCollapsed, hasRep, _, isChild, factionID, hasBonusRepGain =
             TitanPanelReputation:BlizzAPI_GetFactionInfo(index)
         if factionID then
             -- Normalize values
@@ -936,9 +903,6 @@ local function BuildFactionDetailsList()
                 else
                     if rootHeader ~= "" then
                         tinsert(headerPath, rootHeader)
-                    end
-                    if not isChild then
-                        nestedHeader = ""
                     end
                 end
             end

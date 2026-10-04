@@ -344,13 +344,6 @@ end
 function TitanPanelReputation:ApplyFactionMapping(factionDetails)
     if not factionDetails or not factionDetails.factionID then return factionDetails end
 
-    -- Always cache the Blizzard-provided hierarchy level for later use
-    if not factionDetails.headerLevel then
-        factionDetails.headerLevel = factionDetails.isHeader and 0 or (factionDetails.isChild and 2 or 1)
-    end
-
-    -- TitanDebug("Faction ID: " .. factionDetails.factionID .. " name: " .. factionDetails.name .. " headerLevel: " .. factionDetails.headerLevel)
-
     local override = self:GetFactionMapping(factionDetails.factionID)
     if not override then
         return factionDetails

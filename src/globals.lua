@@ -108,12 +108,6 @@ TitanPanelReputation.CHANGED_FACTION = "none"
 TitanPanelReputation.DebugMode = false
 
 ---
----The icons to use for achievement standings announcements.
----
----@type string[]
-TitanPanelReputation.ICONS = { "03", "03", "07", "08", "06", "06", "06", "05" }
-
----
 ---The color themes `default` color palette.
 ---
 ---@type table<number, { r: number, g: number, b: number }>

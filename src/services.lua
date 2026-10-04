@@ -940,10 +940,11 @@ end
 
 ---
 ---The rows of each header as last seen expanded, per character: header factionID -> faction IDs of
----its direct rows in list order. The client does not list the rows of a collapsed header, so the
----scan puts these back in (read by ID): the tooltip and menu do not depend on the collapse state.
+---its direct rows in list order, or false for a header only seen collapsed so far. The client does
+---not list the rows of a collapsed header, so the scan puts these back in (read by ID): the tooltip
+---and menu do not depend on the collapse state.
 ---
----@return table<number, number[]>
+---@return table<number, number[]|false>
 local function GetKnownChildren()
     local data = GetCharacterData()
     data.KnownChildren = data.KnownChildren or {}
@@ -983,16 +984,20 @@ local function AddRowsOfCollapsedHeaders(listedRows)
 
     local rows, added, seenChildren = {}, {}, {}
 
-    local function AddRemembered(headerID)
+    -- Read by ID, a row comes without its place in the list (the client reports it as a top-level
+    -- row), so its nesting is taken from where it was remembered
+    local function AddRemembered(headerID, isSubHeader)
         for _, factionID in ipairs(knownChildren[headerID] or {}) do
             if not listed[factionID] and not added[factionID] then
                 local row = ReadRow(TitanPanelReputation:BlizzAPI_GetFactionInfoByID(factionID))
                 if row then
+                    row.isHeader = row.isHeader or knownChildren[factionID] ~= nil
+                    row.isChild = isSubHeader or row.isHeader
                     added[factionID] = true
                     rows[#rows + 1] = row
                     if row.isHeader then
-                        row.rowsUnknown = knownChildren[factionID] == nil
-                        AddRemembered(factionID)
+                        row.rowsUnknown = not knownChildren[factionID]
+                        AddRemembered(factionID, true)
                     end
                 end
             end
@@ -1022,8 +1027,11 @@ local function AddRowsOfCollapsedHeaders(listedRows)
         rows[#rows + 1] = row
         if row.isHeader then
             if row.isCollapsed then
-                row.rowsUnknown = knownChildren[row.factionID] == nil and not row.isInactive
-                AddRemembered(row.factionID)
+                row.rowsUnknown = not knownChildren[row.factionID] and not row.isInactive
+                if knownChildren[row.factionID] == nil then
+                    knownChildren[row.factionID] = false -- a header whose rows were not seen yet
+                end
+                AddRemembered(row.factionID, row.isChild)
             else
                 seenChildren[row.factionID] = {}
             end

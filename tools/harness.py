@@ -234,7 +234,18 @@ local function Visible()
   end
   return rows
 end
-local function ById(id) for _, f in ipairs(FACTIONS) do if f.id == id then return f end end end
+-- Read by ID, a row comes without its place in the list: like the client, report it as a
+-- top-level, expanded row
+local function ById(id)
+  for _, f in ipairs(FACTIONS) do
+    if f.id == id then
+      local copy = {}
+      for k, v in pairs(f) do copy[k] = v end
+      copy.isChild, copy.isCollapsed = false, false
+      return copy
+    end
+  end
+end
 local function FactionData(f)
   if not f then return nil end
   return { name = f.name, description = "", reaction = f.reaction, currentReactionThreshold = f.cur,
@@ -844,7 +855,21 @@ def sc_collapsed_unknown_notice(tree):
             "errors": e.errors()}
 
 
+def sc_collapsed_subheader_grouping(tree):
+    def tbc_lines(text):
+        names = ("Burning Crusade", "Shattrath", "Aldor", "Scryers", "Cenarion")
+        return [line.rstrip() for line in plain(text).splitlines() if any(n in line for n in names)]
+
+    e = Env(tree)
+    e.login({"WatchedFaction": "Stormwind"})  # Shattrath City seen expanded
+    expanded = tbc_lines(e.ev("TOOLTIP()"))
+    e.edit_rows(**{"Shattrath City": {"isCollapsed": True}})
+    e.update(1010.0)
+    return {"expanded": expanded, "sub-header collapsed": tbc_lines(e.ev("TOOLTIP()")), "errors": e.errors()}
+
+
 SCENARIOS = {
+    "collapsed sub-header keeps its group": sc_collapsed_subheader_grouping,
     "collapsed header never seen expanded": sc_collapsed_unknown_notice,
     "collapsed section stays listed": sc_collapsed_section_listed,
     "faction under collapsed header keeps counting": sc_tracking_under_collapsed_header,

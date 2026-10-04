@@ -16,6 +16,7 @@ function TitanPanelReputation:LangdeDE()
         -- Labels
         ["LID_ALL_HIDDEN_LABEL"] = "Ruf: Aus",
         ["LID_NO_FACTION_LABEL"] = "Ruf: Keine Fraktion ausgewählt",
+        ["LID_COLLAPSED_UNKNOWN"] = "(eingeklappt: zum Anzeigen aufklappen)",
         ["LID_SHOW_FACTION_NAME_LABEL"] = "Fraktionsname anzeigen",
         ["LID_SHOW_STANDING"] = "Rufstatus anzeigen",
         ["LID_SHOW_VALUE"] = "Rufwert anzeigen",

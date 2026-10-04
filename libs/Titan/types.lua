@@ -676,6 +676,14 @@ OUT: string - Green string with proper start and end font encoding
 TitanUtils_GetGreenText = function(text) end -- Used by plugins
 
 --[[ API
+NAME: TitanUtils_GetGrayText
+DESC: Make the given text gray.
+VAR: text - text to color
+OUT: string - Gray string with proper start and end font encoding
+--]]
+TitanUtils_GetGrayText = function(text) end
+
+--[[ API
 NAME: TitanUtils_GetBlueText
 DESC: Make the given text blue.
 VAR: text - text to color

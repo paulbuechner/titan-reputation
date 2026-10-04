@@ -25,6 +25,7 @@
 ---@field factionID number: The faction ID
 ---@field hasBonusRepGain boolean: Whether the faction has bonus reputation gain
 ---@field paragonProgressStarted boolean: Whether the paragon progress for the given faction has been started
+---@field rowsUnknown boolean: Whether this is a collapsed header whose rows were never seen expanded (nothing to show yet)
 ---@field icon string|nil: The icon texture path for the faction
 
 ---@class AdjustedIDAndLabel

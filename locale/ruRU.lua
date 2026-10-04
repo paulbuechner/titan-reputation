@@ -16,6 +16,7 @@ function TitanPanelReputation:LangruRU()
         -- Labels
         ["LID_ALL_HIDDEN_LABEL"] = "Репутация: Выключено",
         ["LID_NO_FACTION_LABEL"] = "Репутация: Фракция не выбрана",
+        ["LID_COLLAPSED_UNKNOWN"] = "(collapsed: expand once to list)",
         ["LID_SHOW_FACTION_NAME_LABEL"] = "Показывать название фракции",
         ["LID_SHOW_STANDING"] = "Показывать статус",
         ["LID_SHOW_VALUE"] = "Показывать значение репутации",

@@ -42,7 +42,8 @@ local STANDING_SHOW_VARS = {
 ---Ensures the header path is printed.
 ---
 ---@param headerPath string[] The header path
-local function EnsureHeaderPathPrinted(headerPath)
+---@param note? string Text shown right of the last header, if that one gets printed now
+local function EnsureHeaderPathPrinted(headerPath, note)
     TitanPanelReputation.LAST_HEADER_PATH = TitanPanelReputation.LAST_HEADER_PATH or {}
 
     if not headerPath or #headerPath == 0 then
@@ -54,8 +55,12 @@ local function EnsureHeaderPathPrinted(headerPath)
         if TitanPanelReputation.LAST_HEADER_PATH[level] ~= headerName then
             local indent = string.rep("  ", level - 1)
             local prefix = #tooltipParts == 0 and "" or "\n"
+            local line = indent .. TitanUtils_GetHighlightText(headerName)
+            if note and level == #headerPath then
+                line = line .. "\t" .. note
+            end
 
-            Append(prefix .. indent .. TitanUtils_GetHighlightText(headerName) .. "\n")
+            Append(prefix .. line .. "\n")
             TitanPanelReputation.LAST_HEADER_PATH[level] = headerName
             for trim = level + 1, #TitanPanelReputation.LAST_HEADER_PATH do
                 TitanPanelReputation.LAST_HEADER_PATH[trim] = nil
@@ -116,6 +121,11 @@ local function BuildTooltipFactionInfo(factionDetails)
     -- Skip nodes hidden by the user's menu selections (handles ancestors automatically)
     if TitanPanelReputation:IsFactionEffectivelyHidden(factionDetails) then
         return
+    end
+
+    -- A collapsed header that was never seen expanded has no rows to list yet: say how to get them
+    if isHeader and factionDetails.rowsUnknown then
+        EnsureHeaderPathPrinted(headerPath, TitanUtils_GetGrayText(TitanPanelReputation:GT("LID_COLLAPSED_UNKNOWN")))
     end
 
     -- Init function local variables

@@ -931,6 +931,7 @@ local function CreateFactionDetails(row)
         factionID = factionID,
         hasBonusRepGain = row.hasBonusRepGain or false,
         paragonProgressStarted = paragonProgressStarted or false,
+        rowsUnknown = row.rowsUnknown or false,
         headerLevel = 0,
         headerPath = {}
     }
@@ -968,7 +969,8 @@ end
 ---
 ---Puts the remembered rows of collapsed headers back in after their header, and remembers the rows
 ---of the expanded ones (see `GetKnownChildren`). Inactive factions are not remembered: they are only
----listed under the "Inactive" header, which the tooltip and menu skip anyway.
+---listed under the "Inactive" header, which the tooltip and menu skip anyway. A collapsed header
+---that was never seen expanded gets `rowsUnknown`: it has nothing to show until it is.
 ---
 ---@param listedRows table[]
 ---@return table[]
@@ -989,6 +991,7 @@ local function AddRowsOfCollapsedHeaders(listedRows)
                     added[factionID] = true
                     rows[#rows + 1] = row
                     if row.isHeader then
+                        row.rowsUnknown = knownChildren[factionID] == nil
                         AddRemembered(factionID)
                     end
                 end
@@ -1019,6 +1022,7 @@ local function AddRowsOfCollapsedHeaders(listedRows)
         rows[#rows + 1] = row
         if row.isHeader then
             if row.isCollapsed then
+                row.rowsUnknown = knownChildren[row.factionID] == nil and not row.isInactive
                 AddRemembered(row.factionID)
             else
                 seenChildren[row.factionID] = {}

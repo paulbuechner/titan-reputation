@@ -16,6 +16,7 @@ function TitanPanelReputation:LangesES()
         -- Labels
         ["LID_ALL_HIDDEN_LABEL"] = "Reputation: Off",
         ["LID_NO_FACTION_LABEL"] = "Reputation: No Faction Selected",
+        ["LID_COLLAPSED_UNKNOWN"] = "(collapsed: expand once to list)",
         ["LID_SHOW_FACTION_NAME_LABEL"] = "Show Faction Name",
         ["LID_SHOW_STANDING"] = "Show Standing",
         ["LID_SHOW_VALUE"] = "Show Reputation Value",

@@ -153,6 +153,7 @@ function TitanUtils_GetGoldText(t) return Encode("f2e699", t) end
 function TitanUtils_GetGreenText(t) return Encode("19ff19", t) end
 function TitanUtils_GetNormalText(t) return Encode("ffd200", t) end
 function TitanUtils_GetHighlightText(t) return Encode("ffffff", t) end
+function TitanUtils_GetGrayText(t) return Encode("808080", t) end
 function TitanUtils_GetColoredText(text, color)
   if color and text then
     return Encode(format("%02x", color.r * 255) .. format("%02x", color.g * 255) .. format("%02x", color.b * 255), text)
@@ -823,7 +824,28 @@ def sc_collapsed_section_listed(tree):
             "errors": e.errors() + e2.errors() + e3.errors()}
 
 
+def sc_collapsed_unknown_notice(tree):
+    def section_lines(text):
+        names = ("Dragonflight", "Valdrakken", "Sabellian", "Steamwheedle", "Booty Bay", "Gadgetzan")
+        return [line.strip() for line in plain(text).splitlines() if any(n in line for n in names)]
+
+    rows = retail_rows()
+    for r in rows:
+        if r["name"] in ("Dragonflight", "Steamwheedle Cartel"):
+            r["isCollapsed"] = True  # collapsed since before the addon saw them expanded
+    e = Env(tree, rows=rows)
+    e.login({"WatchedFaction": "Stormwind"})
+    never_expanded = section_lines(e.ev("TOOLTIP()"))
+    e.edit_rows(**{"Dragonflight": {"isCollapsed": False}, "Steamwheedle Cartel": {"isCollapsed": False}})
+    e.update(1010.0)
+    e.edit_rows(**{"Dragonflight": {"isCollapsed": True}, "Steamwheedle Cartel": {"isCollapsed": True}})
+    e.update(1020.0)
+    return {"never expanded": never_expanded, "expanded once, collapsed again": section_lines(e.ev("TOOLTIP()")),
+            "errors": e.errors()}
+
+
 SCENARIOS = {
+    "collapsed header never seen expanded": sc_collapsed_unknown_notice,
     "collapsed section stays listed": sc_collapsed_section_listed,
     "faction under collapsed header keeps counting": sc_tracking_under_collapsed_header,
     "new-faction toast: expanding a collapsed header": sc_expand_collapsed_header,

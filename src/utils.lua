@@ -78,50 +78,40 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID,
     local label = _G["FACTION_STANDING_LABEL" .. standingID]
     local factionType = "Faction Standing"
 
-    if not WoW10 then
-        local adjustedIDAndLabel = ---@type AdjustedIDAndLabel
-        {
-            adjustedID = adjustedID,
-            label = label,
-            factionType = factionType
-        }
-        return adjustedIDAndLabel
-    end
-
-    returnOnNotShowFriendInfo = returnOnNotShowFriendInfo or false
-
+    -- Friendships exist since MoP (Classic included); the info is nil for every other faction
     if friendShipReputationInfo then
-        if returnOnNotShowFriendInfo and not TitanGetVar(TitanPanelReputation.ID, "ShowFriendsOnBar") then return end -- if not showing friendsip info, return
+        if returnOnNotShowFriendInfo and not TitanGetVar(TitanPanelReputation.ID, "ShowFriendsOnBar") then return end -- if not showing friendship info, return
 
         -- If reached max friendship reputation standing, reflect it in the standingID (adjustedID)
         if not friendShipReputationInfo.nextThreshold then adjustedID = 8 end
 
+        label = friendShipReputationInfo.reaction
         factionType = "Friendship Ranking"
     end
 
-    if friendShipReputationInfo then label = friendShipReputationInfo.reaction end
+    if WoW10 and factionID then
+        -- Paragon - AdjustedID = 9
+        if C_Reputation.IsFactionParagon(factionID) and paragonProgressStarted == true then
+            if topValue == 0 or topValue == 1000 then
+                -- If topValue is 0 or 1000, that individual faction is paragon but their paragon
+                -- rep is tracked on another faction (e.g. "Azj Kahet" Sentinals)
+                label = label .. " - " .. TitanPanelReputation:GT("LID_PARAGON")
+            else
+                label = TitanPanelReputation:GT("LID_PARAGON")
+            end
 
-    -- Paragon - AdjustedID = 9
-    if factionID and C_Reputation.IsFactionParagon(factionID) and paragonProgressStarted == true then
-        if topValue == 0 or topValue == 1000 then
-            -- If topValue is 0 or 1000, that individual faction is paragon but their paragon
-            -- rep is tracked on another faction (e.g. "Azj Kahet" Sentinals)
-            label = label .. " - " .. TitanPanelReputation:GT("LID_PARAGON")
-        else
-            label = TitanPanelReputation:GT("LID_PARAGON")
+            adjustedID = 9
         end
 
-        adjustedID = 9
-    end
+        -- Renown -> AdjustedID = 10
+        if C_Reputation.IsMajorFaction(factionID) then
+            local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
 
-    -- Renown -> AdjustedID = 10
-    if factionID and C_Reputation.IsMajorFaction(factionID) then
-        local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
-
-        if majorFactionData ~= nil then
-            label = tostring(majorFactionData.renownLevel)
+            if majorFactionData ~= nil then
+                label = tostring(majorFactionData.renownLevel)
+            end
+            adjustedID = 10
         end
-        adjustedID = 10
     end
 
     local adjustedIDAndLabel = ---@type AdjustedIDAndLabel

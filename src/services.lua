@@ -1035,12 +1035,16 @@ function TitanPanelReputation:HandleUpdateFaction()
     local newFactionsCount = 0
     local newFactions = {}
     local showAnnouncements = TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") or TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")
+    -- Unknown factions only count as discovered against a baseline: the first scan after login
+    -- fills TABLE, and the client can still add factions to the list shortly after login.
+    local detectNewFactions = showAnnouncements and next(TitanPanelReputation.TABLE) ~= nil
+        and (GetTime() - TitanPanelReputation.INIT_TIME) > 30
 
     self:FactionDetailsProvider(function(details)
         -- Check if the faction can be tracked
         if (not details.isHeader and details.name) or (details.isHeader and details.hasRep) then
             -- Detect newly discovered factions (for announcement later)
-            if showAnnouncements and not TitanPanelReputation.TABLE[details.factionID] and details.earnedValue and details.earnedValue > 0 and details.standingID <= 4 then
+            if detectNewFactions and not TitanPanelReputation.TABLE[details.factionID] and details.earnedValue and details.earnedValue > 0 and details.standingID <= 4 then
                 newFactionsCount = newFactionsCount + 1
                 newFactions[details.factionID] = details
             end
@@ -1064,7 +1068,7 @@ function TitanPanelReputation:HandleUpdateFaction()
     --       fresh login was performed. This could be prevented if we persist reputation data per character in
     --       saved variables. Because this is a rare edge case, we accept the minor annoyance.
     local isNewFaction = (newFactionsCount == 1 or newFactionsCount == 2)
-    if showAnnouncements and isNewFaction then
+    if detectNewFactions and isNewFaction then
         for _, details in pairs(newFactions) do
             local adjusted = TitanPanelReputation:GetAdjustedIDAndLabel(
                 details.factionID,

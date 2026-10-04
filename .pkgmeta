@@ -12,5 +12,6 @@ ignore:
   - resources/ArtTextureID.lua
   - libs/MSBT
   - libs/Titan
+  - tools
 
 changelog-title: "Titan [Reputation Continued]"

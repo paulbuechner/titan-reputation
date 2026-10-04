@@ -223,23 +223,13 @@ function TitanPanelReputation:BuildTooltipText()
                     "/" .. TitanPanelReputation:GT("LID_MINUTE_SHORT") .. " " ..
                     "\t" .. TitanPanelReputation:GT("LID_SESSION_SUMMARY_TOTAL") .. ": " .. rateText(v)
 
-                -- Append time to next level (TTL) info; needs a positive rate to be computable
-                if (TitanGetVar(TitanPanelReputation.ID, "ShowTipSessionSummaryTTL") and RPH > 0) then
+                -- Append time to next level (TTL) info, if it can be computed
+                if (TitanGetVar(TitanPanelReputation.ID, "ShowTipSessionSummaryTTL")) then
                     local earnedValue, topValue = TitanPanelReputation:FilterTableByName(f)
-                    --
-                    if earnedValue and topValue then
-                        local _, hrs, mins = TitanPanelReputation:TTL(earnedValue, topValue, RPH)
-
-                        local TTL_STRING
-                        if (hrs > 0) then
-                            TTL_STRING = "TTL: " ..
-                                hrs .. TitanPanelReputation:GT("LID_HOURS_SHORT") .. " " ..
-                                mins .. TitanPanelReputation:GT("LID_MINUTES_SHORT")
-                        else
-                            TTL_STRING = "TTL: " .. mins .. TitanPanelReputation:GT("LID_MINUTES_SHORT")
-                        end
-
-                        RPH_STRING = RPH_STRING .. " - " .. TTL_STRING
+                    local ttlText = earnedValue and topValue
+                        and TitanPanelReputation:GetTimeToLevelText(earnedValue, topValue, RPH)
+                    if ttlText then
+                        RPH_STRING = RPH_STRING .. " - TTL: " .. ttlText
                     end
                 end
 

@@ -143,6 +143,28 @@ function TitanPanelReputation:GetStandingColor(adjustedID)
 end
 
 ---
+---Formats the time needed to reach `topValue` at the given rate (e.g. "2hrs 5mins").
+---
+---@param earnedValue number The earned value of the faction
+---@param topValue number The top value of the faction
+---@param RPH number The reputation per hour
+---@return string|nil text Nil without a positive rate, when already at the top value, or below a minute
+---@nodiscard
+function TitanPanelReputation:GetTimeToLevelText(earnedValue, topValue, RPH)
+    if RPH <= 0 or earnedValue >= topValue then
+        return nil
+    end
+
+    local _, hrs, mins = self:TTL(earnedValue, topValue, RPH)
+    if hrs > 0 then
+        return hrs .. self:GT("LID_HOURS_SHORT") .. " " .. mins .. self:GT("LID_MINUTES_SHORT")
+    elseif mins > 0 then
+        return mins .. self:GT("LID_MINUTES_SHORT")
+    end
+    return nil
+end
+
+---
 ---Trims the given string by removing leading and trailing whitespace.
 ---
 ---@param value string The string to trim

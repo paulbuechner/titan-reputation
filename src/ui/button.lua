@@ -106,22 +106,11 @@ function TitanPanelReputation.BuildButtonText(factionDetails)
                     text = text .. ColorText(" @ ", COLOR) .. RPH_STRING
                 end
 
-                -- Append time to next level (TTL) info; needs a positive rate to be computable
-                if (TitanGetVar(TitanPanelReputation.ID, "ShowSessionSummaryTTL") and RPH > 0) then
-                    local _, hrs, mins = TitanPanelReputation:TTL(earnedValue, topValue, RPH)
-
-                    local TTL_STRING = ""
-                    if (hrs > 0) then
-                        TTL_STRING = ColorText("TTL: ", COLOR) ..
-                            hrs .. TitanPanelReputation:GT("LID_HOURS_SHORT") .. " " ..
-                            mins .. TitanPanelReputation:GT("LID_MINUTES_SHORT")
-                    elseif (mins > 0) then -- only render minutes if there are any
-                        TTL_STRING = ColorText("TTL: ", COLOR) ..
-                            mins .. TitanPanelReputation:GT("LID_MINUTES_SHORT")
-                    end
-
-                    if TTL_STRING ~= "" then
-                        text = text .. " - " .. TTL_STRING
+                -- Append time to next level (TTL) info, if it can be computed
+                if (TitanGetVar(TitanPanelReputation.ID, "ShowSessionSummaryTTL")) then
+                    local ttlText = TitanPanelReputation:GetTimeToLevelText(earnedValue, topValue, RPH)
+                    if ttlText then
+                        text = text .. " - " .. ColorText("TTL: ", COLOR) .. ttlText
                     end
                 end
             end

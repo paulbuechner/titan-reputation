@@ -43,11 +43,11 @@ function TitanPanelReputation:UpdateLanguage()
     elseif GetLocale() == "esES" then
         TitanPanelReputation:Log(
             "Spanish locale not supported. You can help translating by visiting: " ..
-            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/esEs.lua")
+            "https://github.com/paulbuechner/titan-reputation/blob/main/locale/esES.lua")
         TitanPanelReputation:LangesES()
     elseif GetLocale() == "frFR" then
         TitanPanelReputation:Log(
-            "France locale not supported. You can help translating by visiting: " ..
+            "French locale not supported. You can help translating by visiting: " ..
             "https://github.com/paulbuechner/titan-reputation/blob/main/locale/frFR.lua")
         TitanPanelReputation:LangfrFR()
     elseif GetLocale() == "itIT" then

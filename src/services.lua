@@ -1090,25 +1090,65 @@ function TitanPanelReputation:RefreshButtonText()
 end
 
 ---
+---Node keys of the headers that were collapsed in the previous scan (see `IsRevealedByExpand`).
+---
+---@type table<string, boolean>
+local collapsedHeaderKeys = {}
+
+---
+---Faction IDs this character has seen in the reputation list, saved per character: a faction that
+---is missing from it is new, one that reappears from a collapsed header is not.
+---
+---@return table<number, boolean>
+local function GetKnownFactions()
+    TitanRep_CharData.KnownFactions = TitanRep_CharData.KnownFactions or {}
+    return TitanRep_CharData.KnownFactions
+end
+
+---
+---Whether the entry only shows up because a header that was collapsed in the previous scan got
+---expanded. Covers what the known factions cannot: headers kept collapsed since before this
+---character's factions were first recorded.
+---
+---@param details FactionDetails
+---@return boolean
+local function IsRevealedByExpand(details)
+    for _, key in ipairs(GetAncestorKeys(details)) do
+        if collapsedHeaderKeys[key] then
+            return true
+        end
+    end
+    return false
+end
+
+---
 ---Public entrypoint used by the `UPDATE_FACTION` event handler in `main.lua`.
 ---
 function TitanPanelReputation:HandleUpdateFaction()
     local newFactionsCount = 0
     local newFactions = {}
+    local known = GetKnownFactions()
+    local collapsedNow = {}
     local showAnnouncements = TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") or TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceMik")
-    -- Unknown factions only count as discovered against a baseline: the first scan after login
-    -- fills TABLE, and the client can still add factions to the list shortly after login.
-    local detectNewFactions = showAnnouncements and next(TitanPanelReputation.TABLE) ~= nil
+    -- New factions are judged against the ones this character has seen before. The very first scan
+    -- only records that baseline, and the client can still add factions shortly after login.
+    local detectNewFactions = showAnnouncements and next(known) ~= nil
         and (GetTime() - TitanPanelReputation.INIT_TIME) > 30
 
     self:FactionDetailsProvider(function(details)
+        if details.isHeader and details.isCollapsed then
+            collapsedNow[self:GetNodeKey(details)] = true
+        end
+
         -- Check if the faction can be tracked
         if (not details.isHeader and details.name) or (details.isHeader and details.hasRep) then
             -- Detect newly discovered factions (for announcement later)
-            if detectNewFactions and not TitanPanelReputation.TABLE[details.factionID] and details.earnedValue and details.earnedValue > 0 and details.standingID <= 4 then
+            if detectNewFactions and not known[details.factionID] and not IsRevealedByExpand(details)
+                and details.earnedValue and details.earnedValue > 0 and details.standingID <= 4 then
                 newFactionsCount = newFactionsCount + 1
                 newFactions[details.factionID] = details
             end
+            known[details.factionID] = true
 
             -- 1. Handle the faction update
             HandleFactionUpdate(details)
@@ -1122,12 +1162,10 @@ function TitanPanelReputation:HandleUpdateFaction()
             }
         end
     end)
+    collapsedHeaderKeys = collapsedNow
 
     -- 3. Announce newly discovered factions (iterate over collected newFactions)
     -- NOTE: Max 2 factions can be discovered at once, e.g. WotLK Horde Expedition
-    -- NOTE: This will also trigger if the a reputation header is uncollapsed when it was collapsed and a reload or
-    --       fresh login was performed. This could be prevented if we persist reputation data per character in
-    --       saved variables. Because this is a rare edge case, we accept the minor annoyance.
     local isNewFaction = (newFactionsCount == 1 or newFactionsCount == 2)
     if detectNewFactions and isNewFaction then
         for _, details in pairs(newFactions) do

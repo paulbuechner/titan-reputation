@@ -177,6 +177,9 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         if not TitanRep_Data or type(TitanRep_Data) ~= "table" then
             TitanRep_Data = {}
         end
+        if type(TitanRep_CharData) ~= "table" then
+            TitanRep_CharData = {}
+        end
 
         -- Set addon in init time (uptime of pc in seconds, with millisecond precision)
         TitanPanelReputation.INIT_TIME = GetTime();

@@ -765,7 +765,35 @@ def sc_watched_under_collapsed_header(tree):
             "after reload, still collapsed": plain(e2.ev("BUTTON()")), "errors": e.errors() + e2.errors()}
 
 
+def sc_expand_collapsed_header(tree):
+    rows = retail_rows()
+    for r in rows:
+        if r["name"] == "The Burning Crusade":
+            r["isCollapsed"] = True
+    e = Env(tree, rows=rows)
+    e.login({"WatchedFaction": "Stormwind", "ShowAnnounceFrame": True})
+    e.edit_rows(**{"The Burning Crusade": {"isCollapsed": False}})
+    e.update(1100.0)
+    return {"toasts after expanding": e.alerts(), "errors": e.errors()}
+
+
+def sc_known_from_last_session(tree):
+    e = Env(tree)
+    e.login({"WatchedFaction": "Stormwind", "ShowAnnounceFrame": True})
+    rows = copy.deepcopy(e.rows)
+    for r in rows:
+        if r["name"] == "Cenarion Expedition":
+            r["hidden"] = True  # e.g. filtered out of the list at the next login
+    e2 = e.relog(rows=rows)
+    e2.login()
+    e2.edit_rows(**{"Cenarion Expedition": {"hidden": False}})
+    e2.update(1100.0)
+    return {"toasts after it reappears": e2.alerts(), "errors": e.errors() + e2.errors()}
+
+
 SCENARIOS = {
+    "new-faction toast: expanding a collapsed header": sc_expand_collapsed_header,
+    "new-faction toast: faction known from last session": sc_known_from_last_session,
     "watched faction under collapsed header": sc_watched_under_collapsed_header,
     "menu: equally named sub-headers": sc_same_named_subheaders,
     "UPDATE_FACTION burst": sc_event_burst,

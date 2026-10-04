@@ -16,6 +16,7 @@
 ## X-Child-Of: Titan
 
 ## SavedVariables: TitanRep_Data
+## SavedVariablesPerCharacter: TitanRep_CharData
 
 locale/enUS.lua
 locale/deDE.lua

@@ -89,13 +89,14 @@ TitanPanelReputation.BUTTON_TEXT = TitanPanelReputation:GT("LID_NO_FACTION_LABEL
 TitanPanelReputation.TOOLTIP_TEXT = ""
 
 ---
----Used to track the earned reputation amount for a given faction (e.g. "rep increased by 15")
+---The biggest reputation change of the current `UPDATE_FACTION` burst (e.g. 15 for "rep increased by 15").
 ---
 ---@type number
 TitanPanelReputation.HIGHCHANGED = 0
 
 ---
----The name of the faction last changed (reputation earned for).
+---The faction with the biggest reputation change of the current `UPDATE_FACTION` burst, or "none".
+---The "Auto Show Changed" option puts it on the button.
 ---
 ---@type string
 TitanPanelReputation.CHANGED_FACTION = "none"

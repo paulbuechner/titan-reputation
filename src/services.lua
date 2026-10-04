@@ -808,15 +808,14 @@ local function HandleFactionUpdate(factionDetails)
         TitanPanelReputation.RTS[name] = (TitanPanelReputation.RTS[name] or 0) + earnedAmount
     end
 
-    -- Check if the earned amount is a new high or low
-    if (earnedAmount > 0 and earnedAmount > TitanPanelReputation.HIGHCHANGED) or
-        (earnedAmount < 0 and earnedAmount < TitanPanelReputation.HIGHCHANGED) then
-        -- If so, update the highest changed amount to the current earned amount
+    -- Remember the faction with the biggest change of this burst for AutoChange (see main.lua).
+    -- Gains win over losses: a loss only counts while no gain has been seen.
+    local highChanged = TitanPanelReputation.HIGHCHANGED
+    if (earnedAmount > 0 and earnedAmount > highChanged) or
+        (earnedAmount < 0 and highChanged <= 0 and earnedAmount < highChanged) then
         TitanPanelReputation.HIGHCHANGED = earnedAmount
+        TitanPanelReputation.CHANGED_FACTION = name
     end
-
-    -- Update the current tracked faction when the reputation changes
-    TitanPanelReputation.CHANGED_FACTION = name
 end
 
 ---

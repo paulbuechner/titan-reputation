@@ -155,18 +155,19 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         TitanPanelReputation:InvalidateFactionDetailsCache()
 
         if TitanPanelReputation.INIT_TIME > 0 then
-            -- Set the current tracked faction
+            -- UPDATE_FACTION fires in bursts; events within .15s count as one reputation change
             if ((GetTime() - TitanPanelReputation.EVENT_TIME) > .15) then
                 TitanPanelReputation.HIGHCHANGED = 0
+                TitanPanelReputation.CHANGED_FACTION = "none"
                 TitanPanelReputation.EVENT_TIME = GetTime()
-
-                -- If AutoChange is enabled (i.e. not 'none') set the watched faction to the changed faction
-                if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
-                    TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
-                end
             end
 
             TitanPanelReputation:HandleUpdateFaction()
+
+            -- If AutoChange is enabled, show the faction with the biggest change of this burst
+            if TitanGetVar(TitanPanelReputation.ID, "AutoChange") and TitanPanelReputation.CHANGED_FACTION ~= "none" then
+                TitanSetVar(TitanPanelReputation.ID, "WatchedFaction", TitanPanelReputation.CHANGED_FACTION)
+            end
         end
 
         --[[  --------------------------- MAIN ADDON LOOP END --------------------------- ]]

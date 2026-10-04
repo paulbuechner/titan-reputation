@@ -33,7 +33,11 @@
     "UIDropDownMenu_RefreshAll",
     "UIDROPDOWNMENU_OPEN_MENU",
     "UIDropDownMenu_Refresh",
-    "ACHIEVEMENT_UNLOCKED"
+    "ACHIEVEMENT_UNLOCKED",
+    "GetNumFactions",
+    "GetFactionInfo",
+    "GetFactionInfoByID",
+    "IsFactionInactive"
   ],
   "Lua.runtime.version": "Lua 5.1",
   "Lua.runtime.builtin": {

@@ -33,7 +33,26 @@ function TitanPanelReputation:TTL(earnedValue, topValue, RPH)
 end
 
 ---
----Formats the given time into a human readable format (e.g. "< 1min"/"30mins"/"1hr 30min").
+---Formats a count with its short unit, singular for a count of one (e.g. "1min", "5mins").
+---
+---@param count number
+---@param oneKey string Locale key of the unit for a count of one
+---@param manyKey string Locale key of the unit for any other count
+---@return string
+local function FormatCount(count, oneKey, manyKey)
+    return count .. TitanPanelReputation:GT(count == 1 and oneKey or manyKey)
+end
+
+local function FormatHours(hours)
+    return FormatCount(hours, "LID_ONE_HOUR_SHORT", "LID_HOURS_SHORT")
+end
+
+local function FormatMinutes(minutes)
+    return FormatCount(minutes, "LID_MINUTE_SHORT", "LID_MINUTES_SHORT")
+end
+
+---
+---Formats the given time into a human readable format (e.g. "< 1min"/"30mins"/"1hr 30mins").
 ---
 ---@param time number The time to format
 ---@return string humantime The formatted time string
@@ -45,12 +64,11 @@ function TitanPanelReputation:GetHumanReadableTime(time)
     else
         humantime = floor(time / 60)
         if (humantime < 60) then
-            humantime = humantime .. TitanPanelReputation:GT("LID_MINUTES_SHORT")
+            humantime = FormatMinutes(humantime)
         else
             local hours = floor(humantime / 60)
             local mins = floor((time - (hours * 60 * 60)) / 60)
-            humantime = hours .. TitanPanelReputation:GT("LID_HOURS_SHORT") .. " "
-                .. mins .. TitanPanelReputation:GT("LID_MINUTES_SHORT")
+            humantime = FormatHours(hours) .. " " .. FormatMinutes(mins)
         end
     end
     return humantime
@@ -155,9 +173,9 @@ function TitanPanelReputation:GetTimeToLevelText(earnedValue, topValue, RPH)
 
     local _, hrs, mins = self:TTL(earnedValue, topValue, RPH)
     if hrs > 0 then
-        return hrs .. self:GT("LID_HOURS_SHORT") .. " " .. mins .. self:GT("LID_MINUTES_SHORT")
+        return FormatHours(hrs) .. " " .. FormatMinutes(mins)
     elseif mins > 0 then
-        return mins .. self:GT("LID_MINUTES_SHORT")
+        return FormatMinutes(mins)
     end
     return nil
 end

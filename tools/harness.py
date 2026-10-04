@@ -868,7 +868,17 @@ def sc_collapsed_subheader_grouping(tree):
     return {"expanded": expanded, "sub-header collapsed": tbc_lines(e.ev("TOOLTIP()")), "errors": e.errors()}
 
 
+def sc_time_formatting(tree):
+    e = Env(tree)
+    e.login({"WatchedFaction": "Stormwind"})
+    durations = {f"{s}s": e.ev(f"NS:GetHumanReadableTime({s})") for s in (30, 60, 119, 120, 3600, 3660, 3720, 7260)}
+    ttl = {f"{top} rep @ {rph}/h": e.ev(f"NS:GetTimeToLevelText(0, {top}, {rph})")
+           for top, rph in ((100, 6000), (100, 3000), (100, 100), (161, 100), (100, 50))}
+    return {"durations": durations, "time to level": ttl, "errors": e.errors()}
+
+
 SCENARIOS = {
+    "time formatting": sc_time_formatting,
     "collapsed sub-header keeps its group": sc_collapsed_subheader_grouping,
     "collapsed header never seen expanded": sc_collapsed_unknown_notice,
     "collapsed section stays listed": sc_collapsed_section_listed,

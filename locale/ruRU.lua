@@ -8,6 +8,7 @@ function TitanPanelReputation:LangruRU()
         ["LID_MINUTES_SHORT"] = "мин",
         ["LID_HOUR_SHORT"] = "ч",
         ["LID_HOURS_SHORT"] = "ч",
+        ["LID_ONE_HOUR_SHORT"] = "ч",
 
         ["LID_TITAN_TOO_OLD_WARNING_BUTTON"] = "or later required",
         ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START"] = "Please upgrade Titan Panel to version",

@@ -8,6 +8,7 @@ function TitanPanelReputation:LangptBR()
         ["LID_MINUTES_SHORT"] = "mins",
         ["LID_HOUR_SHORT"] = "h",
         ["LID_HOURS_SHORT"] = "hrs",
+        ["LID_ONE_HOUR_SHORT"] = "hr",
 
         ["LID_TITAN_TOO_OLD_WARNING_BUTTON"] = "or later required",
         ["LID_TITAN_TOO_OLD_WARNING_TOOLTIP_START"] = "Please upgrade Titan Panel to version",

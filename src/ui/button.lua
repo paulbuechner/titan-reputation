@@ -46,7 +46,7 @@ function TitanPanelReputation.BuildButtonText(factionDetails)
 
     if (TitanGetVar(TitanPanelReputation.ID, "ShortStanding")) then LABEL = string.utf8sub(LABEL, 1, adjustedID == 10 and 2 or 1) end
 
-    local COLOR = TitanPanelReputation.BARCOLORS and TitanPanelReputation.BARCOLORS[adjustedID] or nil
+    local COLOR = TitanPanelReputation:GetStandingColor(adjustedID)
     local text = ""
 
     if (TitanGetVar(TitanPanelReputation.ID, "ShowFactionName")) then

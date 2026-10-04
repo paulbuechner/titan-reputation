@@ -162,7 +162,7 @@ local function BuildTooltipFactionInfo(factionDetails)
                 LABEL = LABEL and string.utf8sub(LABEL, 1, adjustedID == 10 and 2 or 1) or ""
             end
 
-            local color = TitanPanelReputation.BARCOLORS and TitanPanelReputation.BARCOLORS[adjustedID] or nil
+            local color = TitanPanelReputation:GetStandingColor(adjustedID)
             local line = indentPrefix .. preface .. ColorText(name, color) .. "\t"
             if (adjustedID == 8 or topValue == 1000 or topValue == 0) then
                 line = line .. ColorText(LABEL, color)

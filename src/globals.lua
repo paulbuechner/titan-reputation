@@ -146,9 +146,3 @@ TitanPanelReputation.COLORS_ARMORY = {
     [9] = { r = 1, g = 0.5, b = 0.1 },          -- #ff801a Paragon
     [10] = { r = 0.000, g = 0.749, b = 0.953 }, -- #00bff3 Renown
 }
-
----
----The color theme currently in use.
----
----@type table<number, { r: number, g: number, b: number }>
-TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_DEFAULT

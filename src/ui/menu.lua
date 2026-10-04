@@ -35,11 +35,9 @@ local function BuildDisplayText(factionDetails)
     local adjustedID, label = GetStandingLabel(factionDetails)
     if not adjustedID then return nil end
 
-    local text = factionDetails.name .. " - " .. label
-    if TitanPanelReputation.BARCOLORS then
-        return TitanUtils_GetColoredText(text, TitanPanelReputation.BARCOLORS[adjustedID])
-    end
-    return text
+    -- A nil color (the "Basic" theme) leaves the text as is
+    return TitanUtils_GetColoredText(factionDetails.name .. " - " .. label,
+        TitanPanelReputation:GetStandingColor(adjustedID))
 end
 
 ---
@@ -259,16 +257,9 @@ local function BuildColorOptions(parent)
         { TitanPanelReputation:GT("LID_NO_COLORS"),      3 },
     }
 
-    Titan_Menu.AddSelectorList(parent, id, nil, "ColorValue", list, function()
-        local colorValue = TitanGetVar(id, "ColorValue")
-        if colorValue == 1 then
-            TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_DEFAULT
-        elseif colorValue == 2 then
-            TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_ARMORY
-        else
-            TitanPanelReputation.BARCOLORS = nil
-        end
-    end)
+    -- Colors are looked up from ColorValue on each render (GetStandingColor), and Titan updates
+    -- the button after the selection, so no follow-up function is needed.
+    Titan_Menu.AddSelectorList(parent, id, nil, "ColorValue", list)
 end
 
 ---

@@ -134,6 +134,25 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionID,
 end
 
 ---
+---Returns the bar color for an adjusted standing ID in the color theme chosen in the menu,
+---or nil for the "Basic" theme (no coloring).
+---
+---Resolved on every call: Titan only loads plugin settings at PLAYER_ENTERING_WORLD, so a
+---theme picked at ADDON_LOADED would always be the default one.
+---
+---@param adjustedID number The adjusted standing ID (see `GetAdjustedIDAndLabel`)
+---@return { r: number, g: number, b: number }|nil
+---@nodiscard
+function TitanPanelReputation:GetStandingColor(adjustedID)
+    local colorValue = TitanGetVar(TitanPanelReputation.ID, "ColorValue")
+    if colorValue == 3 then
+        return nil
+    end
+    local palette = colorValue == 2 and TitanPanelReputation.COLORS_ARMORY or TitanPanelReputation.COLORS_DEFAULT
+    return palette[adjustedID]
+end
+
+---
 ---Trims the given string by removing leading and trailing whitespace.
 ---
 ---@param value string The string to trim

@@ -184,9 +184,10 @@ end
 ---@param factionID number
 ---@param adjusted AdjustedIDAndLabel
 local function ShowReputationAnnouncement(name, factionID, adjusted)
+    local color = TitanPanelReputation:GetStandingColor(adjusted.adjustedID)
     local msg
-    if (TitanPanelReputation.BARCOLORS) then
-        msg = TitanUtils_GetColoredText(name .. " - " .. adjusted.label, TitanPanelReputation.BARCOLORS[(adjusted.adjustedID)])
+    if color then
+        msg = TitanUtils_GetColoredText(name .. " - " .. adjusted.label, color)
     else
         msg = TitanUtils_GetGoldText(name .. " - " .. adjusted.label)
     end

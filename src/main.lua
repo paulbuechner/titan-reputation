@@ -132,12 +132,6 @@ function TitanPanelReputationButton_OnEvent(event, ...)
         -- Set addon in init time (uptime of pc in seconds, with millisecond precision)
         TitanPanelReputation.INIT_TIME = GetTime();
 
-        -- Set color theme
-        local colorValue = TitanGetVar(TitanPanelReputation.ID, "ColorValue")
-        if (colorValue == 1) then TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_DEFAULT end
-        if (colorValue == 2) then TitanPanelReputation.BARCOLORS = TitanPanelReputation.COLORS_ARMORY end
-        if (colorValue == 3) then TitanPanelReputation.BARCOLORS = nil end
-
         -- Set debug mode (restore from saved vars)
         TitanPanelReputation:SetDebugMode(TitanRep_Data.DebugMode, true)
 

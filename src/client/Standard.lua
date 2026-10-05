@@ -1,0 +1,3 @@
+local _, TitanPanelReputation = ...
+
+TitanPanelReputation.IS_RETAIL = true

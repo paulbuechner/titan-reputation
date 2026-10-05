@@ -1,9 +1,19 @@
 local _, TitanPanelReputation = ...
 
-local WoW3 = select(4, GetBuildInfo()) >= 30000
-local WoW10 = select(4, GetBuildInfo()) >= 100000
+-- Retail and WoW Forever load the Mainline alert template, the Classic clients their own (see
+-- src/client)
+local MainlineUI = TitanPanelReputation.IS_RETAIL or TitanPanelReputation.IS_FOREVER
 
 local TextureKitConstants = _G.TextureKitConstants
+
+---
+---Whether the client has achievements, whose toast and UI the standing announcement borrows:
+---retail, WoW Forever and Classic since Wrath.
+---
+---@return boolean
+function TitanPanelReputation:HasAchievements()
+    return _G.AchievementFrame_LoadUI ~= nil
+end
 
 local function EnsureAchievementUI()
     if not _G.AchievementFrame and _G.AchievementFrame_LoadUI then
@@ -12,8 +22,7 @@ local function EnsureAchievementUI()
 end
 
 local function GetAchievementAlertSystem()
-    -- No achievements / no achievement toast system before WotLK.
-    if not WoW3 then
+    if not TitanPanelReputation:HasAchievements() then
         return nil
     end
     if not _G.AlertFrame or type(_G.AlertFrame.AddQueuedAlertFrameSubSystem) ~= "function" then
@@ -44,7 +53,7 @@ local function GetAchievementAlertSystem()
 
         AchievementShield_SetPoints(0, shieldPoints, GameFontNormal, GameFontNormalSmall);
 
-        if WoW10 then
+        if MainlineUI then
             -- Retail UI
             -- https://github.com/Gethe/wow-ui-source/blob/main/Interface/AddOns/Blizzard_FrameXML/Mainline/AlertFrameSystems.lua
             unlocked:SetPoint("TOP", 7, -23);
@@ -119,7 +128,7 @@ local function GetAchievementAlertSystem()
     end
 
     TitanPanelReputation.AchievementAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("AchievementAlertFrameTemplate", SetupFrame, 2, 6)
-    if WoW10 then
+    if MainlineUI then
         TitanPanelReputation.AchievementAlertSystem:SetCanShowMoreConditionFunc(function() return not C_PetBattles.IsInBattle() end)
     else
         TitanPanelReputation.AchievementAlertSystem:SetCanShowMoreConditionFunc(function() return true end);

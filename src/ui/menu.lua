@@ -1,7 +1,7 @@
 local _, TitanPanelReputation = ...
 
-local WoW3 = select(4, GetBuildInfo()) >= 30000
-local WoW5 = select(4, GetBuildInfo()) >= 50000
+-- Friendship factions came with MoP: content, so the client's game type decides (see src/client)
+local HasFriendships = TitanPanelReputation.IS_RETAIL or TitanPanelReputation.IS_MISTS
 
 ---
 ---Resolve the adjusted standing ID and label for a faction, honoring the `ShortTipStanding` setting.
@@ -160,7 +160,7 @@ local function BuildButtonOptions(parent)
     local id = TitanPanelReputation.ID
 
     Titan_Menu.AddSelector(parent, id, TitanPanelReputation:GT("LID_SHOW_ICON"), "ShowIcon")
-    if WoW5 then
+    if HasFriendships then
         Titan_Menu.AddSelector(parent, id, TitanPanelReputation:GT("LID_SHOW_FRIENDS_ON_BAR"), "ShowFriendsOnBar")
     end
     Titan_Menu.AddSelector(parent, id, TitanPanelReputation:GT("LID_SHOW_FACTION_NAME_LABEL"), "ShowFactionName")
@@ -206,7 +206,7 @@ local function BuildTooltipOptions(parent)
 
     Titan_Menu.AddDivider(parent)
 
-    if WoW5 then
+    if HasFriendships then
         local friends = Titan_Menu.AddButton(parent, TitanPanelReputation:GT("LID_FRIENDSHIP_RANK_SETTINGS"))
         Titan_Menu.AddSelector(friends, id, TitanPanelReputation:GT("LID_SHOW_FRIENDSHIPS"), "ShowFriendships")
         Titan_Menu.AddSelector(friends, id, TitanPanelReputation:GT("LID_HIDE_MAX_FRIENDSHIPS"), "HideMaxFriendships")
@@ -280,7 +280,7 @@ function TitanPanelReputation:BuildContextMenu(_owner, rootDescription)
             format(TitanPanelReputation:GT("LID_AUTO_CHANGE_EXPERIENCE_BAR"),
                 SHOW_FACTION_ON_MAINSCREEN or "Show as Experience Bar"))
     end
-    if WoW3 then
+    if TitanPanelReputation:HasAchievements() then
         Titan_Menu.AddSelector(root, id, TitanPanelReputation:GT("LID_SHOW_ANNOUNCE_FRAME"), "ShowAnnounceFrame")
     end
     if C_AddOns.IsAddOnLoaded("MikScrollingBattleText") then

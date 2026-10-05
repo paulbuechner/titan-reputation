@@ -44,8 +44,9 @@ def locate(tree, rel):
     return None
 
 
-def load_order(tree):
-    """Lua files in the order WoW loads them: TOC lines, with XML Script/Include expanded."""
+def load_order(tree, game):
+    """Lua files in the order WoW loads them: TOC lines (`[Game]` resolved to the client's game
+    type), with XML Script/Include expanded."""
     def expand(rel):
         rel = rel.replace("\\", "/")
         if rel.endswith(".lua"):
@@ -66,13 +67,13 @@ def load_order(tree):
     for line in toc.read_text(encoding="utf-8-sig").splitlines():
         line = line.strip()
         if line and not line.startswith("#"):
-            order += expand(line)
+            order += expand(line.replace("[Game]", game))
     return order
 
 STUBS = r"""
 NOW = 1000.0
 ERRORS, CHAT, ALERTS, BUTTON_RENDERS = {}, {}, {}, {}
-local BUILD = { retail = 120100, mop = 50504, era = 11509 }
+local BUILD = { retail = 120100, forever = 16001, mop = 50504, era = 11509 }
 function GetBuildInfo() return "x", "1", "d", BUILD[MODE] end
 function GetTime() return NOW end
 function GetLocale() return LOCALE or "enUS" end
@@ -300,8 +301,9 @@ function GetFactionInfo(i) return FactionInfo(Visible()[i]) end
 function GetFactionInfoByID(id) return FactionInfo(ById(id)) end
 function IsFactionInactive(i) local f = Visible()[i]; return f ~= nil and f.inactive or false end
 function SetWatchedFactionIndex(i) local f = Visible()[i]; XP_BAR = f and f.id or nil end
--- Each client only has its own API: retail removed the globals in 11.0, Classic lacks the newer ones
-if MODE == "retail" then
+-- Each client only has its own API: retail removed the globals in 11.0, Classic lacks the newer ones.
+-- WoW Forever has the retail API under a Classic build number.
+if MODE == "retail" or MODE == "forever" then
   GetNumFactions, GetFactionInfo, GetFactionInfoByID, IsFactionInactive = nil, nil, nil, nil
   SetWatchedFactionIndex = nil
 else
@@ -310,6 +312,8 @@ else
   C_Reputation.SetWatchedFactionByID, C_Reputation.SetWatchedFactionByIndex = nil, nil
   C_MajorFactions = nil
 end
+-- Achievements: retail, WoW Forever and Classic since Wrath
+if MODE ~= "era" then function AchievementFrame_LoadUI() end end
 
 -- Driver helpers
 function FIRE(event, ...)
@@ -442,6 +446,10 @@ def retail_extras():
     }
 
 
+# The game type each simulated client puts in for `[Game]` in TOC file names
+GAME_TYPES = {"retail": "Standard", "forever": "Camelot", "mop": "Mists", "era": "Vanilla"}
+
+
 def declared_saved_variables(tree):
     """Globals the TOC declares as SavedVariables / SavedVariablesPerCharacter."""
     toc = next(tree.glob("*.toc")).read_text(encoding="utf-8-sig")
@@ -470,7 +478,7 @@ class Env:
             "  local f, err = loadstring(code, '@' .. name); if not f then return 'compile: ' .. safe(err) end "
             "  local ok, rerr = pcall(f, 'TitanReputation', ns); if not ok then return 'runtime: ' .. safe(rerr) end "
             "end")
-        for rel in load_order(tree):
+        for rel in load_order(tree, GAME_TYPES[mode]):
             code = locate(tree, rel).read_bytes()
             if code.startswith(b"\xef\xbb\xbf"):  # WoW's loader skips a UTF-8 BOM, loadstring does not
                 code = code[3:]
@@ -884,6 +892,16 @@ def sc_collapsed_subheader_grouping(tree):
     return {"expanded": expanded, "sub-header collapsed": tbc_lines(e.ev("TOOLTIP()")), "errors": e.errors()}
 
 
+def sc_forever(tree):
+    rows = [r for r in retail_rows() if r["id"] in (9003, 72, 169, 21, 369, 87)]
+    e = Env(tree, mode="forever", rows=rows, extras={})
+    e.login({"WatchedFaction": "Booty Bay", "ShowAnnounceFrame": True})
+    e.edit_rows(**{"Booty Bay": {"reaction": 6, "cur": 9000, "next": 21000, "standing": 9100}})  # -> Honored
+    e.update(1010.0)
+    return {"button": plain(e.ev("BUTTON()")), "tooltip": plain(e.ev("TOOLTIP()")),
+            "menu": plain(e.ev("MENU_DUMP(MENU())")), "toasts": e.alerts(), "errors": e.errors()}
+
+
 def sc_experience_bar(tree):
     def auto_change(e):
         return next(line.strip() for line in plain(e.ev("MENU_DUMP(MENU())")).splitlines() if "Auto Show" in line)
@@ -924,6 +942,7 @@ def sc_time_formatting(tree):
 
 
 SCENARIOS = {
+    "WoW Forever (retail API, Classic build number)": sc_forever,
     "follow the experience bar faction": sc_experience_bar,
     "time formatting": sc_time_formatting,
     "collapsed sub-header keeps its group": sc_collapsed_subheader_grouping,

@@ -1,6 +1,8 @@
 local _, TitanPanelReputation = ...
 
-local WoW11 = select(4, GetBuildInfo()) >= 110000
+-- Retail 11.0 moved the reputation list into C_Reputation. Detected rather than read from the build
+-- number: WoW Forever runs the retail API under a Classic version (1.60).
+local HasFactionDataAPI = C_Reputation.GetFactionDataByIndex ~= nil
 
 ---
 ---Returns the number of lines in the faction display.
@@ -10,7 +12,7 @@ local WoW11 = select(4, GetBuildInfo()) >= 110000
 ---@return number numFactions
 ---@nodiscard
 function TitanPanelReputation:BlizzAPI_GetNumFactions()
-    return WoW11 and C_Reputation.GetNumFactions() or GetNumFactions()
+    return HasFactionDataAPI and C_Reputation.GetNumFactions() or GetNumFactions()
 end
 
 ---
@@ -21,7 +23,7 @@ end
 ---@return boolean isInactive
 ---@nodiscard
 function TitanPanelReputation:BlizzAPI_IsFactionInactive(index)
-    if WoW11 then
+    if HasFactionDataAPI then
         return not C_Reputation.IsFactionActive(index)
     else
         return IsFactionInactive(index)
@@ -64,7 +66,7 @@ end
 ---@return string|nil name, string|nil description, number|nil standingID, number|nil barMin, number|nil barMax, number|nil barValue, boolean|nil atWarWith, boolean|nil canToggleAtWar, boolean|nil isHeader, boolean|nil isCollapsed, boolean|nil hasRep, boolean|nil isWatched, boolean|nil isChild, number|nil factionID, boolean|nil hasBonusRepGain, boolean|nil canSetInactive, boolean|nil isAccountWide
 ---@nodiscard
 function TitanPanelReputation:BlizzAPI_GetFactionInfo(factionIndex)
-    if WoW11 then
+    if HasFactionDataAPI then
         return UnpackFactionData(C_Reputation.GetFactionDataByIndex(factionIndex))
     else
         return GetFactionInfo(factionIndex)
@@ -80,7 +82,7 @@ end
 ---@param factionID number
 ---@nodiscard
 function TitanPanelReputation:BlizzAPI_GetFactionInfoByID(factionID)
-    if WoW11 then
+    if HasFactionDataAPI then
         return UnpackFactionData(C_Reputation.GetFactionDataByID(factionID))
     else
         return GetFactionInfoByID(factionID)

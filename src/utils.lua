@@ -1,7 +1,5 @@
 local _, TitanPanelReputation = ...
 
-local WoW10 = select(4, GetBuildInfo()) >= 100000
-
 ---
 ---Filters the `TitanPanelReputation.TABLE` by the given faction name.
 ---Returns the `earnedValue` and `topValue` for the given faction name.
@@ -105,9 +103,10 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, returnOnNotS
         factionType = "Friendship Ranking"
     end
 
-    if WoW10 and factionID then
+    -- Paragon and renown are checked by API, not by build number (see CreateFactionDetails)
+    if factionID then
         -- Paragon - AdjustedID = 9
-        if C_Reputation.IsFactionParagon(factionID) and paragonProgressStarted == true then
+        if paragonProgressStarted == true and C_Reputation.IsFactionParagon(factionID) then
             if topValue == 0 or topValue == 1000 then
                 -- If topValue is 0 or 1000, that individual faction is paragon but their paragon
                 -- rep is tracked on another faction (e.g. "Azj Kahet" Sentinals)
@@ -120,7 +119,7 @@ function TitanPanelReputation:GetAdjustedIDAndLabel(factionDetails, returnOnNotS
         end
 
         -- Renown -> AdjustedID = 10
-        if C_Reputation.IsMajorFaction(factionID) then
+        if C_MajorFactions and C_Reputation.IsMajorFaction(factionID) then
             local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
 
             if majorFactionData ~= nil then

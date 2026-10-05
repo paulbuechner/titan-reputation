@@ -29,6 +29,8 @@ locale/zhCN.lua
 
 libs/libs.xml
 
+# Client flags (IS_RETAIL, IS_FOREVER, IS_CLASSIC, ...): one file per game type
+src/client/[Game].lua
 src/blizz-api.lua
 src/globals.lua
 src/services.lua

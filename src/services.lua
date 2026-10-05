@@ -1,9 +1,5 @@
 local _, TitanPanelReputation = ...
 
-local WoW3 = select(4, GetBuildInfo()) >= 30000
-local WoW5 = select(4, GetBuildInfo()) >= 50000
-local WoW10 = select(4, GetBuildInfo()) >= 100000
-
 local function BuildKeyLookup(savedList)
     local lookup = {}
     if type(savedList) == "table" then
@@ -186,8 +182,8 @@ local function BuildStandingAlertPayload(params)
 end
 
 local function DispatchReputationAnnouncement(message, alertPayload)
-    -- Achievement-style toasts require the Achievement system (WotLK+).
-    if WoW3 and TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") and alertPayload then
+    -- Achievement-style toast (skipped on clients without achievements, see ShowStandingAchievement)
+    if TitanGetVar(TitanPanelReputation.ID, "ShowAnnounceFrame") and alertPayload then
         TitanPanelReputation:ShowStandingAchievement(alertPayload)
     end
 
@@ -221,9 +217,6 @@ end
 
 function TitanPanelReputation:TriggerDebugStandingToast(factionDetails)
     if not factionDetails or not TitanPanelReputation:IsDebugEnabled() then
-        return
-    end
-    if not WoW3 then
         return
     end
 
@@ -864,46 +857,43 @@ local function CreateFactionDetails(row)
     --[[ --------------------------------------------------------
             Handle Renown, Paragon and Friendship factions
         -----------------------------------------------------------]]
-    if (WoW10) then
-        if (IsFactionParagon(factionID)) then -- Paragon
-            -- Get faction paragon info
-            local paragonEarnedValue, paragonTopValue, paragonProgress = GetParagonInfo(factionID)
-            if paragonEarnedValue and paragonTopValue then
-                earnedValue = paragonEarnedValue
-                topValue = paragonTopValue
-                paragonProgressStarted = paragonProgress
-            end
-        elseif (C_Reputation.IsMajorFaction(factionID)) then -- Renown
-            -- Get the renown faction data
-            local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
+    -- Gated by API, not by build number: WoW Forever runs the retail API under a Classic version
+    if (IsFactionParagon(factionID)) then -- Paragon
+        -- Get faction paragon info
+        local paragonEarnedValue, paragonTopValue, paragonProgress = GetParagonInfo(factionID)
+        if paragonEarnedValue and paragonTopValue then
+            earnedValue = paragonEarnedValue
+            topValue = paragonTopValue
+            paragonProgressStarted = paragonProgress
+        end
+    elseif (C_MajorFactions and C_Reputation.IsMajorFaction(factionID)) then -- Renown
+        -- Get the renown faction data
+        local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID)
 
-            if majorFactionData then
-                -- Set the top value to the renown level threshold of the major faction
-                topValue = majorFactionData.renownLevelThreshold
+        if majorFactionData then
+            -- Set the top value to the renown level threshold of the major faction
+            topValue = majorFactionData.renownLevelThreshold
 
-                -- If the faction has maximum renown, set the earned value to the renown level threshold of the major faction
-                if C_MajorFactions.HasMaximumRenown(factionID) then
-                    earnedValue = majorFactionData.renownLevelThreshold
-                else
-                    -- Otherwise, set the earned value to the renown reputation earned by the major faction
-                    earnedValue = majorFactionData.renownReputationEarned
-                end
+            -- If the faction has maximum renown, set the earned value to the renown level threshold of the major faction
+            if C_MajorFactions.HasMaximumRenown(factionID) then
+                earnedValue = majorFactionData.renownLevelThreshold
+            else
+                -- Otherwise, set the earned value to the renown reputation earned by the major faction
+                earnedValue = majorFactionData.renownReputationEarned
             end
         end
     end
 
-    if (WoW5) then -- Friendship Reputation is available with MoP
-        if (friendShipReputationInfo) then
-            -- Set topValue to the difference between nextFriendThreshold and friendThreshold (reactionThreshold) if
-            -- nextFriendThreshold exists, otherwise set it to the difference between friendRep (standing) and friendThreshold
-            if friendShipReputationInfo.nextThreshold then
-                topValue = friendShipReputationInfo.nextThreshold -
-                    friendShipReputationInfo.reactionThreshold
-            else
-                topValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
-            end
-            earnedValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
+    if (friendShipReputationInfo) then -- Friendship (since MoP; the info is nil for every other faction)
+        -- Set topValue to the difference between nextFriendThreshold and friendThreshold (reactionThreshold) if
+        -- nextFriendThreshold exists, otherwise set it to the difference between friendRep (standing) and friendThreshold
+        if friendShipReputationInfo.nextThreshold then
+            topValue = friendShipReputationInfo.nextThreshold -
+                friendShipReputationInfo.reactionThreshold
+        else
+            topValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
         end
+        earnedValue = friendShipReputationInfo.standing - friendShipReputationInfo.reactionThreshold
     end
 
     -- Calculate earnedValueRatio based on the earned value and top value. If top value is less than or equal to 0, set it to 0
